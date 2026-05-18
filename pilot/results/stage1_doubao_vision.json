@@ -1,0 +1,21 @@
+{
+  "model": "doubao-seed-1-6-vision-250815",
+  "pages_tested": 1,
+  "total_cost_cny": 0.014304,
+  "total_cost_usd": 0.001974,
+  "avg_cost_per_page_usd": 0.001974,
+  "estimated_full_pipeline_usd": 253.0,
+  "details": [
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第1讲 数形结合_p26_img1.jpeg",
+      "char_count": 379,
+      "formula_count": 7,
+      "input_tokens": 1431,
+      "output_tokens": 715,
+      "cost_cny": 0.014304,
+      "cost_usd": 0.001974,
+      "elapsed_s": 15.14,
+      "text_preview": "### 练习10  \n利用平方差公式速算：  \n\n(1) $\\boldsymbol{102 \\times 98 = \\underline{\\quad}}$；  \n\n(2) $\\boldsymbol{1\\dfrac{1}{15} \\times \\dfrac{14}{15} = \\underline{\\quad}}$；  \n\n(3) $\\boldsymbol{864^2 - 136^2 = \\underline{\\quad}}$。  \n\n\n### 练习11  \n如图，有一块边长为$a$的正方形空地，想在中间位置修一条“十”字形小路，小路的宽为$b$，试求剩余空地的面积。用两种方法表示出来，比较这两种表示方法，验证了什么公式？  \n\n\n（图：边长为$a$的正方形内，“十”字形小路（横向、纵向各一条，宽为$b$）将正方形分成四个小矩形）  \n\n\n页码：16"
+    }
+  ]
+}

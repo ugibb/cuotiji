@@ -1,0 +1,26 @@
+{
+  "tool": "pdfplumber",
+  "file_count": 3,
+  "success_count": 3,
+  "avg_elapsed_s": 0.07,
+  "details": [
+    {
+      "file": "12级-2022版《学而思秘籍 小学数学思维培养》第15讲 计算问题综合选讲.pdf",
+      "char_count": 31,
+      "elapsed_s": 0.07,
+      "status": "ok"
+    },
+    {
+      "file": "12级-2022版《学而思秘籍 小学数学思维培养》第16讲 图形问题综合选讲.pdf",
+      "char_count": 31,
+      "elapsed_s": 0.07,
+      "status": "ok"
+    },
+    {
+      "file": "12级-2022版《学而思秘籍 小学数学思维培养》第1讲 数形结合.pdf",
+      "char_count": 35,
+      "elapsed_s": 0.07,
+      "status": "ok"
+    }
+  ]
+}

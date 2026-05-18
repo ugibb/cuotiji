@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI 错题集 · 高保真原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0D1B2A;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;padding:20px}
+.phone{width:375px;height:812px;background:#F7F8FC;border-radius:40px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,255,255,.08)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;transform:translateX(20px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0)}
+.sbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:12px;font-weight:600;color:#0D1B2A;flex-shrink:0;background:inherit}
+.sbar-r{display:flex;gap:5px;align-items:center}
+.nav{height:44px;display:flex;align-items:center;padding:0 16px;flex-shrink:0;background:#fff}
+.nav-title{flex:1;text-align:center;font-size:17px;font-weight:600;color:#0D1B2A}
+.back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1677FF;font-size:24px;line-height:1}
+.tabbar{height:83px;background:#fff;border-top:1px solid #EBEBEB;display:flex;align-items:flex-start;padding-top:10px;flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:#999}
+.tab.on{color:#1677FF}
+.tab-ic{font-size:22px;line-height:1}
+.scroll{flex:1;overflow-y:auto;padding:12px 16px 16px}
+.scroll::-webkit-scrollbar{display:none}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.cb{background:#E8F4FF;color:#1677FF}
+.cg{background:#F6FFED;color:#52C41A}
+.cr{background:#FFF2F0;color:#FF4D4F}
+.co{background:#FFF7E6;color:#FA8C16}
+.btn{width:100%;height:48px;border-radius:24px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.bp{background:linear-gradient(135deg,#1677FF,#0958D9);color:#fff}
+.bo{background:linear-gradient(135deg,#FF7A00,#FF4D00);color:#fff}
+.bl{background:transparent;border:1.5px solid #1677FF;color:#1677FF}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dr{background:#FF4D4F}.do{background:#FAAD14}.dg{background:#52C41A}
+.row{display:flex;align-items:center;gap:8px}
+h2{font-size:15px;font-weight:600;color:#0D1B2A;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>WiFi</span><span>100%</span></div></div></div>
+  <div style="padding:4px 16px 10px;background:#fff">
+    <div style="font-size:22px;font-weight:700;color:#0D1B2A">早上好 👋</div>
+    <div style="font-size:13px;color:#999;margin-top:2px">2026年4月21日 · 星期二</div>
+  </div>
+  <div class="scroll">
+    <div class="card" style="background:linear-gradient(135deg,#1677FF,#0958D9);color:#fff;cursor:pointer" onclick="go('s-exam')">
+      <div style="display:flex;justify-content:space-between">
+        <div><div style="font-size:11px;opacity:.8;margin-bottom:4px">当前备考项目</div><div style="font-size:18px;font-weight:700">数学期中考</div><div style="font-size:13px;opacity:.8;margin-top:2px">目标：120 分</div></div>
+        <div style="text-align:right"><div style="font-size:32px;font-weight:800">29</div><div style="font-size:11px;opacity:.8">天后考试</div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-bottom:5px"><span>知识点修复进度</span><span>3 / 10</span></div>
+        <div style="height:6px;background:rgba(255,255,255,.3);border-radius:3px"><div style="height:100%;width:30%;background:#fff;border-radius:3px"></div></div>
+      </div>
+    </div>
+    <div class="card row" style="cursor:pointer" onclick="go('s-review')">
+      <div style="width:48px;height:48px;border-radius:14px;background:#FFF7E6;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📚</div>
+      <div style="flex:1"><div style="font-size:15px;font-weight:600;color:#0D1B2A">今日复习</div><div style="font-size:13px;color:#999;margin-top:2px">5 道到期错题等你来</div></div>
+      <div style="background:#FF7A00;color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px">5道</div>
+    </div>
+    <button class="btn bp" style="margin-bottom:12px" onclick="go('s-camera')">📷 &nbsp;拍照录入错题</button>
+    <div class="card" style="cursor:pointer" onclick="go('s-blindspot')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="margin:0">知识盲区</h2>
+        <span style="font-size:13px;color:#1677FF">全部 ›</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><span class="dot dr"></span><span style="flex:1;font-size:13px;color:#333">一元一次方程·移项</span><span class="chip cr" style="font-size:11px;padding:2px 8px">3错</span></div>
+        <div class="row"><span class="dot do"></span><span style="flex:1;font-size:13px;color:#333">三角形全等·SAS</span><span class="chip co" style="font-size:11px;padding:2px 8px">复习中</span></div>
+        <div class="row"><span class="dot dg"></span><span style="flex:1;font-size:13px;color:#333">整式乘法·乘法法则</span><span class="chip cg" style="font-size:11px;padding:2px 8px">已掌握</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;padding-bottom:4px"><span style="font-size:13px;color:#1677FF;cursor:pointer" onclick="go('s-parent')">切换家长视图 →</span></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on" onclick="go('s-home')"><div class="tab-ic">🏠</div>首页</div>
+    <div class="tab" onclick="go('s-camera')"><div class="tab-ic">📷</div>录入</div>
+    <div class="tab" onclick="go('s-review')"><div class="tab-ic">📚</div>复习</div>
+    <div class="tab" onclick="go('s-blindspot')"><div class="tab-ic">🗺️</div>盲区</div>
+    <div class="tab" onclick="go('s-exam')"><div class="tab-ic">🎯</div>备考</div>
+  </div>
+</div>
+
+<!-- CAMERA -->
+<div class="screen" id="s-camera">
+  <div style="flex:1;background:#000;position:relative;display:flex;flex-direction:column">
+    <div style="position:absolute;top:0;left:0;right:0;height:54px;background:rgba(0,0,0,.55);display:flex;align-items:center;padding:10px 16px;color:#fff;z-index:10">
+      <span style="cursor:pointer;font-size:22px" onclick="go('s-home')">✕</span>
+      <span style="flex:1;text-align:center;font-size:16px;font-weight:600">拍照录入</span>
+      <span style="font-size:13px;color:#FAAD14">使用说明</span>
+    </div>
+    <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#1a2a1a,#0d150d)">
+      <div style="position:relative;width:280px;height:360px">
+        <div style="position:absolute;top:0;left:0;width:28px;height:28px;border-top:3px solid #fff;border-left:3px solid #fff;border-radius:2px 0 0"></div>
+        <div style="position:absolute;top:0;right:0;width:28px;height:28px;border-top:3px solid #fff;border-right:3px solid #fff;border-radius:0 2px 0"></div>
+        <div style="position:absolute;bottom:0;left:0;width:28px;height:28px;border-bottom:3px solid #fff;border-left:3px solid #fff;border-radius:0 0 0 2px"></div>
+        <div style="position:absolute;bottom:0;right:0;width:28px;height:28px;border-bottom:3px solid #fff;border-right:3px solid #fff;border-radius:0 0 2px"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:13px;text-align:center;padding:20px;line-height:1.8">将试卷放入框内<br>自动检测边缘</div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:115px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);border-radius:20px;display:flex;padding:3px;gap:0">
+      <div id="mp" style="padding:6px 20px;border-radius:16px;background:#fff;color:#0D1B2A;font-size:13px;font-weight:600;cursor:pointer" onclick="setMode('p')">整页模式</div>
+      <div id="ms" style="padding:6px 20px;color:rgba(255,255,255,.8);font-size:13px;cursor:pointer" onclick="setMode('s')">单题模式</div>
+    </div>
+    <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="go('s-confirm')">
+      <div style="width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0D1B2A"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="screen" id="s-confirm">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>100%</span></div></div>
+  <div class="nav"><div class="back" onclick="go('s-camera')">‹</div><div class="nav-title">确认错题</div><div style="width:32px"></div></div></div>
+  <div class="scroll">
+    <div class="row" style="margin-bottom:12px"><span class="chip cb">AI 识别完成</span><span style="font-size:12px;color:#999">耗时 2.3s</span></div>
+    <div class="card">
+      <div style="font-size:12px;color:#999;margin-bottom:8px">题目识别结果</div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:12px;font-size:15px;color:#333;line-height:1.9;font-family:serif">解方程：<b>2x − 5 = 3x + 1</b></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:10px"><span style="color:#999">正确答案</span><span style="color:#52C41A;font-weight:600">x = −6</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:4px"><span style="color:#999">你的答案</span><span style="color:#FF4D4F;font-weight:600">x = 6</span></div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:#999;margin-bottom:8px">知识点标签</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="chip cb">一元一次方程 ✕</span>
+        <span class="chip cb">移项法则 ✕</span>
+        <span style="background:#F5F5F5;color:#999;font-size:12px;padding:4px 12px;border-radius:20px;cursor:pointer">+ 添加</span>
+      </div>
+    </div>
+    <div class="card row" style="border:1.5px dashed #D9D9D9;background:transparent;cursor:pointer">
+      <div style="width:44px;height:44px;border-radius:12px;background:#F5F5F5;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>
+      <div><div style="font-size:14px;font-weight:500;color:#333">上传草稿（选填）</div><div style="font-size:12px;color:#999;margin-top:2px">AI 可根据草稿分析解题过程</div></div>
+    </div>
+    <button class="btn bp" onclick="go('s-chat')">开始根因诊断 →</button>
+    <div style="text-align:center;margin-top:10px"><span style="font-size:13px;color:#999;cursor:pointer">跳过，直接保存</span></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="screen" id="s-chat">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>100%</span></div></div>
+  <div class="nav"><div class="back" onclick="go('s-confirm')">‹</div><div class="nav-title">根因诊断</div><span style="font-size:12px;color:#999">2/5轮</span></div>
+  <div style="background:#F7F8FC;padding:8px 16px;display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:#999">进度</span><div style="flex:1;height:4px;background:#E8E8E8;border-radius:2px"><div style="width:40%;height:100%;background:#1677FF;border-radius:2px"></div></div></div></div>
+  <div class="scroll" style="background:#F7F8FC">
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1677FF,#0958D9);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700">AI</div>
+      <div style="max-width:260px;background:#fff;border-radius:4px 16px 16px 16px;padding:12px;font-size:14px;color:#333;line-height:1.7;box-shadow:0 1px 4px rgba(0,0,0,.06)">我看到这道题是解方程 <b>2x − 5 = 3x + 1</b>，你当时算出来答案是多少？😊</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <div style="max-width:220px;background:#1677FF;border-radius:16px 4px 16px 16px;padding:12px;font-size:14px;color:#fff;line-height:1.7">我算的是 x = 6</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1677FF,#0958D9);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700">AI</div>
+      <div style="max-width:260px;background:#fff;border-radius:4px 16px 16px 16px;padding:12px;font-size:14px;color:#333;line-height:1.7;box-shadow:0 1px 4px rgba(0,0,0,.06)">嗯！能说说你是怎么移项的吗？比如 3x 移到左边之后，你写了什么？</div>
+    </div>
+    <div style="background:#fff;border-radius:16px;padding:16px;margin-top:4px;border-left:4px solid #FF4D4F">
+      <div style="font-size:12px;color:#999;margin-bottom:6px">🔍 根因分析结论</div>
+      <div style="font-size:14px;font-weight:600;color:#FF4D4F;margin-bottom:6px">知识漏洞</div>
+      <div style="font-size:13px;color:#333;line-height:1.7">移项时把 3x 移到左边后，符号应变为 −3x，你写成了 +3x，导致合并同类项出错。</div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #F0F0F0">
+        <div style="font-size:12px;color:#999;margin-bottom:6px">知识点状态更新 →</div>
+        <div class="row"><span class="dot dr"></span><span style="font-size:13px;color:#333;flex:1">一元一次方程·移项</span><span class="chip cr" style="font-size:11px">待修复</span></div>
+      </div>
+    </div>
+    <div style="height:70px"></div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:10px 16px 28px;border-top:1px solid #F0F0F0">
+    <button class="btn bp" onclick="go('s-home')">✓ 完成录入，回到首页</button>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div class="screen" id="s-review">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>100%</span></div></div>
+  <div class="nav"><div class="back" onclick="go('s-home')">‹</div><div class="nav-title">今日复习</div><span style="font-size:13px;color:#999">5道</span></div></div>
+  <div style="flex:1;background:#F7F8FC;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative">
+    <div id="rc" style="width:100%;max-width:343px;perspective:1000px;cursor:pointer" onclick="flip()">
+      <div id="ci" style="position:relative;width:100%;height:400px;transition:transform .5s;transform-style:preserve-3d">
+        <div style="position:absolute;inset:0;background:#fff;border-radius:20px;padding:24px;display:flex;flex-direction:column;backface-visibility:hidden;box-shadow:0 8px 28px rgba(0,0,0,.1)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span class="chip cr">移项法则</span><span style="font-size:12px;color:#999">1 / 5 题</span></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:18px;font-family:serif;color:#0D1B2A;text-align:center;line-height:2">解方程：<br><b>2x − 5 = 3x + 1</b></div>
+          <div style="text-align:center;color:#999;font-size:13px;margin-top:8px">👆 点击翻转查看答案</div>
+        </div>
+        <div style="position:absolute;inset:0;background:linear-gradient(160deg,#F6FFED,#fff);border-radius:20px;padding:24px;display:flex;flex-direction:column;backface-visibility:hidden;transform:rotateY(180deg);box-shadow:0 8px 28px rgba(0,0,0,.1)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="chip cg">参考答案</span><span style="font-size:12px;color:#999">1 / 5 题</span></div>
+          <div style="font-size:24px;font-weight:700;color:#52C41A;text-align:center;margin:10px 0;font-family:serif">x = −6</div>
+          <div style="background:#F6FFED;border-radius:12px;padding:12px;font-size:13px;color:#333;line-height:1.7;margin-bottom:10px"><b>解法：</b>移项 → 2x − 3x = 1 + 5 → −x = 6 → x = −6</div>
+          <div style="border-top:1px solid #F0F0F0;padding-top:12px"><div style="font-size:12px;color:#999;margin-bottom:4px">🔍 上次根因</div><div style="font-size:13px;color:#FF4D4F">移项时 +3x 移到左边应变 −3x，符号搞反了</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;margin-top:20px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer" onclick="swipeL()">
+        <div style="width:58px;height:58px;border-radius:50%;background:#fff;border:2px solid #FF4D4F;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,.08)">✕</div>
+        <span style="font-size:11px;color:#FF4D4F">还没会</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer" onclick="swipeR()">
+        <div style="width:58px;height:58px;border-radius:50%;background:#fff;border:2px solid #52C41A;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,.08)">✓</div>
+        <span style="font-size:11px;color:#52C41A">掌握了</span>
+      </div>
+    </div>
+    <div id="toast" style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:#0D1B2A;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;white-space:nowrap">已掌握！3 天后再巩固一次 🎉</div>
+  </div>
+</div>
+
+<!-- BLINDSPOT -->
+<div class="screen" id="s-blindspot">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>100%</span></div></div>
+  <div class="nav"><div class="back" onclick="go('s-home')">‹</div><div class="nav-title">知识盲区地图</div><div style="width:32px"></div></div>
+  <div style="display:flex;border-bottom:1px solid #EBEBEB">
+    <div style="flex:1;text-align:center;padding:10px;font-size:14px;font-weight:600;color:#1677FF;border-bottom:2px solid #1677FF">全部盲区</div>
+    <div style="flex:1;text-align:center;padding:10px;font-size:14px;color:#999;cursor:pointer">本次备考</div>
+  </div></div>
+  <div class="scroll" style="background:#F7F8FC">
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <div class="card" style="flex:1;text-align:center;padding:12px;margin-bottom:0"><div style="font-size:24px;font-weight:700;color:#FF4D4F">5</div><div style="font-size:12px;color:#999;margin-top:2px">未掌握</div></div>
+      <div class="card" style="flex:1;text-align:center;padding:12px;margin-bottom:0"><div style="font-size:24px;font-weight:700;color:#FAAD14">3</div><div style="font-size:12px;color:#999;margin-top:2px">复习中</div></div>
+      <div class="card" style="flex:1;text-align:center;padding:12px;margin-bottom:0"><div style="font-size:24px;font-weight:700;color:#52C41A">7</div><div style="font-size:12px;color:#999;margin-top:2px">已掌握</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="row" style="padding:14px 16px;cursor:pointer;background:#fff" onclick="tog(this)">
+        <span class="dot dr"></span><span style="flex:1;font-size:15px;font-weight:600;color:#0D1B2A">方程与不等式</span>
+        <span class="chip cr" style="font-size:11px">3错</span><span class="arr" style="color:#999;font-size:16px;margin-left:6px;transition:transform .3s">›</span>
+      </div>
+      <div class="sec" style="max-height:160px;overflow:hidden;transition:max-height .3s">
+        <div style="padding:0 16px 12px;border-top:1px solid #F5F5F5">
+          <div class="row" style="padding:8px 0"><span class="dot dr"></span><span style="flex:1;font-size:13px;color:#333">移项法则</span><span class="chip cr" style="font-size:11px">3错</span></div>
+          <div class="row" style="padding:8px 0"><span class="dot do"></span><span style="flex:1;font-size:13px;color:#333">合并同类项</span><span class="chip co" style="font-size:11px">复习中</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="row" style="padding:14px 16px;cursor:pointer;background:#fff" onclick="tog(this)">
+        <span class="dot do"></span><span style="flex:1;font-size:15px;font-weight:600;color:#0D1B2A">三角形与全等</span>
+        <span class="chip co" style="font-size:11px">2复习中</span><span class="arr" style="color:#999;font-size:16px;margin-left:6px;transition:transform .3s">›</span>
+      </div>
+      <div class="sec" style="max-height:0;overflow:hidden;transition:max-height .3s">
+        <div style="padding:0 16px 12px;border-top:1px solid #F5F5F5">
+          <div class="row" style="padding:8px 0"><span class="dot do"></span><span style="flex:1;font-size:13px;color:#333">SAS 全等条件</span><span class="chip co" style="font-size:11px">复习中</span></div>
+          <div class="row" style="padding:8px 0"><span class="dot dg"></span><span style="flex:1;font-size:13px;color:#333">三角形内角和</span><span class="chip cg" style="font-size:11px">已掌握</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="row" style="padding:14px 16px;background:#fff">
+        <span class="dot dg"></span><span style="flex:1;font-size:15px;font-weight:600;color:#0D1B2A">整式运算</span>
+        <span class="chip cg" style="font-size:11px">全掌握</span><span style="color:#CCC;font-size:16px;margin-left:6px">›</span>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab" onclick="go('s-home')"><div class="tab-ic">🏠</div>首页</div>
+    <div class="tab" onclick="go('s-camera')"><div class="tab-ic">📷</div>录入</div>
+    <div class="tab" onclick="go('s-review')"><div class="tab-ic">📚</div>复习</div>
+    <div class="tab on" onclick="go('s-blindspot')"><div class="tab-ic">🗺️</div>盲区</div>
+    <div class="tab" onclick="go('s-exam')"><div class="tab-ic">🎯</div>备考</div>
+  </div>
+</div>
+
+<!-- EXAM -->
+<div class="screen" id="s-exam">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>100%</span></div></div>
+  <div class="nav"><div class="back" onclick="go('s-home')">‹</div><div class="nav-title">备考项目</div><div style="width:32px"></div></div></div>
+  <div class="scroll" style="background:#F7F8FC">
+    <div class="card" style="background:linear-gradient(135deg,#1677FF,#0958D9);color:#fff">
+      <div style="display:flex;justify-content:space-between">
+        <div><div style="font-size:11px;opacity:.8">进行中</div><div style="font-size:20px;font-weight:700;margin-top:4px">数学期中考</div><div style="font-size:13px;opacity:.85;margin-top:4px">目标：120 分 &nbsp;·&nbsp; 2026/05/20</div></div>
+        <div style="text-align:right"><div style="font-size:40px;font-weight:800;line-height:1">29</div><div style="font-size:11px;opacity:.8">天后考试</div></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.85;margin-bottom:6px"><span>知识点修复进度</span><span>3 / 10 已修复</span></div>
+        <div style="height:8px;background:rgba(255,255,255,.25);border-radius:4px"><div style="height:100%;width:30%;background:#fff;border-radius:4px"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0">本周优先修复</h2><span class="chip cb" style="font-size:11px">AI 推荐</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="row" style="padding:10px;background:#FFF2F0;border-radius:10px"><span style="font-size:20px">1️⃣</span><div style="flex:1;margin-left:4px"><div style="font-size:13px;font-weight:600;color:#0D1B2A">移项法则</div><div style="font-size:12px;color:#999;margin-top:1px">已错 3 次，影响最大</div></div><span class="chip cr" style="font-size:11px">优先</span></div>
+        <div class="row" style="padding:10px;background:#FFF7E6;border-radius:10px"><span style="font-size:20px">2️⃣</span><div style="flex:1;margin-left:4px"><div style="font-size:13px;font-weight:600;color:#0D1B2A">SAS 全等判定</div><div style="font-size:12px;color:#999;margin-top:1px">复习中，需要巩固</div></div><span class="chip co" style="font-size:11px">跟进</span></div>
+      </div>
+    </div>
+    <div class="card row" style="opacity:.55">
+      <span style="font-size:22px">🏁</span>
+      <div style="margin-left:4px"><div style="font-size:14px;font-weight:600;color:#0D1B2A">考后录入成绩</div><div style="font-size:12px;color:#999;margin-top:2px">录入实际分数，AI 帮你复盘</div></div>
+    </div>
+    <button class="btn bl">+ 新建备考项目</button>
+  </div>
+  <div class="tabbar">
+    <div class="tab" onclick="go('s-home')"><div class="tab-ic">🏠</div>首页</div>
+    <div class="tab" onclick="go('s-camera')"><div class="tab-ic">📷</div>录入</div>
+    <div class="tab" onclick="go('s-review')"><div class="tab-ic">📚</div>复习</div>
+    <div class="tab" onclick="go('s-blindspot')"><div class="tab-ic">🗺️</div>盲区</div>
+    <div class="tab on" onclick="go('s-exam')"><div class="tab-ic">🎯</div>备考</div>
+  </div>
+</div>
+
+<!-- PARENT -->
+<div class="screen" id="s-parent">
+  <div style="background:#fff"><div class="sbar"><span>9:41</span><div class="sbar-r"><span>100%</span></div></div>
+  <div class="nav"><div class="back" onclick="go('s-home')">‹</div><div class="nav-title">家长视图</div><span class="chip co" style="font-size:11px">只读</span></div></div>
+  <div class="scroll" style="background:#F7F8FC">
+    <div class="card row">
+      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#1677FF,#0958D9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0">小</div>
+      <div style="flex:1;margin-left:4px"><div style="font-size:16px;font-weight:600;color:#0D1B2A">小明</div><div style="font-size:13px;color:#999;margin-top:2px">初一 · 数学</div></div>
+      <div style="text-align:right"><div style="font-size:12px;color:#999">上次录入</div><div style="font-size:13px;color:#1677FF;font-weight:500;margin-top:2px">2天前</div></div>
+    </div>
+    <div class="card">
+      <h2>📊 本周学习概况</h2>
+      <div style="display:flex;justify-content:space-around;margin-bottom:14px">
+        <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:#1677FF">8</div><div style="font-size:12px;color:#999;margin-top:2px">新增错题</div></div>
+        <div style="width:1px;background:#F0F0F0"></div>
+        <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:#52C41A">3</div><div style="font-size:12px;color:#999;margin-top:2px">已掌握</div></div>
+        <div style="width:1px;background:#F0F0F0"></div>
+        <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:#FF4D4F">5</div><div style="font-size:12px;color:#999;margin-top:2px">盲区总数</div></div>
+      </div>
+      <div style="background:#F7F8FC;border-radius:10px;padding:12px">
+        <div style="font-size:12px;color:#999;margin-bottom:8px">TOP 3 盲区</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="row"><span class="dot dr"></span><span style="flex:1;font-size:13px;color:#333">移项法则</span><span style="font-size:12px;color:#FF4D4F">3错</span></div>
+          <div class="row"><span class="dot do"></span><span style="flex:1;font-size:13px;color:#333">SAS 全等判定</span><span style="font-size:12px;color:#FAAD14">复习中</span></div>
+          <div class="row"><span class="dot do"></span><span style="flex:1;font-size:13px;color:#333">分式化简</span><span style="font-size:12px;color:#FAAD14">复习中</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📈 近 4 周盲区趋势</h2>
+      <div style="display:flex;align-items:flex-end;justify-content:space-around;height:80px;gap:6px;margin-bottom:8px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1">
+          <span style="font-size:11px;color:#999">12</span>
+          <div style="width:100%;flex:1;background:#FFCCC7;border-radius:4px 4px 0 0"></div>
+          <span style="font-size:10px;color:#BBB">4周前</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1">
+          <span style="font-size:11px;color:#999">9</span>
+          <div style="width:100%;height:75%;background:#FFCCC7;border-radius:4px 4px 0 0"></div>
+          <span style="font-size:10px;color:#BBB">3周前</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1">
+          <span style="font-size:11px;color:#999">7</span>
+          <div style="width:100%;height:58%;background:#FFCCC7;border-radius:4px 4px 0 0"></div>
+          <span style="font-size:10px;color:#BBB">2周前</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1">
+          <span style="font-size:11px;color:#FF4D4F;font-weight:600">5</span>
+          <div style="width:100%;height:42%;background:#FF4D4F;border-radius:4px 4px 0 0"></div>
+          <span style="font-size:10px;color:#BBB">本周</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#52C41A;text-align:center">↓ 盲区持续减少，继续保持！</div>
+    </div>
+    <div class="card">
+      <h2>📋 历史周报</h2>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#F7F8FC;border-radius:10px;cursor:pointer"><span style="font-size:13px;color:#333">2026-04-14 周报</span><span style="font-size:12px;color:#1677FF">查看 ›</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#F7F8FC;border-radius:10px;cursor:pointer"><span style="font-size:13px;color:#333">2026-04-07 周报</span><span style="font-size:12px;color:#1677FF">查看 ›</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+let flipped=false;
+function flip(){flipped=!flipped;document.getElementById('ci').style.transform=flipped?'rotateY(180deg)':'rotateY(0)'}
+function swipeR(){const c=document.getElementById('rc');c.style.transition='transform .4s,opacity .4s';c.style.transform='translateX(130%) rotate(15deg)';c.style.opacity='0';const t=document.getElementById('toast');t.style.opacity='1';setTimeout(()=>{t.style.opacity='0';c.style.transition='none';c.style.transform='none';c.style.opacity='1';flipped=false;document.getElementById('ci').style.transform='rotateY(0)'},1800)}
+function swipeL(){const c=document.getElementById('rc');c.style.transition='transform .4s,opacity .4s';c.style.transform='translateX(-130%) rotate(-15deg)';c.style.opacity='0';setTimeout(()=>{c.style.transition='none';c.style.transform='none';c.style.opacity='1';flipped=false;document.getElementById('ci').style.transform='rotateY(0)'},600)}
+function tog(h){const s=h.nextElementSibling,a=h.querySelector('.arr'),open=s.style.maxHeight&&s.style.maxHeight!=='0px';s.style.maxHeight=open?'0px':'200px';a.style.transform=open?'':'rotate(90deg)'}
+function setMode(m){const p=document.getElementById('mp'),s=document.getElementById('ms');if(m==='p'){p.style.cssText='padding:6px 20px;border-radius:16px;background:#fff;color:#0D1B2A;font-size:13px;font-weight:600;cursor:pointer';s.style.cssText='padding:6px 20px;color:rgba(255,255,255,.8);font-size:13px;cursor:pointer'}else{s.style.cssText='padding:6px 20px;border-radius:16px;background:#fff;color:#0D1B2A;font-size:13px;font-weight:600;cursor:pointer';p.style.cssText='padding:6px 20px;color:rgba(255,255,255,.8);font-size:13px;cursor:pointer'}}
+</script>
+</body>
+</html>

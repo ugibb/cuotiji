@@ -1,0 +1,20 @@
+{
+  "model": "MathPix (整文档处理)",
+  "pages_tested": 1,
+  "total_cost_usd": 0.004,
+  "avg_cost_per_page_usd": 0.004,
+  "estimated_full_pipeline_usd": 512.0,
+  "note": "整本 PDF 一次性处理，含版面结构和图片链接；成本约 $0.004/页（Starter 计划）",
+  "details": [
+    {
+      "image": "第1讲 数形结合_p26（从整本MD提取）",
+      "char_count": 415,
+      "formula_count": 8,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.004,
+      "elapsed_s": null,
+      "text_preview": "\\section*{练习10}\n\n利用平方差公式速算：\n（1） $102 \\times 98=$ $\\_\\_\\_\\_$ ；\n（2） $1 \\frac{1}{15} \\times \\frac{14}{15}=$ $\\_\\_\\_\\_$ ；\n（3） $864^{2}-136^{2}=$ $\\_\\_\\_\\_$。\n\n\\section*{练习11}\n\n如图，有一块边长为 $a$ 的正方形空地，想在中间位置修一条＂十＂字形小路，小路的宽为 $b$ ，试求剩余空地的面积。用两种方法表示出来，比较这两种表示方法，验证了什么公式？\n![](https://cdn.mathpix.com/cropped/f2cb1a87-7896-4d8b-8c0e-6d3328d153b5-26.jpg?height=246&width=245&top_left_y=1519&top_left_x=166)\n\n\\section*{入 拍照批改 秒判对错}"
+    }
+  ]
+}

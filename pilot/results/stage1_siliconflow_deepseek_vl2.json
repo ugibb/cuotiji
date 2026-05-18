@@ -1,0 +1,15 @@
+{
+  "model": "deepseek-ai/deepseek-vl2",
+  "model_key": "deepseek-vl2",
+  "pages_tested": 1,
+  "total_cost_cny": 0.0,
+  "total_cost_usd": 0.0,
+  "avg_cost_per_page_usd": 0.0,
+  "estimated_full_pipeline_usd": 0.0,
+  "details": [
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第1讲 数形结合_p26_img1.jpeg",
+      "error": "Error code: 403 - {'code': 30003, 'message': 'Model disabled.', 'data': None}"
+    }
+  ]
+}

@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>奥数练习册 · 高保真原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;padding:20px;gap:24px;flex-wrap:wrap}
+.phone{width:375px;height:812px;background:#F5F6FA;border-radius:44px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,.7),inset 0 0 0 1.5px rgba(255,255,255,.12)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;transform:translateX(16px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0)}
+
+/* status bar */
+.sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:12px;font-weight:600;flex-shrink:0}
+.sb-r{display:flex;gap:5px;align-items:center}
+
+/* nav bar */
+.nb{height:48px;display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.06)}
+.nb-title{flex:1;text-align:center;font-size:17px;font-weight:700}
+.nb-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#5B5FC7}
+.nb-action{font-size:14px;color:#5B5FC7;font-weight:500;cursor:pointer;min-width:36px;text-align:right}
+
+/* tab bar */
+.tabbar{height:56px;background:#fff;border-top:1px solid #EBEBEB;display:flex;align-items:center;flex-shrink:0}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:500;color:#9CA3AF;height:100%}
+.tab.on{color:#5B5FC7;font-weight:700}
+
+/* scroll */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+
+/* cards */
+.card{background:#fff;border-radius:16px;padding:16px;margin:0 16px 12px}
+.card-flat{background:#fff;border-radius:16px;padding:16px;margin:0 0 12px}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.chip-blue{background:#EEF0FF;color:#5B5FC7}
+.chip-green{background:#EDFCF2;color:#16A34A}
+.chip-red{background:#FEF2F2;color:#DC2626}
+.chip-orange{background:#FFF7ED;color:#EA580C}
+.chip-gray{background:#F3F4F6;color:#6B7280}
+
+/* btn */
+.btn{width:100%;height:50px;border-radius:25px;border:none;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s,opacity .1s}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-primary{background:linear-gradient(135deg,#5B5FC7,#4338CA);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid #5B5FC7;color:#5B5FC7}
+.btn-sm{height:38px;border-radius:19px;font-size:13px;font-weight:600;padding:0 20px;width:auto}
+
+/* misc */
+.row{display:flex;align-items:center;gap:8px}
+.divider{height:1px;background:#F0F1F5;margin:12px 0}
+h3{font-size:15px;font-weight:700;color:#111827}
+.label{font-size:12px;color:#9CA3AF}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-red{background:#DC2626}.dot-orange{background:#F59E0B}.dot-green{background:#16A34A}
+
+/* ========== SCREEN: HOME ========== */
+#s-home .sb{background:#fff;color:#111}
+#s-home .hero{background:linear-gradient(135deg,#5B5FC7 0%,#4338CA 100%);padding:20px 20px 28px;color:#fff;flex-shrink:0}
+#s-home .hero-sub{font-size:12px;opacity:.75;margin-bottom:6px}
+#s-home .hero-name{font-size:22px;font-weight:800;margin-bottom:14px}
+#s-home .stat-row{display:flex;gap:12px}
+#s-home .stat{background:rgba(255,255,255,.15);border-radius:12px;padding:10px 14px;flex:1;text-align:center}
+#s-home .stat-n{font-size:24px;font-weight:800;line-height:1}
+#s-home .stat-l{font-size:11px;opacity:.8;margin-top:3px}
+
+/* ========== SCREEN: CHAPTER ========== */
+#s-chapter .sb{background:#fff;color:#111}
+#s-chapter .nb{background:#fff}
+
+/* ========== SCREEN: CAMERA ========== */
+#s-camera .viewfinder{flex:1;background:#0a0a0a;position:relative;display:flex;align-items:center;justify-content:center}
+#s-camera .corner{position:absolute;width:26px;height:26px}
+#s-camera .corner.tl{top:60px;left:48px;border-top:3px solid #fff;border-left:3px solid #fff;border-radius:3px 0 0}
+#s-camera .corner.tr{top:60px;right:48px;border-top:3px solid #fff;border-right:3px solid #fff;border-radius:0 3px 0}
+#s-camera .corner.bl{bottom:60px;left:48px;border-bottom:3px solid #fff;border-left:3px solid #fff;border-radius:0 0 0 3px}
+#s-camera .corner.br{bottom:60px;right:48px;border-bottom:3px solid #fff;border-right:3px solid #fff;border-radius:0 0 3px}
+#s-camera .hint{color:rgba(255,255,255,.4);font-size:13px;text-align:center;line-height:1.8}
+#s-camera .shutter-wrap{background:#1a1a1a;padding:20px 0 32px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#s-camera .shutter{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;justify-content:center}
+#s-camera .shutter-inner{width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #1a1a1a}
+#s-camera.mode-single .corner.tl{top:120px;left:60px}
+#s-camera.mode-single .corner.tr{top:120px;right:60px}
+#s-camera.mode-single .corner.bl{bottom:120px;left:60px}
+#s-camera.mode-single .corner.br{bottom:120px;right:60px}
+
+/* ========== SCREEN: LOADING ========== */
+#s-loading .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:20px}
+#s-loading .spinner{width:60px;height:60px;border:4px solid #EEF0FF;border-top:4px solid #5B5FC7;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#s-loading .steps{width:100%;display:flex;flex-direction:column;gap:10px}
+#s-loading .step{display:flex;align-items:center;gap:10px;font-size:13px}
+#s-loading .step-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.step-done{background:#EDFCF2;color:#16A34A}
+.step-active{background:#EEF0FF;color:#5B5FC7}
+.step-wait{background:#F3F4F6;color:#9CA3AF}
+
+/* ========== SCREEN: SUMMARY ========== */
+#s-summary .sb{background:#fff;color:#111}
+#s-summary .hero{background:linear-gradient(135deg,#5B5FC7,#4338CA);padding:32px 24px;color:#fff;text-align:center;flex-shrink:0}
+#s-summary .score{font-size:56px;font-weight:900;line-height:1}
+#s-summary .score-label{font-size:13px;opacity:.8;margin-top:4px}
+#s-summary .mood{font-size:32px;margin-bottom:8px}
+
+/* ========== SCREEN: PROBLEM LIST ========== */
+#s-list .sb{background:#F5F6FA;color:#111}
+#s-list .nb{background:#F5F6FA}
+#s-list .filter-row{display:flex;gap:8px;padding:10px 16px;background:#F5F6FA;flex-shrink:0}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:#fff;color:#6B7280}
+.filter-btn.on{background:#5B5FC7;color:#fff}
+.problem-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;margin:0 16px 8px;border-radius:14px;cursor:pointer}
+.problem-status{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:700}
+.ps-correct{background:#EDFCF2;color:#16A34A}
+.ps-wrong{background:#FEF2F2;color:#DC2626}
+.ps-unknown{background:#FFF7ED;color:#EA580C}
+.ps-text{font-size:11px;font-weight:700}
+
+/* ========== SCREEN: PROBLEM DETAIL (correct) ========== */
+#s-correct .sb,#s-wrong .sb,#s-unknown .sb{background:#fff;color:#111}
+#s-correct .nb,#s-wrong .nb,#s-unknown .nb{background:#fff}
+.answer-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;font-size:14px;font-weight:700}
+.ab-correct{background:#EDFCF2;color:#16A34A}
+.ab-wrong{background:#FEF2F2;color:#DC2626}
+.analysis-block{background:#F5F6FA;border-radius:12px;padding:14px}
+.analysis-row{display:flex;gap:10px;margin-bottom:10px}
+.analysis-row:last-child{margin-bottom:0}
+.analysis-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.analysis-label{font-size:11px;color:#9CA3AF;margin-bottom:2px}
+.analysis-text{font-size:13px;color:#111827;line-height:1.6}
+
+/* voice input area */
+.voice-area{background:#fff;padding:14px 16px 28px;border-top:1px solid #F0F1F5;flex-shrink:0}
+.voice-hint{font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:10px}
+.voice-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border-radius:25px;background:#EEF0FF;border:none;cursor:pointer;font-size:14px;font-weight:600;color:#5B5FC7}
+.voice-btn.recording{background:#FEF2F2;color:#DC2626;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* AI chat bubble */
+.ai-bubble{display:flex;gap:10px;margin-bottom:14px;padding:0 16px}
+.ai-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5B5FC7,#4338CA);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.ai-msg{max-width:240px;background:#fff;border-radius:4px 16px 16px 16px;padding:11px 14px;font-size:13px;color:#111827;line-height:1.7;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.user-bubble{display:flex;justify-content:flex-end;margin-bottom:14px;padding:0 16px}
+.user-msg{max-width:220px;background:#5B5FC7;border-radius:16px 4px 16px 16px;padding:11px 14px;font-size:13px;color:#fff;line-height:1.7}
+
+/* ========== SCREEN: DONE ========== */
+#s-done .sb{background:#fff;color:#111}
+#s-done .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;gap:16px}
+#s-done .trophy{font-size:72px;animation:bounce .6s ease-out}
+@keyframes bounce{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- ===================== HOME ===================== -->
+<div class="screen active" id="s-home">
+  <div style="background:#fff"><div class="sb" style="background:#fff;color:#111"><span>9:41</span><div class="sb-r"><span>WiFi</span><span>100%</span></div></div></div>
+  <div class="hero" style="padding:14px 18px 16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-14px;right:8px;font-size:108px;font-weight:900;color:rgba(255,255,255,.06);font-family:Georgia,'STSong',serif;line-height:1;pointer-events:none;user-select:none">❝</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.8px;margin-bottom:9px;position:relative">2026年4月22日 · 星期三</div>
+    <div style="font-size:17px;font-weight:800;color:#fff;line-height:1.6;letter-spacing:2px;position:relative">锲而不舍，金石可镂</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:5px;text-align:right;letter-spacing:.5px;position:relative">— 《荀子·劝学》</div>
+  </div>
+  <div class="scroll" style="padding-top:10px">
+    <!-- 本周训练目标 -->
+    <div class="card" style="padding:11px 14px;margin-bottom:8px">
+      <div class="row" style="margin-bottom:7px">
+        <h3 style="flex:1;font-size:13px">本周训练目标</h3>
+        <span style="font-size:10px;color:#9CA3AF">4月20日 — 4月26日</span>
+      </div>
+      <div class="row" style="margin-bottom:8px;gap:8px">
+        <span style="background:#EEF0FF;color:#5B5FC7;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap">第4章·整除与余数</span>
+        <span style="font-size:12px;color:#374151;flex:1">掌握余数运算规律，完成 5 次练习</span>
+      </div>
+      <div class="row" style="margin-bottom:5px">
+        <div style="display:flex;gap:4px;flex:1">
+          <div style="height:5px;flex:1;border-radius:3px;background:#16A34A"></div>
+          <div style="height:5px;flex:1;border-radius:3px;background:#F3F4F6"></div>
+          <div style="height:5px;flex:1;border-radius:3px;background:#F3F4F6"></div>
+          <div style="height:5px;flex:1;border-radius:3px;background:#F3F4F6"></div>
+          <div style="height:5px;flex:1;border-radius:3px;background:#F3F4F6"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:#16A34A;margin-left:10px;white-space:nowrap">1 / 5</span>
+      </div>
+    </div>
+    <!-- 训练日历 -->
+    <div class="card" style="padding:12px 14px">
+      <div class="row" style="margin-bottom:8px">
+        <h3 style="flex:1">训练日历</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1" onclick="calMonth(-1)">‹</span>
+          <span style="font-size:13px;font-weight:600;color:#374151" id="cal-title"></span>
+          <span style="font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1" onclick="calMonth(1)">›</span>
+        </div>
+      </div>
+      <!-- week header -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px">
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">一</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">二</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">三</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">四</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">五</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">六</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:1px 0">日</div>
+      </div>
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px 0"></div>
+      <!-- legend -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:6px;padding-top:6px;border-top:1px solid #F0F1F5">
+        <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#16A34A"></div><span style="font-size:10px;color:#9CA3AF">已完成</span></div>
+        <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#EA580C"></div><span style="font-size:10px;color:#9CA3AF">错题未登记</span></div>
+        <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#DC2626"></div><span style="font-size:10px;color:#9CA3AF">作业未上传</span></div>
+        <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#D1D5DB"></div><span style="font-size:10px;color:#9CA3AF">无训练计划</span></div>
+      </div>
+      <!-- 当日训练大纲 -->
+      <div id="day-detail" style="display:none;margin-top:8px;border-top:1px solid #F0F1F5;padding-top:8px"></div>
+    </div>
+    <!-- 最近记录 -->
+    <div class="card">
+      <h3 style="margin-bottom:12px">最近练习</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row" style="padding:10px;background:#F5F6FA;border-radius:10px;cursor:pointer">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:#111827">第3章·鸡兔同笼</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px">4月21日 · 8题</div>
+          </div>
+          <div style="text-align:right">
+            <span class="chip chip-green">6对</span>
+            <span class="chip chip-red" style="margin-left:4px">2错</span>
+          </div>
+        </div>
+        <div class="row" style="padding:10px;background:#F5F6FA;border-radius:10px;cursor:pointer">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:#111827">第2章·行程问题</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px">4月19日 · 10题</div>
+          </div>
+          <div style="text-align:right">
+            <span class="chip chip-green">7对</span>
+            <span class="chip chip-red" style="margin-left:4px">3错</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on">首页</div>
+    <div class="tab" onclick="go('s-mine')">我的</div>
+  </div>
+</div>
+
+<!-- ===================== CHAPTER ===================== -->
+<div class="screen" id="s-chapter">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-home')">‹</div>
+      <div class="nb-title">选择章节</div>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px 0">
+    <div style="padding:0 16px 10px;font-size:12px;color:#9CA3AF">选择本次练习对应的章节</div>
+    <div id="chapters">
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第1章·计数原理')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔢</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第1章 · 计数原理</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">加法原理 · 乘法原理 · 排列组合</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第2章·行程问题')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚶</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第2章 · 行程问题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">相遇 · 追及 · 流水</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第3章·鸡兔同笼')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🐰</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第3章 · 鸡兔同笼</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">假设法 · 列方程法</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第4章·整除与余数')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">➗</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第4章 · 整除与余数</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">整除判断 · 余数运算</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第5章·数列与规律')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📈</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第5章 · 数列与规律</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">等差数列 · 数字规律</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" id="chapter-btn" style="opacity:.4;pointer-events:none" onclick="go('s-camera')">下一步：拍照上传</button>
+  </div>
+</div>
+
+<!-- ===================== CAMERA ===================== -->
+<div class="screen" id="s-camera">
+  <div style="background:#111;padding:14px 16px;display:flex;align-items:center;flex-shrink:0">
+    <span style="cursor:pointer;font-size:22px;color:#fff" onclick="go('s-chapter')">✕</span>
+    <span style="flex:1;text-align:center;font-size:15px;font-weight:600;color:#fff" id="camera-title">第3章·鸡兔同笼</span>
+    <span style="font-size:13px;color:rgba(255,255,255,.5)">帮助</span>
+  </div>
+  <div style="background:#111;display:flex;justify-content:center;padding:0 0 10px;flex-shrink:0">
+    <div style="display:flex;background:rgba(255,255,255,.12);border-radius:20px;padding:3px">
+      <div id="cam-mode-page" onclick="setCamMode('page')" style="padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#111;transition:all .2s">整张卷子</div>
+      <div id="cam-mode-single" onclick="setCamMode('single')" style="padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.55);transition:all .2s">单题拍摄</div>
+    </div>
+  </div>
+  <div class="viewfinder">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="hint" id="cam-hint">将试卷放入框内<br>自动识别题目边缘</div>
+  </div>
+  <div class="shutter-wrap">
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%">
+      <div style="position:absolute;left:40px;font-size:12px;color:#999;text-align:center">相册<br>选择</div>
+      <div class="shutter" onclick="go('s-loading')">
+        <div class="shutter-inner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LOADING ===================== -->
+<div class="screen" id="s-loading">
+  <div class="sb" style="background:#fff;color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  <div class="body">
+    <div class="spinner"></div>
+    <div style="font-size:17px;font-weight:700;color:#111827">AI 正在批改作业…</div>
+    <div style="font-size:13px;color:#9CA3AF">通常需要 10-20 秒</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot step-done">✓</div>
+        <span style="color:#16A34A">图片识别完成，共 5 道题</span>
+      </div>
+      <div class="step">
+        <div class="step-dot step-done">✓</div>
+        <span style="color:#16A34A">题目解析完成</span>
+      </div>
+      <div class="step">
+        <div class="step-dot step-active" id="loading-dot">…</div>
+        <span style="color:#5B5FC7" id="loading-text">正在逐题批改</span>
+      </div>
+      <div class="step">
+        <div class="step-dot step-wait">4</div>
+        <span style="color:#9CA3AF">生成错误归因分析</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="go('s-summary')">跳过，直接查看结果</button>
+  </div>
+</div>
+
+<!-- ===================== SUMMARY ===================== -->
+<div class="screen" id="s-summary">
+  <div class="sb" style="background:#5B5FC7;color:#fff"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  <div class="hero">
+    <div class="mood">🎉</div>
+    <div class="score">3 / 5</div>
+    <div class="score-label">第3章·鸡兔同笼 · 5道题</div>
+    <div style="margin-top:14px;font-size:14px;line-height:1.7;opacity:.92">做得不错！鸡兔同笼的假设法你已经掌握了，<br>列方程这关再冲一次就能打通！ 💪</div>
+  </div>
+  <div class="scroll" style="padding:16px 0">
+    <div class="card">
+      <div class="row" style="justify-content:space-around;padding:4px 0">
+        <div style="text-align:center"><div style="font-size:26px;font-weight:800;color:#16A34A">3</div><div class="label" style="margin-top:2px">答对</div></div>
+        <div style="width:1px;background:#F0F1F5"></div>
+        <div style="text-align:center"><div style="font-size:26px;font-weight:800;color:#DC2626">1</div><div class="label" style="margin-top:2px">做错</div></div>
+        <div style="width:1px;background:#F0F1F5"></div>
+        <div style="text-align:center"><div style="font-size:26px;font-weight:800;color:#EA580C">1</div><div class="label" style="margin-top:2px">不会</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px">本次涉及知识点</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="chip chip-green">假设法 ✓ 已打通</span>
+        <span class="chip chip-red">列方程法 ✗ 待突破</span>
+        <span class="chip chip-orange">条件转化 ? 待分析</span>
+      </div>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="go('s-list')">开始逐题复盘 →</button>
+      <button class="btn btn-ghost" onclick="go('s-home')">稍后复盘</button>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ===================== PROBLEM LIST ===================== -->
+<div class="screen" id="s-list">
+  <div style="background:#F5F6FA">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#F5F6FA">
+      <div class="nb-back" onclick="go('s-summary')">‹</div>
+      <div class="nb-title">题目列表</div>
+      <span style="font-size:13px;color:#9CA3AF;min-width:36px;text-align:right">5题</span>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn on" onclick="setFilter(this,'all')">全部 5</button>
+      <button class="filter-btn" onclick="setFilter(this,'wrong')">做错 1</button>
+      <button class="filter-btn" onclick="setFilter(this,'unknown')">不会 1</button>
+      <button class="filter-btn" onclick="setFilter(this,'correct')">答对 3</button>
+    </div>
+  </div>
+  <div class="scroll" style="padding-top:8px;padding-bottom:16px">
+    <div class="problem-item" onclick="go('s-wrong')">
+      <div class="problem-status ps-wrong"><span class="ps-text">✗</span></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#111827">第 1 题</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px">鸡兔同笼·列方程法</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#DC2626;font-weight:600">做错了</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">待复盘</div>
+      </div>
+    </div>
+    <div class="problem-item" onclick="go('s-correct')">
+      <div class="problem-status ps-correct"><span class="ps-text">✓</span></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#111827">第 2 题</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px">鸡兔同笼·假设法</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#16A34A;font-weight:600">答对了</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">可探索</div>
+      </div>
+    </div>
+    <div class="problem-item" onclick="go('s-unknown')">
+      <div class="problem-status ps-unknown"><span class="ps-text">?</span></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#111827">第 3 题</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px">鸡兔同笼·条件转化</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#EA580C;font-weight:600">不会做</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">待引导</div>
+      </div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-status ps-correct"><span class="ps-text">✓</span></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#111827">第 4 题</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px">鸡兔同笼·假设法变形</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#16A34A;font-weight:600">答对了</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">已复盘</div>
+      </div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-status ps-correct"><span class="ps-text">✓</span></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#111827">第 5 题</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px">鸡兔同笼·综合应用</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#16A34A;font-weight:600">答对了</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">已复盘</div>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" onclick="go('s-done')">完成复盘</button>
+  </div>
+</div>
+
+<!-- ===================== PROBLEM: WRONG ===================== -->
+<div class="screen" id="s-wrong">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb">
+      <div class="nb-back" onclick="go('s-list')">‹</div>
+      <div class="nb-title">第 1 题</div>
+      <span class="nb-action">1/5</span>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px;background:#F5F6FA">
+    <!-- question -->
+    <div class="card-flat">
+      <div class="label" style="margin-bottom:6px">题目</div>
+      <div style="font-size:15px;color:#111827;line-height:1.9;background:#F5F6FA;border-radius:10px;padding:12px;font-family:serif">
+        笼子里有鸡和兔共 20 只，脚共 56 只。<br>问鸡和兔各有多少只？
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <div style="flex:1;background:#FEF2F2;border-radius:10px;padding:10px">
+          <div class="label" style="margin-bottom:4px">你的答案</div>
+          <div style="font-size:14px;font-weight:700;color:#DC2626">鸡14只，兔6只</div>
+        </div>
+        <div style="flex:1;background:#EDFCF2;border-radius:10px;padding:10px">
+          <div class="label" style="margin-bottom:4px">正确答案</div>
+          <div style="font-size:14px;font-weight:700;color:#16A34A">鸡12只，兔8只</div>
+        </div>
+      </div>
+    </div>
+    <!-- ai analysis -->
+    <div class="card-flat">
+      <div class="row" style="margin-bottom:10px">
+        <div class="answer-badge ab-wrong">✗ 做错了</div>
+      </div>
+      <div class="analysis-block">
+        <div class="analysis-row">
+          <div class="analysis-icon">🎯</div>
+          <div><div class="analysis-label">知识点</div><div class="analysis-text">鸡兔同笼 · 列方程法</div></div>
+        </div>
+        <div class="analysis-row">
+          <div class="analysis-icon">🕳️</div>
+          <div><div class="analysis-label">这道题的坑</div><div class="analysis-text">脚的数量：鸡 2 只脚，兔 4 只脚，设未知数时容易把系数搞反</div></div>
+        </div>
+        <div class="analysis-row" style="margin-bottom:0">
+          <div class="analysis-icon">🔍</div>
+          <div><div class="analysis-label">AI 初步归因</div><div class="analysis-text">你列方程时，2x + 4y = 56 写成了 4x + 2y = 56，把鸡兔的脚数弄反了</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- AI chat -->
+    <div style="padding-bottom:80px">
+      <div class="ai-bubble">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">你在列方程的时候，x 代表什么、y 代表什么？能说说你当时怎么想的吗？😊</div>
+      </div>
+      <div class="user-bubble">
+        <div class="user-msg">我设 x 是鸡的数量，然后鸡有 4 只脚…</div>
+      </div>
+      <div class="ai-bubble">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">找到了！🎉 鸡是 2 只脚，兔才是 4 只脚，你把它们搞反了。这是这道题专门挖的坑——下次看到"脚的数量"先停一秒，想想谁是几条腿。</div>
+      </div>
+    </div>
+  </div>
+  <div class="voice-area">
+    <div class="voice-hint">对着麦克风说出你的解题思路</div>
+    <button class="voice-btn" id="voice-wrong" onclick="toggleVoice('voice-wrong')">🎙 按住说话</button>
+  </div>
+</div>
+
+<!-- ===================== PROBLEM: CORRECT ===================== -->
+<div class="screen" id="s-correct">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb">
+      <div class="nb-back" onclick="go('s-list')">‹</div>
+      <div class="nb-title">第 2 题</div>
+      <span class="nb-action">2/5</span>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px;background:#F5F6FA">
+    <div class="card-flat">
+      <div class="label" style="margin-bottom:6px">题目</div>
+      <div style="font-size:15px;color:#111827;line-height:1.9;background:#F5F6FA;border-radius:10px;padding:12px;font-family:serif">
+        笼子里有鸡和兔，头共 10 个，脚共 28 只。<br>用假设法求鸡和兔各几只？
+      </div>
+      <div style="background:#EDFCF2;border-radius:10px;padding:10px;margin-top:10px">
+        <div class="label" style="margin-bottom:4px">你的答案</div>
+        <div style="font-size:14px;font-weight:700;color:#16A34A">鸡6只，兔4只 ✓</div>
+      </div>
+    </div>
+    <div class="card-flat">
+      <div class="row" style="margin-bottom:10px">
+        <div class="answer-badge ab-correct">✓ 答对了</div>
+      </div>
+      <div class="analysis-block">
+        <div class="analysis-row">
+          <div class="analysis-icon">🎯</div>
+          <div><div class="analysis-label">知识点</div><div class="analysis-text">鸡兔同笼 · 假设法</div></div>
+        </div>
+        <div class="analysis-row">
+          <div class="analysis-icon">🕳️</div>
+          <div><div class="analysis-label">这道题的坑</div><div class="analysis-text">假设全是鸡时，多余的脚数要除以 2（兔比鸡多 2 只脚），容易忘记除以 2</div></div>
+        </div>
+        <div class="analysis-row" style="margin-bottom:0">
+          <div class="analysis-icon">💡</div>
+          <div><div class="analysis-label">更优解法</div><div class="analysis-text">也可以用列方程法：设兔 x 只，则 4x + 2(10-x) = 28，更简洁</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-flat">
+      <div style="font-size:13px;color:#6B7280;margin-bottom:10px">你的解法与 AI 一致吗？有疑问可以追问</div>
+      <div class="ai-bubble" style="padding:0">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">你做对了！能说说假设"全是鸡"之后，你怎么算出兔的数量的？</div>
+      </div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+  <div class="voice-area">
+    <div class="voice-hint">说说你的解题思路，看和 AI 是否一致</div>
+    <button class="voice-btn" onclick="toggleVoice('voice-correct')" id="voice-correct">🎙 按住说话</button>
+  </div>
+</div>
+
+<!-- ===================== PROBLEM: UNKNOWN ===================== -->
+<div class="screen" id="s-unknown">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb">
+      <div class="nb-back" onclick="go('s-list')">‹</div>
+      <div class="nb-title">第 3 题</div>
+      <span class="nb-action">3/5</span>
+    </div>
+  </div>
+  <div class="scroll" style="background:#F5F6FA;padding-bottom:80px">
+    <div style="padding:16px">
+      <div class="card-flat">
+        <div class="label" style="margin-bottom:6px">题目</div>
+        <div style="font-size:15px;color:#111827;line-height:1.9;background:#F5F6FA;border-radius:10px;padding:12px;font-family:serif">
+          一个停车场停了轿车和摩托车共 40 辆，轮子共 114 个。<br>轿车和摩托车各有多少辆？
+        </div>
+      </div>
+    </div>
+    <!-- guided dialogue -->
+    <div style="padding:0 0 8px">
+      <div class="ai-bubble">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">没关系，我们一起来！先读一遍题——题目告诉了你哪两个条件？</div>
+      </div>
+      <div class="user-bubble">
+        <div class="user-msg">共 40 辆，轮子共 114 个</div>
+      </div>
+      <div class="ai-bubble">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">对了！现在想一想：轿车有几个轮子，摩托车有几个轮子？</div>
+      </div>
+      <div class="user-bubble">
+        <div class="user-msg">轿车4个，摩托车2个</div>
+      </div>
+      <div class="ai-bubble">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">很好！那我们假设 40 辆全是摩托车，轮子一共有几个？和 114 比，多了还是少了？</div>
+      </div>
+      <div style="background:#EEF0FF;border-radius:12px;padding:12px;margin:0 16px;border-left:3px solid #5B5FC7">
+        <div style="font-size:11px;color:#5B5FC7;font-weight:600;margin-bottom:4px">💡 AI 引导到这里了</div>
+        <div style="font-size:13px;color:#111827">用语音继续和 AI 一起推导答案</div>
+      </div>
+    </div>
+  </div>
+  <div class="voice-area">
+    <div class="voice-hint">跟着 AI 的问题，说出你的思考</div>
+    <button class="voice-btn" onclick="toggleVoice('voice-unknown')" id="voice-unknown">🎙 按住说话</button>
+  </div>
+</div>
+
+<!-- ===================== DONE ===================== -->
+<div class="screen" id="s-done">
+  <div class="sb" style="background:#fff;color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  <div class="body">
+    <div class="trophy">🏆</div>
+    <div style="font-size:22px;font-weight:800;color:#111827">复盘完成！</div>
+    <div style="font-size:14px;color:#6B7280;line-height:1.8;max-width:280px">
+      今天攻克了<b style="color:#5B5FC7"> 1 个</b>错题归因，<br>搞懂了<b style="color:#5B5FC7"> 1 道</b>不会的题，<br>列方程法这关——明天再冲一次！
+    </div>
+    <div style="background:#EEF0FF;border-radius:16px;padding:16px;width:100%;text-align:center">
+      <div style="font-size:12px;color:#5B5FC7;font-weight:600;margin-bottom:4px">📲 已推送给家长</div>
+      <div style="font-size:12px;color:#6B7280">本次复盘小结已通过微信通知发送</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+      <button class="btn btn-primary" onclick="go('s-home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MINE ===================== -->
+<div class="screen" id="s-mine">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  </div>
+  <div class="scroll" style="padding-top:0">
+    <div style="background:linear-gradient(135deg,#5B5FC7,#4338CA);padding:24px 20px 28px;color:#fff">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800">小</div>
+        <div>
+          <div style="font-size:18px;font-weight:800">小明</div>
+          <div style="font-size:12px;opacity:.8;margin-top:2px">小学五年级 · 奥数备考中</div>
+        </div>
+        <div style="margin-left:auto;font-size:13px;opacity:.8">编辑</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:18px">
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800">12/100</div>
+          <div style="font-size:11px;opacity:.8;margin-top:2px">练习次数</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800">47</div>
+          <div style="font-size:11px;opacity:.8;margin-top:2px">错题登记</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800">8/87</div>
+          <div style="font-size:11px;opacity:.8;margin-top:2px">通关打卡</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 16px 0">
+      <div class="card-flat">
+        <h3 style="margin-bottom:12px">历史练习</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#F5F6FA;border-radius:10px">
+            <div><div style="font-size:13px;font-weight:600">第3章·鸡兔同笼</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">4月22日</div></div>
+            <div><span class="chip chip-green">3对</span><span class="chip chip-red" style="margin-left:4px">1错</span><span class="chip chip-orange" style="margin-left:4px">1不会</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#F5F6FA;border-radius:10px">
+            <div><div style="font-size:13px;font-weight:600">第2章·行程问题</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">4月19日</div></div>
+            <div><span class="chip chip-green">7对</span><span class="chip chip-red" style="margin-left:4px">3错</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-flat" style="margin-top:12px">
+        <h3 style="margin-bottom:12px">家长通知设置</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+          <div style="font-size:14px;color:#111827">每次复盘完成后推送</div>
+          <div style="width:44px;height:26px;background:#5B5FC7;border-radius:13px;position:relative;cursor:pointer">
+            <div style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;right:2px;top:2px;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+            <div style="font-size:14px;color:#111827">家长微信</div>
+            <div style="font-size:13px;color:#5B5FC7">已绑定 ›</div>
+        </div>
+      </div>
+    </div>
+    <div style="height:100px"></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab" onclick="go('s-home')">首页</div>
+    <div class="tab on">我的</div>
+  </div>
+</div>
+
+</div><!-- /phone -->
+
+<script>
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='s-loading'){setTimeout(()=>go('s-summary'),2800)}
+}
+
+/* ---- 训练日历 ---- */
+const TODAY = {y:2026, m:3, d:22}; // month 0-indexed
+const FULL_DONE     = new Set([4,7,9,14,17,21]);   // 已上传 + 登记错题完成 → 绿
+const UPLOADED_ONLY = new Set([10,16,19]);          // 已上传 + 待登记错题   → 橙
+
+// 每日训练大纲：key = "月(0-indexed)-日"
+const SCHEDULE = {
+  '3-1' :{chapter:'第1章·计数原理', color:'#818CF8', topic:'加法原理与乘法原理', points:['分步计数与分类计数的区别','多步骤问题用乘法原理','例题：从A到B的路线数']},
+  '3-2' :{chapter:'第1章·计数原理', color:'#818CF8', topic:'排列基础', points:['有序与无序的判断','全排列公式 P(n,n)=n!','部分排列 P(n,r)']},
+  '3-3' :{chapter:'第1章·计数原理', color:'#818CF8', topic:'组合基础', points:['组合与排列的区别','C(n,r) 公式推导','组合数的对称性']},
+  '3-4' :{chapter:'第1章·计数原理', color:'#818CF8', topic:'综合练习', points:['排列组合混合题','容斥原理初步','挑战：错位排列']},
+  '3-7' :{chapter:'第2章·行程问题', color:'#F59E0B', topic:'相遇问题', points:['同向/反向行进的距离关系','相遇时间 = 总路程 ÷ 速度和','多次相遇的规律']},
+  '3-8' :{chapter:'第2章·行程问题', color:'#F59E0B', topic:'追及问题', points:['追及时间 = 距离差 ÷ 速度差','何时能追上的判断','环形跑道追及']},
+  '3-9' :{chapter:'第2章·行程问题', color:'#F59E0B', topic:'流水行船', points:['顺流速度 = 船速+水速','逆流速度 = 船速−水速','往返平均速度陷阱']},
+  '3-10':{chapter:'第2章·行程问题', color:'#F59E0B', topic:'火车过桥', points:['过桥距离 = 车长+桥长','相向而行两车相遇','同向两车追及']},
+  '3-14':{chapter:'第3章·鸡兔同笼', color:'#34D399', topic:'假设法基础', points:['假设全为一种，计算差值','差值 ÷ 每只差的脚数','验证答案']},
+  '3-15':{chapter:'第3章·鸡兔同笼', color:'#34D399', topic:'列方程法', points:['设未知数的技巧','两个方程联立','注意：别把鸡兔脚数搞反 ⚠️']},
+  '3-16':{chapter:'第3章·鸡兔同笼', color:'#34D399', topic:'变形题型', points:['蜘蛛蜻蜓问题','自行车三轮车问题','多种动物混合']},
+  '3-17':{chapter:'第3章·鸡兔同笼', color:'#34D399', topic:'综合应用', points:['加入"残疾"动物的变形','条件给出总价格而非脚数','综合行程+鸡兔']},
+  '3-19':{chapter:'第3章·鸡兔同笼', color:'#34D399', topic:'挑战题', points:['三种以上动物混合','隐含条件挖掘','竞赛真题练习']},
+  '3-21':{chapter:'第4章·整除与余数', color:'#F87171', topic:'整除判断', points:['2、3、4、5、9的整除规律','合数的因数分解','最大公因数与最小公倍数']},
+  '3-22':{chapter:'第4章·整除与余数', color:'#F87171', topic:'余数基本运算', points:['余数的加法法则','余数的乘法法则','同余的定义与性质']},
+  '3-23':{chapter:'第4章·整除与余数', color:'#F87171', topic:'余数的加减', points:['多个数之和的余数','求某一位数字','尾数规律']},
+  '3-24':{chapter:'第4章·整除与余数', color:'#F87171', topic:'中国剩余定理入门', points:['同余方程组','韩信点兵问题','逐步试验法']},
+  '3-25':{chapter:'第4章·整除与余数', color:'#F87171', topic:'综合练习', points:['余数与周期问题','日历问题','竞赛真题练习']},
+  '3-28':{chapter:'第5章·数列与规律', color:'#60A5FA', topic:'等差数列', points:['通项公式 an = a1+(n-1)d','求和公式','中间项的性质']},
+  '3-29':{chapter:'第5章·数列与规律', color:'#60A5FA', topic:'数字规律', points:['找规律填数','图形数字规律','字母数字混合规律']},
+};
+
+let calYear = TODAY.y, calCurMonth = TODAY.m, selectedDay = null;
+
+function renderCal(){
+  const grid = document.getElementById('cal-grid');
+  const title = document.getElementById('cal-title');
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  title.textContent = calYear + '年 ' + months[calCurMonth];
+
+  const firstDay = new Date(calYear, calCurMonth, 1).getDay();
+  const totalDays = new Date(calYear, calCurMonth+1, 0).getDate();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+
+  let html = '';
+  for(let i=0;i<offset;i++) html += '<div></div>';
+
+  for(let d=1;d<=totalDays;d++){
+    const key = calCurMonth+'-'+d;
+    const plan = SCHEDULE[key];
+    const isToday = calYear===TODAY.y && calCurMonth===TODAY.m && d===TODAY.d;
+    const isFullDone    = calYear===TODAY.y && calCurMonth===TODAY.m && FULL_DONE.has(d);
+    const isUploaded    = calYear===TODAY.y && calCurMonth===TODAY.m && UPLOADED_ONLY.has(d);
+    const isDone        = isFullDone || isUploaded;
+    const isPast  = !isToday && (calYear<TODAY.y || (calYear===TODAY.y && (calCurMonth<TODAY.m || (calCurMonth===TODAY.m && d<TODAY.d))));
+    const isSelected = selectedDay===d && calCurMonth===TODAY.m;
+    const hasPlan = !!plan;
+
+    let circleBg='transparent', numColor='#374151', numWeight=400;
+    if(isFullDone){ circleBg='#EDFCF2'; numColor='#16A34A'; numWeight=600; }
+    else if(isUploaded){ circleBg='#FFEDD5'; numColor='#EA580C'; numWeight=600; }
+    else if((isPast || isToday) && hasPlan){ circleBg='#FEE2E2'; numColor='#DC2626'; numWeight=600; }
+    else if(isPast){ numColor='#9CA3AF'; }
+    else if(!hasPlan){ numColor='#D1D5DB'; }
+
+    const selRing = isSelected ? 'box-shadow:0 0 0 1.5px #C4C9E0;' : '';
+    const cursor = (hasPlan||isDone||isToday) ? 'pointer' : 'default';
+    const planBar = (isToday || isPast) ? `<div style="width:16px;height:3px;border-radius:2px;background:#818CF8;margin-top:2px"></div>` : '<div style="height:5px"></div>';
+
+    html += `<div style="display:flex;flex-direction:column;align-items:center;padding:1px 0;cursor:${cursor}" onclick="calDayClick(${d})">
+      <div style="width:26px;height:26px;border-radius:50%;background:${circleBg};display:flex;align-items:center;justify-content:center;${selRing}">
+        <span style="font-size:11px;font-weight:${numWeight};color:${numColor}">${d}</span>
+      </div>
+      ${planBar}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function calMonth(dir){
+  calCurMonth += dir;
+  if(calCurMonth>11){calCurMonth=0;calYear++;}
+  if(calCurMonth<0){calCurMonth=11;calYear--;}
+  selectedDay=null;
+  renderCal();
+  document.getElementById('day-detail').style.display='none';
+}
+
+function calDayClick(day){
+  const key = calCurMonth+'-'+day;
+  const plan = SCHEDULE[key];
+  const isFullDoneDay     = calCurMonth===TODAY.m && FULL_DONE.has(day);
+  const isUploadedOnlyDay = calCurMonth===TODAY.m && UPLOADED_ONLY.has(day);
+  const isDone = isFullDoneDay || isUploadedOnlyDay;
+  const isToday = calCurMonth===TODAY.m && day===TODAY.d;
+  const isPast = !isToday && (calCurMonth<TODAY.m || (calCurMonth===TODAY.m && day<TODAY.d));
+  const weekDays = ['日','一','二','三','四','五','六'];
+  const weekDay = weekDays[new Date(calYear, calCurMonth, day).getDay()];
+  const detail = document.getElementById('day-detail');
+
+  if(!plan && !isDone){ detail.style.display='none'; selectedDay=null; renderCal(); return; }
+
+  selectedDay = day;
+  renderCal();
+
+  if(!plan){ detail.style.display='none'; return; }
+
+  const pointsHtml = plan.points.map(p=>`<div class="row" style="gap:6px;margin-bottom:5px"><div style="width:4px;height:4px;border-radius:50%;background:#5B5FC7;flex-shrink:0;margin-top:4px"></div><span style="font-size:12px;color:#374151;line-height:1.4">${p}</span></div>`).join('');
+
+  let actionBtn;
+  if(isFullDoneDay){
+    actionBtn = `<div style="display:flex;align-items:center;gap:8px;background:#EDFCF2;border-radius:10px;padding:10px 14px"><span style="font-size:18px">✅</span><div><div style="font-size:13px;font-weight:600;color:#16A34A">已完成答疑登记</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">可在「我的」查看完整记录</div></div></div>`;
+  } else if(isUploadedOnlyDay){
+    actionBtn = `<button class="btn btn-primary" style="height:44px;font-size:14px;background:linear-gradient(135deg,#F97316,#EA580C)" onclick="go('s-list')">📝 登记错题</button>`;
+  } else {
+    actionBtn = `<button class="btn btn-primary" style="height:44px;font-size:14px;background:linear-gradient(135deg,#EF4444,#DC2626)" onclick="go('s-chapter')">📷 上传作业</button>`;
+  }
+
+  detail.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div>
+        <span style="font-size:10px;color:#9CA3AF">${calCurMonth+1}月${day}日 · 周${weekDay}</span>
+        <div style="font-size:13px;font-weight:700;color:#111827;margin-top:1px">${plan.topic}</div>
+      </div>
+      <span style="background:#EEF0FF;color:#5B5FC7;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;margin-left:8px">${plan.chapter}</span>
+    </div>
+    <div style="background:#F9FAFB;border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:10px;color:#9CA3AF;margin-bottom:6px;font-weight:600">本日训练要点</div>
+      ${pointsHtml}
+    </div>
+    ${actionBtn}
+  `;
+  detail.style.display='block';
+}
+
+document.addEventListener('DOMContentLoaded',()=>{renderCal();calDayClick(TODAY.d);});
+renderCal();
+setTimeout(()=>calDayClick(TODAY.d),0);
+
+let selectedChapter=null;
+function selectChapter(el,name){
+  document.querySelectorAll('.chapter-check').forEach(c=>{
+    c.style.background='';c.style.borderColor='#D1D5DB';c.innerHTML='';
+  });
+  const chk=el.querySelector('.chapter-check');
+  chk.style.background='#5B5FC7';chk.style.borderColor='#5B5FC7';
+  chk.innerHTML='<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  selectedChapter=name;
+  document.getElementById('camera-title').textContent=name;
+  const btn=document.getElementById('chapter-btn');
+  btn.style.opacity='1';btn.style.pointerEvents='auto';
+}
+
+function setFilter(btn,type){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function setCamMode(mode){
+  const cam=document.getElementById('s-camera');
+  const btnPage=document.getElementById('cam-mode-page');
+  const btnSingle=document.getElementById('cam-mode-single');
+  const hint=document.getElementById('cam-hint');
+  const activeStyle='padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#111;transition:all .2s';
+  const inactiveStyle='padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.55);transition:all .2s';
+  if(mode==='single'){
+    cam.classList.add('mode-single');
+    btnPage.style.cssText=inactiveStyle;
+    btnSingle.style.cssText=activeStyle;
+    hint.innerHTML='框住单道题目<br>自动裁切识别';
+  } else {
+    cam.classList.remove('mode-single');
+    btnPage.style.cssText=activeStyle;
+    btnSingle.style.cssText=inactiveStyle;
+    hint.innerHTML='将试卷放入框内<br>自动识别题目边缘';
+  }
+}
+
+function toggleVoice(id){
+  const btn=document.getElementById(id);
+  const on=btn.classList.toggle('recording');
+  btn.textContent=on?'🔴  正在录音…':'🎙 按住说话';
+  if(on){setTimeout(()=>{btn.classList.remove('recording');btn.textContent='🎙 按住说话'},2500)}
+}
+</script>
+</body>
+</html>

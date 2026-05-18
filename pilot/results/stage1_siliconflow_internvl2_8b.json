@@ -1,0 +1,15 @@
+{
+  "model": "OpenGVLab/InternVL2-8B",
+  "model_key": "internvl2-8b",
+  "pages_tested": 1,
+  "total_cost_cny": 0.0,
+  "total_cost_usd": 0.0,
+  "avg_cost_per_page_usd": 0.0,
+  "estimated_full_pipeline_usd": 0.0,
+  "details": [
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第1讲 数形结合_p26_img1.jpeg",
+      "error": "Error code: 400 - {'code': 20012, 'message': 'Model does not exist. Please check it carefully.', 'data': None}"
+    }
+  ]
+}

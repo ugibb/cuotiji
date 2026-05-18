@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奥数练习册 · AI 错题消化系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* 🌊 靛蓝瓷 */
+    --ink:#0a1f3d;
+    --ink-rgb:10,31,61;
+    --paper:#f1f3f5;
+    --paper-rgb:241,243,245;
+    --paper-tint:#e4e8ec;
+    --ink-tint:#152a4a;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}
+  .slide.dark{color:var(--paper)}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.9vw;line-height:1.4;opacity:.85}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}
+  .img-slot.r-3x2{aspect-ratio:3/2}
+  .img-slot.r-1x1{aspect-ratio:1/1}
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile > .frame-img{flex:0 0 auto}
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0}
+  .frame.grid-2-7-5,.frame.grid-2-6-6,.frame.grid-2-8-4,.frame.grid-3-3,.frame.grid-6{display:grid}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6.2vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3.1vw;line-height:1.25;letter-spacing:0;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.3vw;line-height:1.3}
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .stat-card{display:flex;flex-direction:column;gap:.8vh;align-items:flex-start;padding-top:1.6vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.3)}
+  .stat-card .stat-label{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.24em;text-transform:uppercase;opacity:.55}
+  .stat-card .stat-nb{font-family:var(--serif-en);font-weight:800;font-size:5.8vw;line-height:.9;letter-spacing:-.03em;font-feature-settings:"tnum";margin-top:.4vh}
+  .stat-card .stat-nb .stat-unit{font-family:var(--serif-zh);font-weight:500;font-size:.38em;letter-spacing:0;opacity:.72;margin-left:.14em}
+  .stat-card .stat-note{font-family:var(--sans-zh);font-weight:400;font-size:max(13px,1.05vw);line-height:1.5;opacity:.72;margin-top:.6vh}
+  .grid-4 .stat-card .stat-nb{font-size:7.5vw}
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+  .pipeline-section{margin-top:4.4vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)}
+  .pipeline-section:first-of-type{border-top:0;padding-top:0;margin-top:3vh}
+  .pipeline-label{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.24em;text-transform:uppercase;opacity:.62;margin-bottom:2.2vh}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.15vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.55vw;letter-spacing:.01em;line-height:1.2}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.95vw);line-height:1.45;opacity:.72}
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(0,1fr);gap:2.4vh 2vw}
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{display:block;margin-top:.8vh;font-family:var(--mono);font-size:max(10px,.8vw);letter-spacing:.22em;text-transform:uppercase;opacity:.6}
+  .callout-src{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+  @media (max-width:900px){
+    .display{font-size:16vw}.display-zh{font-size:12vw}.h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}.h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ① 封面 hero dark -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>奥数练习册 · Demo Day</div>
+    <div>2026.04</div>
+  </div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker">WeChat Miniprogram × Node.js × Claude AI</div>
+    <h1 class="h-hero">奥数<br>练习册</h1>
+    <h2 class="h-sub">AI 驱动的错题消化系统</h2>
+    <p class="lead" style="max-width:60vw">一道错题，从拍照到真正记住——全程 AI 陪伴的奥数学习闭环。</p>
+    <div class="meta-row">
+      <span>WeChat Miniprogram</span><span>·</span>
+      <span>Fastify + Prisma + PostgreSQL</span><span>·</span>
+      <span>Claude Vision</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Sprint 0–3 · MVP 完成</div>
+    <div>— 2026 —</div>
+  </div>
+</section>
+
+<!-- ② 问题数据 light -->
+<section class="slide light">
+  <div class="chrome">
+    <div>The Problem · 残酷现实</div>
+    <div>01 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker">Why This Matters</div>
+    <h2 class="h-xl">传统错题本，做了也白做</h2>
+    <p class="lead" style="margin-bottom:4vh">艾宾浩斯曲线告诉我们：不复习，就遗忘。</p>
+    <div class="grid-6">
+      <div class="stat-card">
+        <div class="stat-label">Forgetting Rate</div>
+        <div class="stat-nb">80<span class="stat-unit">%</span></div>
+        <div class="stat-note">24 小时后遗忘率（艾宾浩斯）</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">整理耗时</div>
+        <div class="stat-nb">2<span class="stat-unit">h+</span></div>
+        <div class="stat-note">每次课后手动整理错题</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">智能功能</div>
+        <div class="stat-nb">0</div>
+        <div class="stat-note">传统错题本的智能提醒</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Review Stages</div>
+        <div class="stat-nb">5</div>
+        <div class="stat-note">1 / 3 / 7 / 14 / 30 天间隔</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Backend Tests</div>
+        <div class="stat-nb">118</div>
+        <div class="stat-note">全部绿灯，当前 MVP 状态</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">API Endpoints</div>
+        <div class="stat-nb">14</div>
+        <div class="stat-note">Sprint 0–3 覆盖</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 01 · 问题与进度</div>
+    <div>Ebbinghaus + MVP</div>
+  </div>
+</section>
+
+<!-- ③ 洞察 dark -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>Core Insight · 核心洞察</div>
+    <div>02 / 10</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:6vh">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;gap:3vh">
+      <div>
+        <div class="kicker">BUT</div>
+        <h2 class="h-xl" style="font-size:6.5vw;white-space:nowrap">做了就忘。</h2>
+        <p class="lead" style="margin-top:3vh">
+          传统错题本有两个致命缺陷：<br>
+          错题记下来没人督促复习；<br>
+          不知道自己哪类题最薄弱。
+        </p>
+      </div>
+      <div class="callout">
+        "做对的题不用再做，<br>做错的题也早已忘了。"
+        <div class="callout-src">— 每一位奥数家长的困境</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2.4vh;padding-top:2vh">
+      <div class="stat-card">
+        <div class="stat-label">遗忘速率</div>
+        <div class="stat-nb">80<span class="stat-unit">%</span></div>
+        <div class="stat-note">24h 后已记不住</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">整理耗时</div>
+        <div class="stat-nb">2<span class="stat-unit">h</span></div>
+        <div class="stat-note">每次课后手动整理</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">弱点盲区</div>
+        <div class="stat-nb">∞</div>
+        <div class="stat-note">没有可视化分析工具</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 02 · 核心痛点</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ④ Act I 幕封 hero light -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>解法 · The Solution</div>
+    <div>Act I · 03 / 10</div>
+  </div>
+  <div class="frame" style="display:grid;gap:6vh;align-content:center;min-height:80vh">
+    <div class="kicker">Act I · 解法</div>
+    <h1 class="h-hero" style="font-size:8.5vw">把拍一拍<br>变成会了</h1>
+    <p class="lead" style="max-width:55vw">手机拍照 → AI 秒析错因 → 艾宾浩斯排期 → 弱点可视化。</p>
+  </div>
+  <div class="foot">
+    <div>奥数练习册 · 解法篇</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ⑤ Pipeline light -->
+<section class="slide light">
+  <div class="chrome">
+    <div>Core Flow · 学习闭环</div>
+    <div>Act I · 04 / 10</div>
+  </div>
+  <div class="frame">
+    <div class="kicker">Five-Step Loop · 五步闭环</div>
+    <h2 class="h-xl">从错题到记住</h2>
+    <div class="pipeline-section">
+      <div class="pipeline-label">学生侧 · Student Flow</div>
+      <div class="pipeline" data-cols="5">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">拍照上传</div><div class="step-desc">手机拍练习册，一键提交</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">AI 解析</div><div class="step-desc">Claude Vision 识别题目与错因</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">错因诊断</div><div class="step-desc">每题标注知识点 + 错误原因</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">智能排期</div><div class="step-desc">艾宾浩斯算法自动安排复习</div></div>
+        <div class="step"><div class="step-nb">05</div><div class="step-title">弱点报告</div><div class="step-desc">知识点薄弱程度时间衰减评分</div></div>
+      </div>
+    </div>
+    <div class="pipeline-section">
+      <div class="pipeline-label">系统侧 · System Pipeline</div>
+      <div class="pipeline" data-cols="4">
+        <div class="step"><div class="step-nb">A</div><div class="step-title">Presign URL</div><div class="step-desc">云存储直传，不过服务器</div></div>
+        <div class="step"><div class="step-nb">B</div><div class="step-title">Async Queue</div><div class="step-desc">异步 OCR + AI 处理</div></div>
+        <div class="step"><div class="step-nb">C</div><div class="step-title">Prisma ORM</div><div class="step-desc">PostgreSQL 结构化存储</div></div>
+        <div class="step"><div class="step-nb">D</div><div class="step-title">Polling</div><div class="step-desc">小程序轮询等待，实时反馈</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 04 · 系统流程</div>
+    <div>Core Flow</div>
+  </div>
+</section>
+
+<!-- ⑥ AI Features dark -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>Features · 核心功能</div>
+    <div>Act I · 05 / 10</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:6vh">
+    <div style="display:flex;flex-direction:column;gap:3vh">
+      <div>
+        <div class="kicker">Feature 01 · 拍照上传 + AI 分析</div>
+        <h2 class="h-xl" style="font-size:5.2vw">拍一拍，<br>30 秒出结果</h2>
+        <p class="lead" style="margin-top:2.4vh">
+          用微信小程序拍下练习册，上传后 AI 自动完成 OCR + 错因分析 + 知识点标注，无需手动整理。
+        </p>
+        <ul style="margin-top:2.4vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55;opacity:.82">
+          <li>wx.chooseMedia 拍照 / 相册选图</li>
+          <li>Presign URL 直传云存储，0 经过服务器</li>
+          <li>Claude Vision 识别题目 + 诊断错误</li>
+          <li>Loading 页异步轮询，实时进度展示</li>
+        </ul>
+      </div>
+      <div class="callout">
+        以前整理一次错题要 2 小时，<br>现在拍一拍，30 秒出结果。
+        <div class="callout-src">— 核心价值</div>
+      </div>
+    </div>
+    <div>
+      <div class="img-slot r-4x3" style="max-height:52vh">
+        <div class="plus">+</div>
+        <div class="label">Camera Page<br>拍照上传界面</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Feature 01 · 拍照 + AI 错因分析</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ⑦ 艾宾浩斯复习 light -->
+<section class="slide light">
+  <div class="chrome">
+    <div>Features · 核心功能</div>
+    <div>Act I · 06 / 10</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:6vh">
+    <div style="display:flex;flex-direction:column;gap:3vh">
+      <div>
+        <div class="kicker">Feature 02 · 智能复习卡</div>
+        <h2 class="h-xl" style="font-size:5.2vw">每天 5 分钟，<br>记住更多</h2>
+        <p class="lead" style="margin-top:2.4vh">
+          根据艾宾浩斯遗忘曲线，自动调度每天的复习题目。翻卡片，标掌握 / 待练习，系统自动更新下次复习时间。
+        </p>
+        <ul style="margin-top:2.4vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55;opacity:.78">
+          <li>CSS 3D 翻转卡片，正面题目 / 背面解析</li>
+          <li>5 阶段复习间隔：1 / 3 / 7 / 14 / 30 天</li>
+          <li>每日打卡 + 连击天数激励</li>
+          <li>3 级 fallback：到期题 → 新题 → 随机题</li>
+        </ul>
+      </div>
+      <div class="callout">
+        不是多做题，<br>是在对的时间做对的题。
+        <div class="callout-src">— 艾宾浩斯间隔复习原理</div>
+      </div>
+    </div>
+    <div>
+      <div class="img-slot r-4x3" style="max-height:52vh">
+        <div class="plus">+</div>
+        <div class="label">Review Card<br>复习翻卡界面</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Feature 02 · 艾宾浩斯复习</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ⑧ 弱点分析 dark -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>Features · 核心功能</div>
+    <div>Act I · 07 / 10</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:6vh">
+    <div style="display:flex;flex-direction:column;gap:3vh">
+      <div>
+        <div class="kicker">Feature 03 · 弱点分析</div>
+        <h2 class="h-xl" style="font-size:5.2vw">知道哪里弱，<br>才能补哪里</h2>
+        <p class="lead" style="margin-top:2.4vh">
+          基于时间衰减的薄弱章节评分算法，最近犯错权重高，遥远历史权重低。直观展示 Top 5 弱点章节。
+        </p>
+        <ul style="margin-top:2.4vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55;opacity:.82">
+          <li>时间衰减公式：<span style="font-family:var(--mono);font-size:.9em">1 / (1 + daysAgo / 7)</span></li>
+          <li>最近一周 / 一月 / 全部 三段时间维度</li>
+          <li>点击章节直接查看该章所有错题</li>
+          <li>数据不足 3 题时提示"积累更多错题"</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2.4vh;padding-top:1vh">
+      <div class="stat-card">
+        <div class="stat-label">Decay Formula</div>
+        <div class="stat-nb" style="font-size:2.8vw;font-family:var(--mono);letter-spacing:-.01em">w=1/(1+d/7)</div>
+        <div class="stat-note">d = 距今天数，越近权重越高</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Time Range</div>
+        <div class="stat-nb">3<span class="stat-unit">档</span></div>
+        <div class="stat-note">全部 / 近一月 / 近一周</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Weak Chapters</div>
+        <div class="stat-nb">Top 5</div>
+        <div class="stat-note">高亮展示最需要复习的章节</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Feature 03 · 弱点分析</div>
+    <div>Time-Decay Scoring</div>
+  </div>
+</section>
+
+<!-- ⑨ 技术架构 hero dark -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>Tech Stack · 技术选型</div>
+    <div>08 / 10</div>
+  </div>
+  <div class="frame" style="display:grid;gap:6vh;align-content:center;min-height:80vh">
+    <div class="kicker">Architecture</div>
+    <h1 class="h-hero" style="font-size:7vw;line-height:1.1">
+      一张照片，<br>连接了什么？
+    </h1>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2vw;margin-top:2vh">
+      <div class="step" style="border-color:rgba(255,255,255,.35)">
+        <div class="step-nb">Frontend</div>
+        <div class="step-title">WeChat MP</div>
+        <div class="step-desc" style="opacity:.7">TypeScript · 原生小程序</div>
+      </div>
+      <div class="step" style="border-color:rgba(255,255,255,.35)">
+        <div class="step-nb">Backend</div>
+        <div class="step-title">Fastify + Prisma</div>
+        <div class="step-desc" style="opacity:.7">Node.js · PostgreSQL</div>
+      </div>
+      <div class="step" style="border-color:rgba(255,255,255,.35)">
+        <div class="step-nb">AI Layer</div>
+        <div class="step-title">Claude Vision</div>
+        <div class="step-desc" style="opacity:.7">OCR + 错因分析</div>
+      </div>
+      <div class="step" style="border-color:rgba(255,255,255,.35)">
+        <div class="step-nb">Algorithm</div>
+        <div class="step-title">Ebbinghaus</div>
+        <div class="step-desc" style="opacity:.7">间隔复习 + 衰减评分</div>
+      </div>
+    </div>
+    <p class="lead" style="max-width:60vw;opacity:.75">
+      118 个测试，全部绿灯。JWT 鉴权 · 学生隔离 · 异步队列 · 打卡连击 · 时间衰减弱点算法。
+    </p>
+  </div>
+  <div class="foot">
+    <div>Page 08 · 技术架构</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ⑩ Before After light -->
+<section class="slide light">
+  <div class="chrome">
+    <div>Before / After · 范式转变</div>
+    <div>09 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker">The Shift · 从传统到 AI</div>
+    <h2 class="h-xl" style="margin-bottom:4vh">错题本的进化</h2>
+    <div class="grid-2-6-6" style="gap:5vw 3vh">
+      <div style="padding:3vh 2vw;border-left:3px solid currentColor;opacity:.55">
+        <div class="kicker" style="opacity:.9">Before · 传统错题本</div>
+        <h3 class="h-md" style="margin-top:2vh">抄 → 忘 → 循环</h3>
+        <ul style="margin-top:3vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55">
+          <li>手抄错题，整理耗时 2 小时</li>
+          <li>没有复习提醒，翻开才想起</li>
+          <li>不知道哪类题反复犯错</li>
+          <li>家长只能凭感觉督促</li>
+        </ul>
+      </div>
+      <div style="padding:3vh 2vw;border-left:3px solid currentColor">
+        <div class="kicker" style="opacity:.9">After · 奥数练习册 AI</div>
+        <h3 class="h-md" style="margin-top:2vh">拍 → 析 → 记 → 通</h3>
+        <ul style="margin-top:3vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55">
+          <li>拍照 30 秒，AI 自动整理错因</li>
+          <li>艾宾浩斯算法，按时提醒复习</li>
+          <li>弱点地图，一眼看出薄弱章节</li>
+          <li>连击打卡，让孩子主动坚持</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 09 · 范式转变</div>
+    <div>Before / After</div>
+  </div>
+</section>
+
+<!-- ⑪ 路线图 dark -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>Roadmap · 下一步</div>
+    <div>10 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker">What's Next · Sprint 4–6</div>
+    <h2 class="h-xl" style="margin-bottom:4vh">三步走向上线</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;flex:1;align-content:start">
+      <div style="padding:3vh 2vw;border-top:3px solid rgba(255,255,255,.4)">
+        <div class="step-nb">Sprint 4</div>
+        <div class="step-title" style="font-size:1.8vw;margin-top:1.2vh;font-family:var(--serif-zh);font-weight:700">考前冲刺</div>
+        <p style="margin-top:1.6vh;font-family:var(--sans-zh);font-size:max(14px,1.05vw);line-height:1.65;opacity:.78">
+          自定义冲刺计划 · 专题集中复习 · 错题一键导出 PDF
+        </p>
+      </div>
+      <div style="padding:3vh 2vw;border-top:3px solid rgba(255,255,255,.4)">
+        <div class="step-nb">Sprint 5</div>
+        <div class="step-title" style="font-size:1.8vw;margin-top:1.2vh;font-family:var(--serif-zh);font-weight:700">家长端</div>
+        <p style="margin-top:1.6vh;font-family:var(--sans-zh);font-size:max(14px,1.05vw);line-height:1.65;opacity:.78">
+          多孩子管理 · 学习报告周报 · 订阅消息提醒
+        </p>
+      </div>
+      <div style="padding:3vh 2vw;border-top:3px solid rgba(255,255,255,.4)">
+        <div class="step-nb">Sprint 6</div>
+        <div class="step-title" style="font-size:1.8vw;margin-top:1.2vh;font-family:var(--serif-zh);font-weight:700">完善上线</div>
+        <p style="margin-top:1.6vh;font-family:var(--sans-zh);font-size:max(14px,1.05vw);line-height:1.65;opacity:.78">
+          真实 OCR 接入 · 性能优化 · 小程序审核上线
+        </p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:4vh">
+      不缺练习，缺的是<span style="font-weight:700">在对的时间做对的复习</span>。
+      <div class="callout-src">— 奥数练习册 · 产品核心命题</div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>奥数练习册 · 2026</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.08,0.12,0.18);
+  vec3 b=vec3(0.03,0.05,0.08);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.5);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.01,disp*0.015,disp*0.03);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.06;
+  vec3 base=vec3(0.04,0.07,0.14);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.88,0.90,0.94);
+  vec3 paper=vec3(0.945,0.953,0.960);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.55,0.68,0.92)*sin(ph)*0.045;
+  col+=vec3(0.62,0.75,0.98)*sin(ph*0.8+2.0)*0.04;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.05;
+  gl_FragColor=vec4(col,1.0);
+}`;
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+function bootGL(canvasId,fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl)return()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return(tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+const drawDark=bootGL('bg-dark',FS_DARK);
+const drawLight=bootGL('bg-light',FS_LIGHT);
+const t0=Date.now();
+(function loop(){const t=(Date.now()-t0)/1000;drawDark(t);drawLight(t);requestAnimationFrame(loop)})();
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+deck.style.width=(total*100)+'vw';
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme||(el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  lock=true;setTimeout(()=>lock=false,700);
+}
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);if(e.key==='End')go(total-1);
+});
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){go(idx+(wheelAcc>0?1:-1));wheelAcc=0;}
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1));
+},{passive:true});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

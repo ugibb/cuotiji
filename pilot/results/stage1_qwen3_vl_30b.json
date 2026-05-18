@@ -1,0 +1,21 @@
+{
+  "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "pages_tested": 1,
+  "total_cost_cny": 0.016543,
+  "total_cost_usd": 0.002283,
+  "avg_cost_per_page_usd": 0.002283,
+  "estimated_full_pipeline_usd": 292.0,
+  "details": [
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第1讲 数形结合_p26_img1.jpeg",
+      "char_count": 314,
+      "formula_count": 5,
+      "input_tokens": 16320,
+      "output_tokens": 223,
+      "cost_cny": 0.016543,
+      "cost_usd": 0.002283,
+      "elapsed_s": 16.56,
+      "text_preview": "学而思秘籍 小学数学思维培养 12 级\n举一反三\n拍照批改 秒判对错\n练习 10\n利用平方差公式速算:\n(1) $102 \\times 98=$ ;\n$(2)1 \\frac{1}{15} \\times \\frac{14}{15}=$ ;\n(3) $864^{2}-136^{2}=$ 。\n练习 11\n如图,有一块边长为 $a$ 的正方形空地,想在中间位置修一条“十”字形小路,小路的宽为 $b$, 试求剩余空地的面积。用两种方法表示出来,比较这两种表示方法,验证了什么公式?\nAPP 扫码看讲解\nhttps://aiqr.sxyapi.com/2023/01/28/061442-002-800.png\nAPP 扫码看讲解\n16"
+    }
+  ]
+}

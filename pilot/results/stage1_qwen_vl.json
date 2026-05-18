@@ -1,0 +1,43 @@
+{
+  "model": "qwen-vl-max",
+  "pages_tested": 3,
+  "total_cost_cny": 0.13057,
+  "total_cost_usd": 0.01802,
+  "avg_cost_per_page_usd": 0.00601,
+  "estimated_full_pipeline_usd": 769.0,
+  "details": [
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第15讲 计算问题综合选讲_p10_img1.jpeg",
+      "char_count": 206,
+      "formula_count": 1,
+      "input_tokens": 1307,
+      "output_tokens": 133,
+      "cost_cny": 0.03164,
+      "cost_usd": 0.00437,
+      "elapsed_s": 9.01,
+      "text_preview": "学而思秘籍 小学数学思维培养 12 级\n\n挑战自我  \n拍照批改 秒判对错\n\n练习 3\n\n田田的生日到了，她邀请同学们去她家里玩新买的数字卡，数字卡可以用来拼成各种算式，田田第一个拼。\n\n计算：$20 \\times 20 - 19 \\times 19 + 18 \\times 18 - 17 \\times 17 + \\cdots + 2 \\times 2 - 1 \\times 1$。\n\nAPP 扫码看讲解\n\n6"
+    },
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第15讲 计算问题综合选讲_p11_img1.jpeg",
+      "char_count": 534,
+      "formula_count": 6,
+      "input_tokens": 1307,
+      "output_tokens": 332,
+      "cost_cny": 0.05552,
+      "cost_usd": 0.00766,
+      "elapsed_s": 16.46,
+      "text_preview": "【例 2】  \n计算：$1 \\times 99 + 2 \\times 98 + 3 \\times 97 + \\cdots + 49 \\times 51$。\n\n【解析】  \n方法一：观察发现式子中每相乘的两个数的和都是相等的，可以采用平方差公式。  \n\n原式 $= (50 - 49) \\times (50 + 49) + (50 - 48) \\times (50 + 48) + (50 - 47) \\times (50 + 47) + \\cdots$  \n$= (50^2 - 49^2) + (50^2 - 48^2) + \\cdots + (50^2 - 1^2)$  \n$= 50^2 \\times 49 - (1^2 + 2^2 + \\cdots + 49^2)$\n\n思维导图  \n$$\n\\text{和差算法} \\xrightarrow{\\text{两个数的和} \\times \\text{"
+    },
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第15讲 计算问题综合选讲_p12_img1.jpeg",
+      "char_count": 366,
+      "formula_count": 18,
+      "input_tokens": 1307,
+      "output_tokens": 231,
+      "cost_cny": 0.0434,
+      "cost_usd": 0.00599,
+      "elapsed_s": 6.99,
+      "text_preview": "$$\n=50^2\\times49-\\frac{1}{6}\\times49\\times50\\times99\n$$\n\n$$\n=50^2\\times49-49\\times25\\times33\n$$\n\n$$\n=49\\times25\\times(100-33)\n$$\n\n$$\n=49\\times25\\times67\n$$\n\n$$\n=82075。\n$$\n\n方法二：也可以用踢三角，\n\n$$\n1\\times99+2\\times98+3\\times97+\\cdots+49\\times51\n$$\n\n$$\n=(99+51+51)\\times(1+2+3+\\cdots+49)\\div3\n$$\n\n$$\n=201\\times1225\\div3\n$$\n\n$$\n=82075。\n$$\n\n踢三角可以解决的问题：求自然数列与等差数列中对应项乘积的和。\n\n学习笔记"
+    }
+  ]
+}

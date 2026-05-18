@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI 错题集 · 项目制学习 · 原型 v2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;padding:20px;gap:24px;flex-wrap:wrap}
+.phone{width:375px;height:812px;background:#F5F6FA;border-radius:44px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,.7),inset 0 0 0 1.5px rgba(255,255,255,.12)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;transform:translateX(16px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0)}
+
+/* status / nav / tabbar */
+.sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:12px;font-weight:600;flex-shrink:0}
+.sb-r{display:flex;gap:5px;align-items:center}
+.nb{height:48px;display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.06)}
+.nb-title{flex:1;text-align:center;font-size:17px;font-weight:700}
+.nb-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#5B5FC7}
+.nb-action{font-size:14px;color:#5B5FC7;font-weight:500;cursor:pointer;min-width:36px;text-align:right}
+.tabbar{height:56px;background:#fff;border-top:1px solid #EBEBEB;display:flex;align-items:center;flex-shrink:0}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:500;color:#9CA3AF;height:100%}
+.tab.on{color:#5B5FC7;font-weight:700}
+
+/* scroll */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+
+/* base components */
+.card{background:#fff;border-radius:16px;padding:16px;margin:0 16px 12px}
+.card-flat{background:#fff;border-radius:16px;padding:16px;margin:0 0 12px}
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.chip-blue{background:#EEF0FF;color:#5B5FC7}
+.chip-green{background:#EDFCF2;color:#16A34A}
+.chip-red{background:#FEF2F2;color:#DC2626}
+.chip-orange{background:#FFF7ED;color:#EA580C}
+.chip-gray{background:#F3F4F6;color:#6B7280}
+.chip-amber{background:#FFFBEB;color:#D97706}
+.btn{width:100%;height:50px;border-radius:25px;border:none;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s,opacity .1s}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-primary{background:linear-gradient(135deg,#5B5FC7,#4338CA);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid #5B5FC7;color:#5B5FC7}
+.btn-disabled{background:#E5E7EB;color:#9CA3AF;pointer-events:none}
+.row{display:flex;align-items:center;gap:8px}
+h3{font-size:15px;font-weight:700;color:#111827}
+.label{font-size:12px;color:#9CA3AF}
+
+/* choice button (intake / assessment) */
+.choice{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#F5F6FA;border:1.5px solid transparent;cursor:pointer;transition:all .15s;margin-bottom:8px;user-select:none}
+.choice.sel{background:#EEF0FF;border-color:#5B5FC7}
+.choice-radio{width:18px;height:18px;border-radius:50%;border:1.5px solid #D1D5DB;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.choice.sel .choice-radio{background:#5B5FC7;border-color:#5B5FC7}
+.choice.sel .choice-radio::after{content:'';width:7px;height:7px;border-radius:50%;background:#fff;display:block}
+.choice-text{font-size:13px;color:#374151;line-height:1.4}
+.choice.sel .choice-text{color:#4338CA;font-weight:600}
+
+/* milestone card */
+.ms-card{background:#fff;border-radius:14px;padding:14px 16px;margin:0 16px 10px;position:relative;overflow:hidden}
+.ms-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.ms-m1::before{background:#5B5FC7}
+.ms-m2::before{background:#F59E0B}
+.ms-m3::before{background:#10B981}
+
+/* step progress bar (setup flow) */
+.flow-bar{display:flex;gap:4px;padding:10px 16px 0;flex-shrink:0}
+.flow-seg{flex:1;height:4px;border-radius:2px;background:#E5E7EB}
+.flow-seg.done{background:#5B5FC7}
+.flow-seg.now{background:#A5B4FC}
+
+/* camera */
+#s-camera .viewfinder{flex:1;background:#0a0a0a;position:relative;display:flex;align-items:center;justify-content:center}
+#s-camera .corner{position:absolute;width:26px;height:26px}
+#s-camera .corner.tl{top:60px;left:48px;border-top:3px solid #fff;border-left:3px solid #fff;border-radius:3px 0 0}
+#s-camera .corner.tr{top:60px;right:48px;border-top:3px solid #fff;border-right:3px solid #fff;border-radius:0 3px 0}
+#s-camera .corner.bl{bottom:60px;left:48px;border-bottom:3px solid #fff;border-left:3px solid #fff;border-radius:0 0 0 3px}
+#s-camera .corner.br{bottom:60px;right:48px;border-bottom:3px solid #fff;border-right:3px solid #fff;border-radius:0 0 3px}
+#s-camera .hint{color:rgba(255,255,255,.4);font-size:13px;text-align:center;line-height:1.8}
+#s-camera .shutter-wrap{background:#1a1a1a;padding:20px 0 32px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#s-camera .shutter{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;justify-content:center}
+#s-camera .shutter-inner{width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #1a1a1a}
+
+/* loading */
+#s-loading .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:20px}
+#s-loading .spinner{width:60px;height:60px;border:4px solid #EEF0FF;border-top:4px solid #5B5FC7;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.step-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.step-done-c{background:#EDFCF2;color:#16A34A}
+.step-active-c{background:#EEF0FF;color:#5B5FC7}
+.step-wait-c{background:#F3F4F6;color:#9CA3AF}
+
+/* problem / AI chat */
+.answer-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;font-size:14px;font-weight:700}
+.ab-correct{background:#EDFCF2;color:#16A34A}
+.ab-wrong{background:#FEF2F2;color:#DC2626}
+.analysis-block{background:#F5F6FA;border-radius:12px;padding:14px}
+.analysis-row{display:flex;gap:10px;margin-bottom:10px}
+.analysis-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.analysis-label{font-size:11px;color:#9CA3AF;margin-bottom:2px}
+.analysis-text{font-size:13px;color:#111827;line-height:1.6}
+.voice-area{background:#fff;padding:14px 16px 28px;border-top:1px solid #F0F1F5;flex-shrink:0}
+.voice-hint{font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:10px}
+.voice-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border-radius:25px;background:#EEF0FF;border:none;cursor:pointer;font-size:14px;font-weight:600;color:#5B5FC7}
+.voice-btn.recording{background:#FEF2F2;color:#DC2626;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.ai-bubble{display:flex;gap:10px;margin-bottom:14px;padding:0 16px}
+.ai-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5B5FC7,#4338CA);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.ai-msg{max-width:240px;background:#fff;border-radius:4px 16px 16px 16px;padding:11px 14px;font-size:13px;color:#111827;line-height:1.7;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.user-bubble{display:flex;justify-content:flex-end;margin-bottom:14px;padding:0 16px}
+.user-msg{max-width:220px;background:#5B5FC7;border-radius:16px 4px 16px 16px;padding:11px 14px;font-size:13px;color:#fff;line-height:1.7}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:#fff;color:#6B7280}
+.filter-btn.on{background:#5B5FC7;color:#fff}
+.problem-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;margin:0 16px 8px;border-radius:14px;cursor:pointer}
+.problem-status{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:700}
+.ps-correct{background:#EDFCF2;color:#16A34A}
+.ps-wrong{background:#FEF2F2;color:#DC2626}
+.ps-unknown{background:#FFF7ED;color:#EA580C}
+.ps-text{font-size:11px;font-weight:700}
+
+/* calendar */
+.cal-day{display:flex;flex-direction:column;align-items:center;padding:1px 0}
+.cal-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.cal-bar{width:16px;height:3px;border-radius:2px;margin-top:2px}
+
+/* misc */
+@keyframes bounce{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- ==================== S-HOME-A: 备赛首页（无项目）==================== -->
+<div class="screen active" id="s-home-a">
+  <div style="background:#fff"><div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>WiFi</span><span>100%</span></div></div></div>
+  <div style="background:linear-gradient(150deg,#4338CA 0%,#5B5FC7 50%,#818CF8 100%);padding:28px 20px 32px;position:relative;overflow:hidden;flex-shrink:0">
+    <div style="position:absolute;top:-20px;right:-10px;font-size:130px;font-weight:900;color:rgba(255,255,255,.05);line-height:1;pointer-events:none">华</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:10px">AI 错题集 · 项目制学习</div>
+    <div style="font-size:24px;font-weight:800;color:#fff;line-height:1.4;margin-bottom:6px">你好，小明 👋</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.6">华杯赛还有 <b style="color:#FCD34D;font-size:16px">213</b> 天<br>AI 已为你准备好专属备赛计划</div>
+    <div style="margin-top:18px;display:flex;gap:10px">
+      <div style="flex:1;background:rgba(255,255,255,.15);border-radius:12px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#fff">免费</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">14天体验</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,.15);border-radius:12px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#fff">≈25min</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">完成诊断</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,.15);border-radius:12px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#fff">每日</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">微信日报</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px 0 8px">
+    <div class="card" style="padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px">培训班有 4 个结构性缺陷，我们逐一解决</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:14px;margin-top:1px">🎯</span>
+          <div><div style="font-size:12px;font-weight:600;color:#374151">AI 诊断 → 精确到每个知识点薄弱程度</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">不是"进快班慢班"，是你专属的能力报告</div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:14px;margin-top:1px">📅</span>
+          <div><div style="font-size:12px;font-weight:600;color:#374151">每日任务 + 遗忘曲线复习，全程追踪</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">下课了事 → 每天执行记录可见</div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:14px;margin-top:1px">📲</span>
+          <div><div style="font-size:12px;font-weight:600;color:#374151">每日微信日报，家长全程可见</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">过程黑箱 → 实时透明</div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:14px;margin-top:1px">💰</span>
+          <div><div style="font-size:12px;font-weight:600;color:#374151">全年 499 元 = 培训班一节课</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">一年费用 vs 培训班单次费用</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" onclick="go('s-setup')" style="font-size:16px">开始备赛，免费诊断能力 →</button>
+      <div style="text-align:center;font-size:12px;color:#9CA3AF;padding:4px">14天免费体验 · 完成能力报告后开始计时</div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on">首页</div>
+    <div class="tab" onclick="go('s-mine')">我的</div>
+  </div>
+</div>
+
+<!-- ==================== S-SETUP: 设置备赛目标 ==================== -->
+<div class="screen" id="s-setup">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-home-a')">‹</div>
+      <div class="nb-title">设置备赛目标</div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="flow-bar">
+      <div class="flow-seg now"></div>
+      <div class="flow-seg"></div>
+      <div class="flow-seg"></div>
+      <div class="flow-seg"></div>
+      <div class="flow-seg"></div>
+    </div>
+    <div style="padding:4px 16px 8px;font-size:11px;color:#9CA3AF">第 1 步，共 5 步</div>
+  </div>
+  <div class="scroll" style="padding:8px 0">
+    <!-- 考试日期 -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px">选择竞赛日期</div>
+      <div style="background:#F5F6FA;border-radius:12px;padding:14px 16px;cursor:pointer;border:1.5px solid #5B5FC7" onclick="selectDate(this)">
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:4px">华杯小学数学邀请赛</div>
+        <div style="font-size:18px;font-weight:800;color:#111827">2026 年 11 月 20 日</div>
+        <div style="font-size:11px;color:#5B5FC7;margin-top:4px">● 距今 201 天</div>
+      </div>
+      <div style="margin-top:8px;font-size:12px;color:#9CA3AF">如日期有变化，可随时修改</div>
+    </div>
+    <!-- 年级 -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px">孩子目前就读年级</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="grade-grid">
+        <div class="choice" onclick="pickGrade(this)"><div class="choice-radio"></div><span class="choice-text">四年级</span></div>
+        <div class="choice sel" onclick="pickGrade(this)"><div class="choice-radio"></div><span class="choice-text">五年级</span></div>
+        <div class="choice" onclick="pickGrade(this)"><div class="choice-radio"></div><span class="choice-text">六年级</span></div>
+        <div class="choice" onclick="pickGrade(this)"><div class="choice-radio"></div><span class="choice-text">其他</span></div>
+      </div>
+    </div>
+    <!-- 目标级别 -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px">本次参赛目标</div>
+      <div id="goal-grid">
+        <div class="choice" onclick="pickGoal(this,'entry')">
+          <div class="choice-radio"></div>
+          <div><div class="choice-text">入门参赛</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">完赛即目标，积累经验</div></div>
+        </div>
+        <div class="choice sel" onclick="pickGoal(this,'award')">
+          <div class="choice-radio"></div>
+          <div><div class="choice-text">冲刺获奖 🏅</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">二等奖及以上（推荐）</div></div>
+        </div>
+        <div class="choice" onclick="pickGoal(this,'top')">
+          <div class="choice-radio"></div>
+          <div><div class="choice-text">挑战一等奖 🏆</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">全力冲顶，需要高强度</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:4px 16px 28px">
+      <button class="btn btn-primary" onclick="go('s-intake')">下一步：AI 初步问卷 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S-INTAKE: AI 初步问卷 ==================== -->
+<div class="screen" id="s-intake">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-setup')">‹</div>
+      <div class="nb-title">AI 初步问卷</div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="flow-bar">
+      <div class="flow-seg done"></div>
+      <div class="flow-seg now"></div>
+      <div class="flow-seg"></div>
+      <div class="flow-seg"></div>
+      <div class="flow-seg"></div>
+    </div>
+    <div style="padding:4px 16px 8px;font-size:11px;color:#9CA3AF">第 2 步，共 5 步 · 4 个问题，约 1 分钟</div>
+  </div>
+  <div class="scroll" style="padding:8px 0 100px">
+    <div style="padding:0 16px 4px;font-size:13px;font-weight:600;color:#374151">先聊几个问题，让 AI 了解你 👋</div>
+
+    <!-- Q1 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px">Q1 · 之前学过多久奥数？</div>
+      <div id="q1">
+        <div class="choice" onclick="pick('q1',this)"><div class="choice-radio"></div><span class="choice-text">从来没学过</span></div>
+        <div class="choice sel" onclick="pick('q1',this)"><div class="choice-radio"></div><span class="choice-text">学了不到 1 年</span></div>
+        <div class="choice" onclick="pick('q1',this)"><div class="choice-radio"></div><span class="choice-text">学了 1-2 年</span></div>
+        <div class="choice" onclick="pick('q1',this)"><div class="choice-radio"></div><span class="choice-text">2 年以上</span></div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px">Q2 · 哪类题目你觉得最难？</div>
+      <div id="q2">
+        <div class="choice sel" onclick="pick('q2',this)"><div class="choice-radio"></div><span class="choice-text">整除 / 余数 / 数论</span></div>
+        <div class="choice" onclick="pick('q2',this)"><div class="choice-radio"></div><span class="choice-text">行程 / 速度 / 应用</span></div>
+        <div class="choice" onclick="pick('q2',this)"><div class="choice-radio"></div><span class="choice-text">几何 / 图形</span></div>
+        <div class="choice" onclick="pick('q2',this)"><div class="choice-radio"></div><span class="choice-text">都差不多难</span></div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px">Q3 · 每周能投入多少时间？</div>
+      <div id="q3">
+        <div class="choice" onclick="pick('q3',this)"><div class="choice-radio"></div><span class="choice-text">3 小时以内</span></div>
+        <div class="choice sel" onclick="pick('q3',this)"><div class="choice-radio"></div><span class="choice-text">3-5 小时</span></div>
+        <div class="choice" onclick="pick('q3',this)"><div class="choice-radio"></div><span class="choice-text">5-8 小时</span></div>
+        <div class="choice" onclick="pick('q3',this)"><div class="choice-radio"></div><span class="choice-text">8 小时以上</span></div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px">Q4 · 距华杯，你现在的信心是？</div>
+      <div id="q4">
+        <div class="choice" onclick="pick('q4',this)"><div class="choice-radio"></div><span class="choice-text">完全没把握，从零开始</span></div>
+        <div class="choice sel" onclick="pick('q4',this)"><div class="choice-radio"></div><span class="choice-text">有一点基础，需要系统强化</span></div>
+        <div class="choice" onclick="pick('q4',this)"><div class="choice-radio"></div><span class="choice-text">挺有信心，冲刺阶段</span></div>
+      </div>
+    </div>
+
+    <div style="background:#EEF0FF;margin:0 16px;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:16px;margin-top:1px">🤖</span>
+      <div style="font-size:12px;color:#4338CA;line-height:1.6">根据你的回答，AI 初步判断你处于<b>中初级</b>水平——接下来的诊断测试会更精准确认，放心作答即可。</div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" id="intake-btn" onclick="go('s-assessment')">开始诊断测试（15题，约15分钟）→</button>
+  </div>
+</div>
+
+<!-- ==================== S-ASSESSMENT: 诊断测试 ==================== -->
+<div class="screen" id="s-assessment">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-intake')">‹</div>
+      <div class="nb-title">诊断测试</div>
+      <span style="font-size:13px;color:#9CA3AF;min-width:36px;text-align:right">3/15</span>
+    </div>
+    <div class="flow-bar">
+      <div class="flow-seg done"></div>
+      <div class="flow-seg done"></div>
+      <div class="flow-seg now"></div>
+      <div class="flow-seg"></div>
+      <div class="flow-seg"></div>
+    </div>
+    <div style="padding:4px 16px 8px;font-size:11px;color:#9CA3AF">第 3 步，共 5 步 · 展示前 3 题（共 15 题）</div>
+  </div>
+  <div class="scroll" style="padding:8px 0 100px">
+    <div style="padding:0 16px 10px;font-size:13px;color:#6B7280;line-height:1.6">
+      根据你的问卷，AI 为你选了 <b style="color:#111827">15 道</b> 诊断题，涵盖 3 个重点知识域。<br>放心作答，做错没关系，这正是诊断用的。
+    </div>
+
+    <!-- Q1 整除余数 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="chip chip-blue">整除 · 余数</span>
+        <span style="font-size:11px;color:#9CA3AF">第 1 题</span>
+      </div>
+      <div style="font-size:14px;color:#111827;line-height:1.9;background:#F9FAFB;border-radius:10px;padding:12px;font-family:Georgia,serif;margin-bottom:12px">
+        一个整数除以 7 余 3，那么这个数除以 14 的余数可能是哪些？
+      </div>
+      <div id="aq1">
+        <div class="choice" onclick="pick('aq1',this)"><div class="choice-radio"></div><span class="choice-text">A. 只能是 3</span></div>
+        <div class="choice" onclick="pick('aq1',this)"><div class="choice-radio"></div><span class="choice-text">B. 只能是 10</span></div>
+        <div class="choice sel" onclick="pick('aq1',this)"><div class="choice-radio"></div><span class="choice-text">C. 可能是 3，也可能是 10</span></div>
+        <div class="choice" onclick="pick('aq1',this)"><div class="choice-radio"></div><span class="choice-text">D. 不确定，无法判断</span></div>
+      </div>
+    </div>
+
+    <!-- Q2 行程 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="chip chip-amber">行程 · 速度</span>
+        <span style="font-size:11px;color:#9CA3AF">第 2 题</span>
+      </div>
+      <div style="font-size:14px;color:#111827;line-height:1.9;background:#F9FAFB;border-radius:10px;padding:12px;font-family:Georgia,serif;margin-bottom:12px">
+        甲乙两地相距 120 千米。一辆汽车从甲出发，速度 40 千米/时；另一辆从乙出发，速度 60 千米/时，两车相向而行，几小时后相遇？
+      </div>
+      <div id="aq2">
+        <div class="choice" onclick="pick('aq2',this)"><div class="choice-radio"></div><span class="choice-text">A. 1 小时</span></div>
+        <div class="choice sel" onclick="pick('aq2',this)"><div class="choice-radio"></div><span class="choice-text">B. 1.2 小时</span></div>
+        <div class="choice" onclick="pick('aq2',this)"><div class="choice-radio"></div><span class="choice-text">C. 2 小时</span></div>
+        <div class="choice" onclick="pick('aq2',this)"><div class="choice-radio"></div><span class="choice-text">D. 3 小时</span></div>
+      </div>
+    </div>
+
+    <!-- Q3 计数 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="chip chip-green">计数 · 规律</span>
+        <span style="font-size:11px;color:#9CA3AF">第 3 题</span>
+      </div>
+      <div style="font-size:14px;color:#111827;line-height:1.9;background:#F9FAFB;border-radius:10px;padding:12px;font-family:Georgia,serif;margin-bottom:12px">
+        从 1 写到 100，数字「2」共出现了多少次？
+      </div>
+      <div id="aq3">
+        <div class="choice" onclick="pick('aq3',this)"><div class="choice-radio"></div><span class="choice-text">A. 10 次</span></div>
+        <div class="choice sel" onclick="pick('aq3',this)"><div class="choice-radio"></div><span class="choice-text">B. 20 次</span></div>
+        <div class="choice" onclick="pick('aq3',this)"><div class="choice-radio"></div><span class="choice-text">C. 21 次</span></div>
+        <div class="choice" onclick="pick('aq3',this)"><div class="choice-radio"></div><span class="choice-text">D. 22 次</span></div>
+      </div>
+    </div>
+
+    <div style="padding:0 16px">
+      <div style="background:#F5F6FA;border-radius:12px;padding:12px 14px;font-size:12px;color:#6B7280;text-align:center">
+        … 剩余 12 道题已在系统中准备好，提交前 3 题后继续 …
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" onclick="goReport()">提交答案，查看能力报告 →</button>
+  </div>
+</div>
+
+<!-- ==================== S-REPORT: 能力报告 ==================== -->
+<div class="screen" id="s-report">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-assessment')">‹</div>
+      <div class="nb-title">你的能力报告</div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="flow-bar">
+      <div class="flow-seg done"></div>
+      <div class="flow-seg done"></div>
+      <div class="flow-seg done"></div>
+      <div class="flow-seg now"></div>
+      <div class="flow-seg"></div>
+    </div>
+    <div style="padding:4px 16px 8px;font-size:11px;color:#9CA3AF">第 4 步，共 5 步 · 能力报告已生成</div>
+  </div>
+  <div class="scroll" style="padding:8px 0 100px">
+    <!-- 总体定级 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#5B5FC7,#4338CA);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;flex-shrink:0">中</div>
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#111827">中级水平</div>
+          <div style="font-size:12px;color:#6B7280;margin-top:2px">有扎实基础，整除余数 · 应用综合 是关键突破点</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:22px;font-weight:900;color:#5B5FC7">67</div>
+          <div style="font-size:10px;color:#9CA3AF">综合分</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 雷达图 -->
+    <div class="card" style="padding:14px 16px">
+      <h3 style="margin-bottom:12px">能力雷达图</h3>
+      <div style="display:flex;justify-content:center">
+        <svg viewBox="0 0 200 200" width="200" height="200">
+          <!-- 背景网格 100% -->
+          <polygon points="100,30 160.6,65 160.6,135 100,170 39.4,135 39.4,65" fill="none" stroke="#E5E7EB" stroke-width="1"/>
+          <!-- 75% -->
+          <polygon points="100,47.5 145.5,72.5 145.5,127.5 100,152.5 54.5,127.5 54.5,72.5" fill="none" stroke="#E5E7EB" stroke-width="1"/>
+          <!-- 50% -->
+          <polygon points="100,65 130.3,82.5 130.3,117.5 100,135 69.7,117.5 69.7,82.5" fill="none" stroke="#E5E7EB" stroke-width="1"/>
+          <!-- 25% -->
+          <polygon points="100,82.5 115.2,91.25 115.2,108.75 100,117.5 84.8,108.75 84.8,91.25" fill="none" stroke="#E5E7EB" stroke-width="1"/>
+          <!-- 轴线 -->
+          <line x1="100" y1="100" x2="100" y2="30" stroke="#E5E7EB" stroke-width="1"/>
+          <line x1="100" y1="100" x2="160.6" y2="65" stroke="#E5E7EB" stroke-width="1"/>
+          <line x1="100" y1="100" x2="160.6" y2="135" stroke="#E5E7EB" stroke-width="1"/>
+          <line x1="100" y1="100" x2="100" y2="170" stroke="#E5E7EB" stroke-width="1"/>
+          <line x1="100" y1="100" x2="39.4" y2="135" stroke="#E5E7EB" stroke-width="1"/>
+          <line x1="100" y1="100" x2="39.4" y2="65" stroke="#E5E7EB" stroke-width="1"/>
+          <!-- 数据面 (85,62,45,78,70,55) -->
+          <polygon points="100,40.5 137.6,78.3 127.3,115.75 100,154.6 57.6,124.5 66.6,80.75"
+            fill="rgba(91,95,199,0.2)" stroke="#5B5FC7" stroke-width="2" stroke-linejoin="round"/>
+          <!-- 数据点 -->
+          <circle cx="100" cy="40.5" r="3.5" fill="#5B5FC7"/>
+          <circle cx="137.6" cy="78.3" r="3.5" fill="#5B5FC7"/>
+          <circle cx="127.3" cy="115.75" r="3.5" fill="#DC2626"/>
+          <circle cx="100" cy="154.6" r="3.5" fill="#5B5FC7"/>
+          <circle cx="57.6" cy="124.5" r="3.5" fill="#5B5FC7"/>
+          <circle cx="66.6" cy="80.75" r="3.5" fill="#F59E0B"/>
+          <!-- 标签 -->
+          <text x="100" y="22" text-anchor="middle" font-size="9" fill="#374151" font-weight="600">计数原理</text>
+          <text x="167" y="62" text-anchor="start" font-size="9" fill="#374151" font-weight="600">行程问题</text>
+          <text x="167" y="142" text-anchor="start" font-size="9" fill="#DC2626" font-weight="700">整除余数⚠</text>
+          <text x="100" y="184" text-anchor="middle" font-size="9" fill="#374151" font-weight="600">鸡兔同笼</text>
+          <text x="33" y="142" text-anchor="end" font-size="9" fill="#374151" font-weight="600">数列规律</text>
+          <text x="33" y="62" text-anchor="end" font-size="9" fill="#F59E0B" font-weight="700">应用综合</text>
+          <!-- 分值 -->
+          <text x="100" y="37" text-anchor="middle" font-size="8" fill="#5B5FC7">85</text>
+          <text x="140" y="75" text-anchor="start" font-size="8" fill="#5B5FC7">62</text>
+          <text x="130" y="118" text-anchor="start" font-size="8" fill="#DC2626">45</text>
+          <text x="100" y="164" text-anchor="middle" font-size="8" fill="#5B5FC7">78</text>
+          <text x="54" y="124" text-anchor="end" font-size="8" fill="#5B5FC7">70</text>
+          <text x="64" y="78" text-anchor="end" font-size="8" fill="#F59E0B">55</text>
+        </svg>
+      </div>
+      <!-- 薄弱点说明 -->
+      <div style="margin-top:4px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#FEF2F2;border-radius:10px">
+          <div><div style="font-size:12px;font-weight:700;color:#DC2626">🔴 整除余数</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">低于同级均值 23%</div></div>
+          <div style="font-size:18px;font-weight:900;color:#DC2626">45<span style="font-size:11px;font-weight:500">分</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#FFFBEB;border-radius:10px">
+          <div><div style="font-size:12px;font-weight:700;color:#D97706">🟡 应用综合</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">有基础，需要强化</div></div>
+          <div style="font-size:18px;font-weight:900;color:#D97706">55<span style="font-size:11px;font-weight:500">分</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#EDFCF2;border-radius:10px">
+          <div><div style="font-size:12px;font-weight:700;color:#16A34A">🟢 计数原理</div><div style="font-size:11px;color:#9CA3AF;margin-top:1px">掌握良好，可继续深化</div></div>
+          <div style="font-size:18px;font-weight:900;color:#16A34A">85<span style="font-size:11px;font-weight:500">分</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 校正对话 -->
+    <div class="card" style="padding:14px 16px">
+      <h3 style="margin-bottom:4px">有什么不准确的？</h3>
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:12px">告诉 AI，它会调整你的能力画像</div>
+      <div class="ai-bubble" style="padding:0;margin-bottom:10px">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">根据你的作答，我判断整除余数是你的主要短板。有没有觉得不准确的地方？比如某块其实你已经在校外学过？</div>
+      </div>
+      <div class="user-bubble" style="padding:0;margin-bottom:10px">
+        <div class="user-msg">整除我其实学过，但是没怎么练</div>
+      </div>
+      <div class="ai-bubble" style="padding:0;margin-bottom:0">
+        <div class="ai-avatar">AI</div>
+        <div class="ai-msg">明白了 👍 把整除余数调整为「有基础待强化」，计划里会适当减少基础讲解，多安排练习题冲刺。画像已更新。</div>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" onclick="go('s-plan-preview')">确认画像，生成个性化计划 →</button>
+  </div>
+</div>
+
+<!-- ==================== S-PLAN-PREVIEW: 计划预览确认 ==================== -->
+<div class="screen" id="s-plan-preview">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-report')">‹</div>
+      <div class="nb-title">你的专属计划</div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="flow-bar">
+      <div class="flow-seg done"></div>
+      <div class="flow-seg done"></div>
+      <div class="flow-seg done"></div>
+      <div class="flow-seg done"></div>
+      <div class="flow-seg now"></div>
+    </div>
+    <div style="padding:4px 16px 8px;font-size:11px;color:#9CA3AF">第 5 步，共 5 步 · 计划已生成，确认后立即开始</div>
+  </div>
+  <div class="scroll" style="padding:8px 0 100px">
+    <!-- 计划总览 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-around;padding:4px 0 12px;border-bottom:1px solid #F0F1F5;margin-bottom:12px">
+        <div style="text-align:center">
+          <div style="font-size:24px;font-weight:900;color:#111827">67</div>
+          <div style="font-size:11px;color:#9CA3AF">学习天数</div>
+        </div>
+        <div style="width:1px;background:#F0F1F5"></div>
+        <div style="text-align:center">
+          <div style="font-size:24px;font-weight:900;color:#111827">3</div>
+          <div style="font-size:11px;color:#9CA3AF">里程碑</div>
+        </div>
+        <div style="width:1px;background:#F0F1F5"></div>
+        <div style="text-align:center">
+          <div style="font-size:24px;font-weight:900;color:#111827">≈1.5h</div>
+          <div style="font-size:11px;color:#9CA3AF">每日时长</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;font-size:12px;color:#6B7280">
+        <span style="font-size:14px">🎯</span>
+        目标：华杯小学组 · 冲刺获奖 · 2026年11月20日
+      </div>
+    </div>
+
+    <!-- M1 -->
+    <div class="ms-card ms-m1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;font-weight:700;background:#EEF0FF;color:#5B5FC7;padding:2px 8px;border-radius:20px">M1</span>
+          <span style="font-size:14px;font-weight:700;color:#111827">整除与余数</span>
+        </div>
+        <span style="font-size:11px;color:#9CA3AF">第 1-21 天</span>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">4月22日 — 5月12日 · 21个学习日</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+        <span class="chip chip-blue" style="font-size:10px">整除判断</span>
+        <span class="chip chip-blue" style="font-size:10px">余数运算</span>
+        <span class="chip chip-blue" style="font-size:10px">同余性质</span>
+        <span class="chip chip-blue" style="font-size:10px">中国剩余定理入门</span>
+      </div>
+      <div style="font-size:12px;color:#5B5FC7;font-weight:600">重点突破 · 整除余数 45→75分</div>
+    </div>
+
+    <!-- M2 -->
+    <div class="ms-card ms-m2">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;font-weight:700;background:#FFFBEB;color:#D97706;padding:2px 8px;border-radius:20px">M2</span>
+          <span style="font-size:14px;font-weight:700;color:#111827">行程·应用综合</span>
+        </div>
+        <span style="font-size:11px;color:#9CA3AF">第 22-46 天</span>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">5月13日 — 6月6日 · 25个学习日</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+        <span class="chip chip-amber" style="font-size:10px;background:#FFFBEB;color:#D97706">相遇追及</span>
+        <span class="chip chip-amber" style="font-size:10px;background:#FFFBEB;color:#D97706">流水行船</span>
+        <span class="chip chip-amber" style="font-size:10px;background:#FFFBEB;color:#D97706">综合应用</span>
+      </div>
+      <div style="font-size:12px;color:#D97706;font-weight:600">提升阶段 · 应用综合 55→72分</div>
+    </div>
+
+    <!-- M3 -->
+    <div class="ms-card ms-m3">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;font-weight:700;background:#ECFDF5;color:#059669;padding:2px 8px;border-radius:20px">M3</span>
+          <span style="font-size:14px;font-weight:700;color:#111827">综合冲刺</span>
+        </div>
+        <span style="font-size:11px;color:#9CA3AF">第 47-67 天</span>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">6月7日 — 6月27日 · 21个学习日</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+        <span class="chip chip-green" style="font-size:10px">真题模拟</span>
+        <span class="chip chip-green" style="font-size:10px">弱点专项</span>
+        <span class="chip chip-green" style="font-size:10px">冲刺训练</span>
+      </div>
+      <div style="font-size:12px;color:#059669;font-weight:600">冲刺阶段 · 综合实战演练</div>
+    </div>
+
+    <div style="margin:0 16px;background:#EEF0FF;border-radius:12px;padding:12px 14px;font-size:12px;color:#4338CA;line-height:1.7">
+      📌 每天最少完成 <b>1 题</b>，最多 <b>3 个知识点</b><br>
+      📱 每晚 21:00 微信日报自动推送给家长<br>
+      🔁 遗忘曲线自动安排复习，不用手动管
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" onclick="go('s-home')" style="font-size:16px">确认计划，开始备赛 🚀</button>
+  </div>
+</div>
+
+<!-- ==================== S-HOME: 首页（执行态）==================== -->
+<div class="screen" id="s-home">
+  <div style="background:#fff"><div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>WiFi</span><span>100%</span></div></div></div>
+  <!-- Hero 倒计时 + 里程碑进度 -->
+  <div style="background:linear-gradient(135deg,#4338CA 0%,#5B5FC7 100%);padding:16px 18px 20px;flex-shrink:0;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-10px;right:8px;font-size:100px;font-weight:900;color:rgba(255,255,255,.06);line-height:1;pointer-events:none">67</div>
+    <div style="display:flex;align-items:flex-start;gap:12px;position:relative">
+      <div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.8px;margin-bottom:4px">距 2026 华杯小学组竞赛</div>
+        <div style="display:flex;align-items:baseline;gap:4px">
+          <span style="font-size:42px;font-weight:900;color:#fff;line-height:1">67</span>
+          <span style="font-size:16px;color:rgba(255,255,255,.7);font-weight:600">天</span>
+        </div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:4px">当前阶段</div>
+        <div style="background:rgba(255,255,255,.18);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:#fff">M1 · 整除与余数</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">Day 3 / 21</div>
+      </div>
+    </div>
+    <!-- M1 进度条 -->
+    <div style="margin-top:10px;position:relative">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.6);margin-bottom:4px">
+        <span>M1 进度</span><span>14%</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.2);border-radius:3px">
+        <div style="width:14%;height:100%;background:#FCD34D;border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:6px">
+        <div style="height:3px;flex:1;border-radius:2px;background:#FCD34D"></div><!-- M1 in progress -->
+        <div style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.25)"></div><!-- M2 -->
+        <div style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.25)"></div><!-- M3 -->
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.45);margin-top:2px">
+        <span>M1 整除</span><span>M2 行程</span><span>M3 冲刺</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll" style="padding-top:10px">
+    <!-- 今日任务 -->
+    <div class="card" style="padding:12px 14px;background:linear-gradient(135deg,#EEF0FF,#F5F3FF);margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <h3 style="font-size:13px;color:#4338CA">今日任务</h3>
+        <span style="font-size:10px;color:#9CA3AF">4月24日 · 周五</span>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:3px">同余定义与性质</div>
+      <div style="font-size:12px;color:#6B7280;margin-bottom:10px">预计 45 分钟 · 含 5 道练习题</div>
+      <button class="btn btn-primary" style="height:42px;font-size:14px" onclick="go('s-chapter')">📷 拍照上传今日作业</button>
+    </div>
+    <!-- 训练日历 -->
+    <div class="card" style="padding:12px 14px">
+      <div class="row" style="margin-bottom:8px">
+        <h3 style="flex:1">训练日历</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1" onclick="calMonth(-1)">‹</span>
+          <span style="font-size:13px;font-weight:600;color:#374151" id="cal-title"></span>
+          <span style="font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1" onclick="calMonth(1)">›</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px">
+        <div style="text-align:center;font-size:10px;color:#9CA3AF">一</div><div style="text-align:center;font-size:10px;color:#9CA3AF">二</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF">三</div><div style="text-align:center;font-size:10px;color:#9CA3AF">四</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF">五</div><div style="text-align:center;font-size:10px;color:#9CA3AF">六</div>
+        <div style="text-align:center;font-size:10px;color:#9CA3AF">日</div>
+      </div>
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px 0"></div>
+      <div id="day-detail" style="display:none;margin-top:8px;border-top:1px solid #F0F1F5;padding-top:8px"></div>
+    </div>
+    <!-- 项目入口 -->
+    <div class="card" style="padding:12px 14px;cursor:pointer" onclick="go('s-detail')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#EEF0FF;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#111827">查看项目进度看板</div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:2px">M1 进行中 · 14% · 3/21天</div>
+        </div>
+        <span style="font-size:18px;color:#D1D5DB">›</span>
+      </div>
+    </div>
+    <!-- 最近练习 -->
+    <div class="card">
+      <h3 style="margin-bottom:10px">最近完成</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row" style="padding:10px;background:#F5F6FA;border-radius:10px">
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#111827">整除判断 · 基础练习</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">4月23日 · 5题</div></div>
+          <div><span class="chip chip-green">4对</span><span class="chip chip-red" style="margin-left:4px">1错</span></div>
+        </div>
+        <div class="row" style="padding:10px;background:#F5F6FA;border-radius:10px">
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#111827">整除判断 · 入门</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">4月22日 · 5题</div></div>
+          <div><span class="chip chip-green">5对</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on">首页</div>
+    <div class="tab" onclick="go('s-mine')">我的</div>
+  </div>
+</div>
+
+<!-- ==================== S-DETAIL: 项目进度看板 ==================== -->
+<div class="screen" id="s-detail">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-home')">‹</div>
+      <div class="nb-title">项目进度看板</div>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+  <div class="scroll" style="padding:10px 0 20px">
+    <!-- 项目头 -->
+    <div style="background:linear-gradient(135deg,#4338CA,#5B5FC7);margin:0 16px 12px;border-radius:16px;padding:16px;color:#fff">
+      <div style="font-size:14px;font-weight:800;margin-bottom:4px">华杯小学奥数 2026</div>
+      <div style="font-size:12px;opacity:.8;margin-bottom:12px">目标：冲刺获奖 · 2026年11月20日</div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:8px;text-align:center">
+          <div style="font-size:18px;font-weight:800">67</div>
+          <div style="font-size:10px;opacity:.7">剩余天数</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:8px;text-align:center">
+          <div style="font-size:18px;font-weight:800">14%</div>
+          <div style="font-size:10px;opacity:.7">总进度</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:8px;text-align:center">
+          <div style="font-size:18px;font-weight:800">3天</div>
+          <div style="font-size:10px;opacity:.7">连续打卡</div>
+        </div>
+      </div>
+    </div>
+    <!-- M1 in progress -->
+    <div class="ms-card ms-m1">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:10px;font-weight:700;background:#EEF0FF;color:#5B5FC7;padding:2px 8px;border-radius:20px">M1 进行中</span>
+        <span style="font-size:14px;font-weight:700;color:#111827">整除与余数</span>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">4月22日 — 5月12日</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#6B7280;margin-bottom:4px">
+        <span>已完成 3 / 21 天</span><span style="color:#5B5FC7;font-weight:600">14%</span>
+      </div>
+      <div style="height:6px;background:#EEF0FF;border-radius:3px;margin-bottom:8px">
+        <div style="width:14%;height:100%;background:#5B5FC7;border-radius:3px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;color:#9CA3AF">整除判断 ✓ · 余数运算 ✓ · 同余性质 进行中</div>
+        <button style="font-size:11px;color:#5B5FC7;background:#EEF0FF;border:none;border-radius:20px;padding:4px 10px;cursor:pointer" onclick="go('s-retro')">预览复盘</button>
+      </div>
+    </div>
+    <!-- M2 pending -->
+    <div class="ms-card ms-m2" style="opacity:.55">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:10px;font-weight:700;background:#FFFBEB;color:#D97706;padding:2px 8px;border-radius:20px">M2 待开始</span>
+        <span style="font-size:14px;font-weight:700;color:#111827">行程·应用综合</span>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">5月13日 — 6月6日</div>
+      <div style="height:6px;background:#F3F4F6;border-radius:3px"></div>
+    </div>
+    <!-- M3 pending -->
+    <div class="ms-card ms-m3" style="opacity:.45">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:10px;font-weight:700;background:#ECFDF5;color:#059669;padding:2px 8px;border-radius:20px">M3 待开始</span>
+        <span style="font-size:14px;font-weight:700;color:#111827">综合冲刺</span>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">6月7日 — 6月27日</div>
+      <div style="height:6px;background:#F3F4F6;border-radius:3px"></div>
+    </div>
+    <!-- 知识点完成概况 -->
+    <div class="card">
+      <h3 style="margin-bottom:10px">知识点掌握热力图</h3>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+        <div style="aspect-ratio:1;border-radius:4px;background:#5B5FC7"></div>
+        <div style="aspect-ratio:1;border-radius:4px;background:#818CF8"></div>
+        <div style="aspect-ratio:1;border-radius:4px;background:#A5B4FC"></div>
+        <div style="aspect-ratio:1;border-radius:4px;background:#E0E7FF"></div>
+        <div style="aspect-ratio:1;border-radius:4px;background:#E0E7FF"></div>
+        <div style="aspect-ratio:1;border-radius:4px;background:#F3F4F6"></div>
+        <div style="aspect-ratio:1;border-radius:4px;background:#F3F4F6"></div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:10px;color:#9CA3AF">
+        <div style="width:10px;height:10px;border-radius:2px;background:#5B5FC7"></div>已掌握
+        <div style="width:10px;height:10px;border-radius:2px;background:#A5B4FC;margin-left:6px"></div>学习中
+        <div style="width:10px;height:10px;border-radius:2px;background:#F3F4F6;margin-left:6px"></div>未开始
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S-RETRO: 里程碑复盘 ==================== -->
+<div class="screen" id="s-retro">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-detail')">‹</div>
+      <div class="nb-title">里程碑复盘</div>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px 0 20px">
+    <!-- 成就卡 -->
+    <div style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 100%);margin:0 16px 14px;border-radius:20px;padding:20px;color:#fff;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:120px;opacity:.06;font-weight:900">★</div>
+      <div style="font-size:32px;margin-bottom:8px;animation:bounce .6s ease-out">🏅</div>
+      <div style="font-size:18px;font-weight:900;margin-bottom:4px">阶段一 · 已解锁！</div>
+      <div style="font-size:13px;opacity:.85;margin-bottom:14px">整除与余数 — 21天全打卡</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px">
+          <div style="font-size:18px;font-weight:800">21</div>
+          <div style="font-size:10px;opacity:.7">打卡天数</div>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px">
+          <div style="font-size:18px;font-weight:800">87%</div>
+          <div style="font-size:10px;opacity:.7">任务完成率</div>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px">
+          <div style="font-size:18px;font-weight:800">45→73</div>
+          <div style="font-size:10px;opacity:.7">整除余数分</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 3 问 -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+        <div class="ai-avatar" style="width:26px;height:26px;font-size:9px">AI</div>
+        <span style="font-size:13px;font-weight:700;color:#111827">阶段复盘 · AI 3 问</span>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Q1 · 这21天里，哪道题让你印象最深？</div>
+      <div style="background:#EEF0FF;border-radius:10px;padding:10px 12px;font-size:12px;color:#4338CA;margin-bottom:4px">「韩信点兵」那道，搞懂之后感觉很有成就感</div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">中国剩余定理确实是这阶段的难点 ✓</div>
+
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Q2 · 整除余数这块，你觉得掌握了几成？</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <div class="choice" style="flex:1;padding:8px;margin:0;justify-content:center"><span class="choice-text" style="font-size:12px">4成以下</span></div>
+        <div class="choice" style="flex:1;padding:8px;margin:0;justify-content:center"><span class="choice-text" style="font-size:12px">5-6成</span></div>
+        <div class="choice sel" style="flex:1;padding:8px;margin:0;justify-content:center"><span class="choice-text" style="font-size:12px">7-8成</span></div>
+        <div class="choice" style="flex:1;padding:8px;margin:0;justify-content:center"><span class="choice-text" style="font-size:12px">9成+</span></div>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Q3 · 进入阶段二之前，你最想说什么？</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div class="choice sel" style="padding:8px 12px;margin:0"><span class="choice-text" style="font-size:12px">想快点开始行程问题 🚀</span></div>
+        <div class="choice" style="padding:8px 12px;margin:0"><span class="choice-text" style="font-size:12px">想再巩固一下余数</span></div>
+        <div class="choice" style="padding:8px 12px;margin:0"><span class="choice-text" style="font-size:12px">有点担心进度</span></div>
+      </div>
+    </div>
+
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" onclick="go('s-home')" style="font-size:15px">成就卡已到账 · 开始 M2 🎯</button>
+      <div style="text-align:center;font-size:12px;color:#9CA3AF">成就卡已通过微信分享给家长</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S-MINE: 我的 ==================== -->
+<div class="screen" id="s-mine">
+  <div style="background:#fff"><div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div></div>
+  <div class="scroll" style="padding-top:0">
+    <div style="background:linear-gradient(135deg,#5B5FC7,#4338CA);padding:24px 20px 28px;color:#fff">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800">小</div>
+        <div>
+          <div style="font-size:18px;font-weight:800">小明</div>
+          <div style="font-size:12px;opacity:.8;margin-top:2px">小学五年级 · 华杯备赛中</div>
+        </div>
+        <div style="margin-left:auto;font-size:13px;opacity:.8;cursor:pointer">编辑</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:20px;font-weight:800">3/21</div>
+          <div style="font-size:10px;opacity:.8;margin-top:2px">M1进度</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:20px;font-weight:800">3</div>
+          <div style="font-size:10px;opacity:.8;margin-top:2px">连续打卡</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:20px;font-weight:800">10</div>
+          <div style="font-size:10px;opacity:.8;margin-top:2px">错题登记</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 16px 0">
+      <!-- 当前项目 -->
+      <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #F0F1F5;cursor:pointer" onclick="go('s-detail')">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:700;color:#5B5FC7">● 进行中</span>
+          <span style="font-size:13px;font-weight:700;color:#111827">华杯奥数备赛计划</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#6B7280;margin-bottom:6px">
+          <span>M1 · 整除与余数</span><span>14% · Day 3/21</span>
+        </div>
+        <div style="height:4px;background:#F3F4F6;border-radius:2px">
+          <div style="width:14%;height:100%;background:#5B5FC7;border-radius:2px"></div>
+        </div>
+      </div>
+      <!-- 家长通知 -->
+      <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #F0F1F5">
+        <h3 style="margin-bottom:12px">家长通知设置</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0F1F5">
+          <div style="font-size:13px;color:#111827">每日复盘完成后推送</div>
+          <div style="width:44px;height:26px;background:#5B5FC7;border-radius:13px;position:relative;cursor:pointer">
+            <div style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;right:2px;top:2px;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+          <div style="font-size:13px;color:#111827">绑定家长微信</div>
+          <div style="font-size:13px;color:#5B5FC7;cursor:pointer">已绑定 ›</div>
+        </div>
+      </div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab" onclick="go('s-home')">首页</div>
+    <div class="tab on">我的</div>
+  </div>
+</div>
+
+<!-- ==================== S-CHAPTER: 选择章节 ==================== -->
+<div class="screen" id="s-chapter">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#fff">
+      <div class="nb-back" onclick="go('s-home')">‹</div>
+      <div class="nb-title">选择章节</div>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px 0">
+    <div style="padding:0 16px 10px;font-size:12px;color:#9CA3AF">选择本次练习对应的章节</div>
+    <div id="chapters">
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第4章·整除与余数')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#EEF0FF;display:flex;align-items:center;justify-content:center;font-size:18px">➗</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#5B5FC7">第4章 · 整除与余数</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">今日任务 · 同余定义与性质</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第1章·计数原理')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px">🔢</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第1章 · 计数原理</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">加法 · 乘法 · 排列组合</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第2章·行程问题')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px">🚶</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第2章 · 行程问题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">相遇 · 追及 · 流水</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+      <div class="problem-item" style="margin-bottom:8px" onclick="selectChapter(this,'第3章·鸡兔同笼')">
+        <div style="width:36px;height:36px;border-radius:10px;background:#F5F6FA;display:flex;align-items:center;justify-content:center;font-size:18px">🐰</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第3章 · 鸡兔同笼</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">假设法 · 列方程法</div></div>
+        <div class="chapter-check" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #D1D5DB"></div>
+      </div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" id="chapter-btn" style="opacity:.4;pointer-events:none" onclick="go('s-camera')">下一步：拍照上传</button>
+  </div>
+</div>
+
+<!-- ==================== S-CAMERA ==================== -->
+<div class="screen" id="s-camera">
+  <div style="background:#111;padding:14px 16px;display:flex;align-items:center;flex-shrink:0">
+    <span style="cursor:pointer;font-size:22px;color:#fff" onclick="go('s-chapter')">✕</span>
+    <span style="flex:1;text-align:center;font-size:15px;font-weight:600;color:#fff" id="camera-title">第4章·整除与余数</span>
+    <span style="font-size:13px;color:rgba(255,255,255,.5)">帮助</span>
+  </div>
+  <div style="background:#111;display:flex;justify-content:center;padding:0 0 10px;flex-shrink:0">
+    <div style="display:flex;background:rgba(255,255,255,.12);border-radius:20px;padding:3px">
+      <div id="cam-mode-page" onclick="setCamMode('page')" style="padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#111;transition:all .2s">整张卷子</div>
+      <div id="cam-mode-single" onclick="setCamMode('single')" style="padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.55);transition:all .2s">单题拍摄</div>
+    </div>
+  </div>
+  <div class="viewfinder">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="hint" id="cam-hint">将试卷放入框内<br>自动识别题目边缘</div>
+  </div>
+  <div class="shutter-wrap">
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%">
+      <div style="position:absolute;left:40px;font-size:12px;color:#999;text-align:center">相册<br>选择</div>
+      <div class="shutter" onclick="go('s-loading')"><div class="shutter-inner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S-LOADING ==================== -->
+<div class="screen" id="s-loading">
+  <div class="sb" style="background:#fff;color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  <div class="body">
+    <div class="spinner"></div>
+    <div style="font-size:17px;font-weight:700;color:#111827">AI 正在批改作业…</div>
+    <div style="font-size:13px;color:#9CA3AF">通常需要 10-20 秒</div>
+    <div style="width:100%;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div class="step-dot step-done-c">✓</div><span style="color:#16A34A">图片识别完成，共 5 道题</span></div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div class="step-dot step-done-c">✓</div><span style="color:#16A34A">题目解析完成</span></div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div class="step-dot step-active-c">…</div><span style="color:#5B5FC7">正在逐题批改</span></div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div class="step-dot step-wait-c">4</div><span style="color:#9CA3AF">生成错误归因分析</span></div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="go('s-summary')">跳过，直接查看结果</button>
+  </div>
+</div>
+
+<!-- ==================== S-SUMMARY ==================== -->
+<div class="screen" id="s-summary">
+  <div class="sb" style="background:#5B5FC7;color:#fff"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  <div style="background:linear-gradient(135deg,#5B5FC7,#4338CA);padding:32px 24px;color:#fff;text-align:center;flex-shrink:0">
+    <div style="font-size:32px;margin-bottom:8px">🎉</div>
+    <div style="font-size:56px;font-weight:900;line-height:1">3 / 5</div>
+    <div style="font-size:13px;opacity:.8;margin-top:4px">第4章·整除与余数 · 5道题</div>
+    <div style="margin-top:12px;font-size:13px;line-height:1.7;opacity:.92">余数运算法则掌握得不错！<br>同余性质这关再练一次就能打通 💪</div>
+  </div>
+  <div class="scroll" style="padding:16px 0">
+    <div class="card">
+      <div style="display:flex;justify-content:space-around;padding:4px 0">
+        <div style="text-align:center"><div style="font-size:26px;font-weight:800;color:#16A34A">3</div><div class="label" style="margin-top:2px">答对</div></div>
+        <div style="width:1px;background:#F0F1F5"></div>
+        <div style="text-align:center"><div style="font-size:26px;font-weight:800;color:#DC2626">1</div><div class="label" style="margin-top:2px">做错</div></div>
+        <div style="width:1px;background:#F0F1F5"></div>
+        <div style="text-align:center"><div style="font-size:26px;font-weight:800;color:#EA580C">1</div><div class="label" style="margin-top:2px">不会</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px">本次涉及知识点</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="chip chip-green">余数加法法则 ✓</span>
+        <span class="chip chip-red">同余性质 ✗ 待突破</span>
+        <span class="chip chip-orange">余数乘法 ? 待分析</span>
+      </div>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="go('s-list')">开始逐题复盘 →</button>
+      <button class="btn btn-ghost" onclick="go('s-home')">稍后复盘</button>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ==================== S-LIST ==================== -->
+<div class="screen" id="s-list">
+  <div style="background:#F5F6FA">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb" style="background:#F5F6FA">
+      <div class="nb-back" onclick="go('s-summary')">‹</div>
+      <div class="nb-title">题目列表</div>
+      <span style="font-size:13px;color:#9CA3AF;min-width:36px;text-align:right">5题</span>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 16px;background:#F5F6FA;flex-shrink:0">
+      <button class="filter-btn on" onclick="setFilter(this)">全部 5</button>
+      <button class="filter-btn" onclick="setFilter(this)">做错 1</button>
+      <button class="filter-btn" onclick="setFilter(this)">不会 1</button>
+      <button class="filter-btn" onclick="setFilter(this)">答对 3</button>
+    </div>
+  </div>
+  <div class="scroll" style="padding-top:8px;padding-bottom:80px">
+    <div class="problem-item" onclick="go('s-wrong')">
+      <div class="problem-status ps-wrong"><span class="ps-text">✗</span></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第 1 题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">整除余数·同余性质</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:#DC2626;font-weight:600">做错了</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">待复盘</div></div>
+    </div>
+    <div class="problem-item" onclick="go('s-correct')">
+      <div class="problem-status ps-correct"><span class="ps-text">✓</span></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第 2 题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">整除余数·余数加法</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:#16A34A;font-weight:600">答对了</div></div>
+    </div>
+    <div class="problem-item" onclick="go('s-unknown')">
+      <div class="problem-status ps-unknown"><span class="ps-text">?</span></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第 3 题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">整除余数·余数乘法</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:#EA580C;font-weight:600">不会做</div></div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-status ps-correct"><span class="ps-text">✓</span></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第 4 题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">整除判断·2和5的倍数</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:#16A34A;font-weight:600">答对了</div></div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-status ps-correct"><span class="ps-text">✓</span></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">第 5 题</div><div style="font-size:12px;color:#9CA3AF;margin-top:2px">整除判断·3的倍数</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:#16A34A;font-weight:600">答对了</div></div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:12px 16px 28px;border-top:1px solid #F0F1F5">
+    <button class="btn btn-primary" onclick="go('s-done')">完成复盘</button>
+  </div>
+</div>
+
+<!-- ==================== S-WRONG ==================== -->
+<div class="screen" id="s-wrong">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb"><div class="nb-back" onclick="go('s-list')">‹</div><div class="nb-title">第 1 题</div><span class="nb-action">1/5</span></div>
+  </div>
+  <div class="scroll" style="padding:16px;background:#F5F6FA">
+    <div class="card-flat">
+      <div class="label" style="margin-bottom:6px">题目</div>
+      <div style="font-size:15px;color:#111827;line-height:1.9;background:#F5F6FA;border-radius:10px;padding:12px;font-family:serif">
+        一个整数除以 7 余 3，那么这个数除以 14 的余数是多少？
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <div style="flex:1;background:#FEF2F2;border-radius:10px;padding:10px"><div class="label" style="margin-bottom:4px">你的答案</div><div style="font-size:14px;font-weight:700;color:#DC2626">3</div></div>
+        <div style="flex:1;background:#EDFCF2;border-radius:10px;padding:10px"><div class="label" style="margin-bottom:4px">正确答案</div><div style="font-size:14px;font-weight:700;color:#16A34A">3 或 10</div></div>
+      </div>
+    </div>
+    <div class="card-flat">
+      <div class="row" style="margin-bottom:10px"><div class="answer-badge ab-wrong">✗ 做错了</div></div>
+      <div class="analysis-block">
+        <div class="analysis-row"><div class="analysis-icon">🎯</div><div><div class="analysis-label">知识点</div><div class="analysis-text">整除余数 · 同余性质</div></div></div>
+        <div class="analysis-row"><div class="analysis-icon">🕳️</div><div><div class="analysis-label">这道题的坑</div><div class="analysis-text">n÷7余3，但 n÷14 的余数取决于 n 的奇偶性：可能是 3，也可能是 10</div></div></div>
+        <div class="analysis-row" style="margin-bottom:0"><div class="analysis-icon">🔍</div><div><div class="analysis-label">归因</div><div class="analysis-text">你只考虑了一种情况，同余的多值性是这道题的核心考点</div></div></div>
+      </div>
+    </div>
+    <div style="padding-bottom:80px">
+      <div class="ai-bubble"><div class="ai-avatar">AI</div><div class="ai-msg">举个例子：n=10 时，10÷7余3，10÷14也余3；但 n=17 时，17÷7余3，17÷14余多少呢？</div></div>
+      <div class="user-bubble"><div class="user-msg">17÷14 = 1 余 3？</div></div>
+      <div class="ai-bubble"><div class="ai-avatar">AI</div><div class="ai-msg">再算一次 😊 17 = 14×1 + 3，确实余3。再试 n=24：24÷7余3，24÷14余多少？</div></div>
+    </div>
+  </div>
+  <div class="voice-area">
+    <div class="voice-hint">对着麦克风说出你的解题思路</div>
+    <button class="voice-btn" id="voice-wrong" onclick="toggleVoice('voice-wrong')">🎙 按住说话</button>
+  </div>
+</div>
+
+<!-- ==================== S-CORRECT ==================== -->
+<div class="screen" id="s-correct">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb"><div class="nb-back" onclick="go('s-list')">‹</div><div class="nb-title">第 2 题</div><span class="nb-action">2/5</span></div>
+  </div>
+  <div class="scroll" style="padding:16px;background:#F5F6FA">
+    <div class="card-flat">
+      <div class="label" style="margin-bottom:6px">题目</div>
+      <div style="font-size:15px;color:#111827;line-height:1.9;background:#F5F6FA;border-radius:10px;padding:12px;font-family:serif">
+        两数之和除以 5 余 2，其中一个数除以 5 余 4，另一个数除以 5 的余数是多少？
+      </div>
+      <div style="background:#EDFCF2;border-radius:10px;padding:10px;margin-top:10px">
+        <div class="label" style="margin-bottom:4px">你的答案</div>
+        <div style="font-size:14px;font-weight:700;color:#16A34A">3 ✓</div>
+      </div>
+    </div>
+    <div class="card-flat">
+      <div class="row" style="margin-bottom:10px"><div class="answer-badge ab-correct">✓ 答对了</div></div>
+      <div class="analysis-block">
+        <div class="analysis-row"><div class="analysis-icon">🎯</div><div><div class="analysis-label">知识点</div><div class="analysis-text">整除余数 · 余数加法法则</div></div></div>
+        <div class="analysis-row" style="margin-bottom:0"><div class="analysis-icon">💡</div><div><div class="analysis-label">解题逻辑</div><div class="analysis-text">余数加法：(4+x)÷5余2，所以 x=3，验证：(4+3)=7，7÷5余2 ✓</div></div></div>
+      </div>
+    </div>
+    <div class="ai-bubble" style="padding:0 0 80px">
+      <div class="ai-avatar">AI</div>
+      <div class="ai-msg">做对了！你能说说「余数加法法则」的一般形式吗？如果 a÷m余r₁，b÷m余r₂，那么 (a+b)÷m的余数怎么算？</div>
+    </div>
+  </div>
+  <div class="voice-area">
+    <div class="voice-hint">说说你的解题思路，看和 AI 是否一致</div>
+    <button class="voice-btn" onclick="toggleVoice('voice-correct')" id="voice-correct">🎙 按住说话</button>
+  </div>
+</div>
+
+<!-- ==================== S-UNKNOWN ==================== -->
+<div class="screen" id="s-unknown">
+  <div style="background:#fff">
+    <div class="sb" style="color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+    <div class="nb"><div class="nb-back" onclick="go('s-list')">‹</div><div class="nb-title">第 3 题</div><span class="nb-action">3/5</span></div>
+  </div>
+  <div class="scroll" style="background:#F5F6FA;padding-bottom:80px">
+    <div style="padding:16px">
+      <div class="card-flat">
+        <div class="label" style="margin-bottom:6px">题目</div>
+        <div style="font-size:15px;color:#111827;line-height:1.9;background:#F5F6FA;border-radius:10px;padding:12px;font-family:serif">
+          两数之积除以 7 的余数，与两数各除以 7 的余数之积除以 7 的余数，有什么关系？
+        </div>
+      </div>
+    </div>
+    <div class="ai-bubble"><div class="ai-avatar">AI</div><div class="ai-msg">没关系，这是余数乘法法则！先从简单例子出发：2×3=6，6÷7余多少？</div></div>
+    <div class="user-bubble"><div class="user-msg">6</div></div>
+    <div class="ai-bubble"><div class="ai-avatar">AI</div><div class="ai-msg">对！现在，2÷7余2，3÷7余3，2×3=6，6÷7余6——刚好等于余数的积。再试 4×5=20，20÷7余多少？</div></div>
+    <div class="user-bubble"><div class="user-msg">20÷7=2余6，所以余6</div></div>
+    <div class="ai-bubble"><div class="ai-avatar">AI</div><div class="ai-msg">完全正确 🎉 4÷7余4，5÷7余5，4×5=20的余数 = (4×5)÷7的余数 = 余数相乘后取余。<br>这就是<b>余数乘法法则</b>！</div></div>
+    <div style="background:#EEF0FF;border-radius:12px;padding:12px;margin:0 16px;border-left:3px solid #5B5FC7">
+      <div style="font-size:11px;color:#5B5FC7;font-weight:600;margin-bottom:4px">💡 已完成引导</div>
+      <div style="font-size:13px;color:#111827">继续用语音完成最后总结</div>
+    </div>
+  </div>
+  <div class="voice-area">
+    <div class="voice-hint">跟着 AI 的问题，说出你的思考</div>
+    <button class="voice-btn" onclick="toggleVoice('voice-unknown')" id="voice-unknown">🎙 按住说话</button>
+  </div>
+</div>
+
+<!-- ==================== S-DONE ==================== -->
+<div class="screen" id="s-done">
+  <div class="sb" style="background:#fff;color:#111"><span>9:41</span><div class="sb-r"><span>100%</span></div></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;gap:16px">
+    <div style="font-size:72px;animation:bounce .6s ease-out">🏆</div>
+    <div style="font-size:22px;font-weight:800;color:#111827">今日复盘完成！</div>
+    <div style="font-size:14px;color:#6B7280;line-height:1.8;max-width:280px">今天攻克了 <b style="color:#5B5FC7">1 个</b>错题归因，<br>搞懂了 <b style="color:#5B5FC7">1 道</b>不会的题。<br>同余性质——明天再冲一次！</div>
+    <div style="background:#EEF0FF;border-radius:16px;padding:16px;width:100%;text-align:center">
+      <div style="font-size:12px;color:#5B5FC7;font-weight:600;margin-bottom:4px">📲 已推送给家长</div>
+      <div style="font-size:12px;color:#6B7280">今日复盘小结已通过微信通知发送</div>
+    </div>
+    <button class="btn btn-primary" onclick="go('s-home')" style="width:100%">返回首页</button>
+  </div>
+</div>
+
+</div><!-- /phone -->
+
+<script>
+/* ── 导航 ── */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el) el.classList.add('active');
+  if(id==='s-loading') setTimeout(()=>go('s-summary'),2800);
+}
+
+/* 报告过渡（模拟 AI 加载） */
+function goReport(){
+  const btn=document.querySelector('#s-assessment button.btn-primary');
+  if(btn){btn.textContent='AI 正在分析…';btn.style.opacity='.7';btn.style.pointerEvents='none';}
+  setTimeout(()=>go('s-report'),1200);
+}
+
+/* ── 选项交互 ── */
+function pick(group,el){
+  document.querySelectorAll('#'+group+' .choice').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function pickGrade(el){
+  document.querySelectorAll('#grade-grid .choice').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function pickGoal(el){
+  document.querySelectorAll('#goal-grid .choice').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function selectDate(el){ el.style.borderColor='#4338CA'; }
+
+/* ── 章节选择 ── */
+let selectedChapter=null;
+function selectChapter(el,name){
+  document.querySelectorAll('.chapter-check').forEach(c=>{c.style.background='';c.style.borderColor='#D1D5DB';c.innerHTML='';});
+  const chk=el.querySelector('.chapter-check');
+  chk.style.background='#5B5FC7';chk.style.borderColor='#5B5FC7';
+  chk.innerHTML='<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  selectedChapter=name;
+  document.getElementById('camera-title').textContent=name;
+  const btn=document.getElementById('chapter-btn');
+  btn.style.opacity='1';btn.style.pointerEvents='auto';
+}
+
+/* ── 拍照模式 ── */
+function setCamMode(mode){
+  const cam=document.getElementById('s-camera');
+  const btnPage=document.getElementById('cam-mode-page');
+  const btnSingle=document.getElementById('cam-mode-single');
+  const hint=document.getElementById('cam-hint');
+  const activeStyle='padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#111;transition:all .2s';
+  const inactiveStyle='padding:5px 20px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.55);transition:all .2s';
+  if(mode==='single'){
+    btnPage.style.cssText=inactiveStyle; btnSingle.style.cssText=activeStyle;
+    hint.innerHTML='框住单道题目<br>自动裁切识别';
+  } else {
+    btnPage.style.cssText=activeStyle; btnSingle.style.cssText=inactiveStyle;
+    hint.innerHTML='将试卷放入框内<br>自动识别题目边缘';
+  }
+}
+
+/* ── 过滤按钮 ── */
+function setFilter(btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+/* ── 语音录入 ── */
+function toggleVoice(id){
+  const btn=document.getElementById(id);
+  const on=btn.classList.toggle('recording');
+  btn.textContent=on?'🔴  正在录音…':'🎙 按住说话';
+  if(on) setTimeout(()=>{btn.classList.remove('recording');btn.textContent='🎙 按住说话';},2500);
+}
+
+/* ── 训练日历 ── */
+const TODAY={y:2026,m:3,d:24};
+const FULL_DONE=new Set([4,7,9,14,17,21,22,23]);
+const UPLOADED_ONLY=new Set([10,16,19]);
+const SCHEDULE={
+  '3-1':{chapter:'第1章·计数原理',color:'#818CF8',topic:'加法原理与乘法原理',points:['分步计数与分类计数的区别','多步骤问题用乘法原理']},
+  '3-7':{chapter:'第2章·行程问题',color:'#F59E0B',topic:'相遇问题',points:['同向/反向行进的距离关系','相遇时间 = 总路程 ÷ 速度和']},
+  '3-14':{chapter:'第3章·鸡兔同笼',color:'#34D399',topic:'假设法基础',points:['假设全为一种，计算差值','差值 ÷ 每只差的脚数']},
+  '3-21':{chapter:'第4章·整除与余数',color:'#F87171',topic:'整除判断',points:['2、3、4、5、9的整除规律','最大公因数与最小公倍数']},
+  '3-22':{chapter:'第4章·整除与余数',color:'#F87171',topic:'余数基本运算',points:['余数的加法法则','余数的乘法法则']},
+  '3-23':{chapter:'第4章·整除与余数',color:'#F87171',topic:'同余定义与性质',points:['同余的定义','同余加减法','同余乘法']},
+  '3-24':{chapter:'第4章·整除与余数',color:'#F87171',topic:'同余定义与性质（练习）',points:['综合运用同余','求数字末位','周期问题入门']},
+  '3-25':{chapter:'第4章·整除与余数',color:'#F87171',topic:'余数与周期',points:['余数与日历问题','周期规律','竞赛真题']},
+  '3-28':{chapter:'第5章·数列与规律',color:'#60A5FA',topic:'等差数列',points:['通项公式','求和公式']},
+};
+let calYear=TODAY.y,calCurMonth=TODAY.m,selectedDay=null;
+function renderCal(){
+  const grid=document.getElementById('cal-grid');
+  const title=document.getElementById('cal-title');
+  if(!grid||!title) return;
+  const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  title.textContent=calYear+'年 '+months[calCurMonth];
+  const firstDay=new Date(calYear,calCurMonth,1).getDay();
+  const totalDays=new Date(calYear,calCurMonth+1,0).getDate();
+  const offset=firstDay===0?6:firstDay-1;
+  let html='';
+  for(let i=0;i<offset;i++) html+='<div></div>';
+  for(let d=1;d<=totalDays;d++){
+    const key=calCurMonth+'-'+d;
+    const plan=SCHEDULE[key];
+    const isToday=calYear===TODAY.y&&calCurMonth===TODAY.m&&d===TODAY.d;
+    const isFullDone=calYear===TODAY.y&&calCurMonth===TODAY.m&&FULL_DONE.has(d);
+    const isUploaded=calYear===TODAY.y&&calCurMonth===TODAY.m&&UPLOADED_ONLY.has(d);
+    const isPast=!isToday&&(calYear<TODAY.y||(calYear===TODAY.y&&(calCurMonth<TODAY.m||(calCurMonth===TODAY.m&&d<TODAY.d))));
+    const isSelected=selectedDay===d&&calCurMonth===TODAY.m;
+    let circleBg='transparent',numColor='#374151',numWeight=400;
+    if(isFullDone){circleBg='#EDFCF2';numColor='#16A34A';numWeight=600;}
+    else if(isUploaded){circleBg='#FFEDD5';numColor='#EA580C';numWeight=600;}
+    else if((isPast||isToday)&&plan){circleBg='#FEE2E2';numColor='#DC2626';numWeight=600;}
+    else if(isPast){numColor='#9CA3AF';}
+    else if(!plan){numColor='#D1D5DB';}
+    if(isToday){circleBg='#5B5FC7';numColor='#fff';numWeight=700;}
+    const selRing=isSelected&&!isToday?'box-shadow:0 0 0 1.5px #C4C9E0;':'';
+    const cursor=(plan||isToday||isFullDone||isUploaded)?'pointer':'default';
+    const bar=isToday||isPast?`<div style="width:16px;height:3px;border-radius:2px;background:${plan?plan.color:'#D1D5DB'};margin-top:2px"></div>`:'<div style="height:5px"></div>';
+    html+=`<div style="display:flex;flex-direction:column;align-items:center;padding:1px 0;cursor:${cursor}" onclick="calDayClick(${d})">
+      <div style="width:26px;height:26px;border-radius:50%;background:${circleBg};display:flex;align-items:center;justify-content:center;${selRing}">
+        <span style="font-size:11px;font-weight:${numWeight};color:${numColor}">${d}</span>
+      </div>${bar}</div>`;
+  }
+  grid.innerHTML=html;
+}
+function calMonth(dir){
+  calCurMonth+=dir;
+  if(calCurMonth>11){calCurMonth=0;calYear++;}
+  if(calCurMonth<0){calCurMonth=11;calYear--;}
+  selectedDay=null;renderCal();
+  const dd=document.getElementById('day-detail');
+  if(dd) dd.style.display='none';
+}
+function calDayClick(day){
+  const key=calCurMonth+'-'+day;
+  const plan=SCHEDULE[key];
+  const isFullDoneDay=calCurMonth===TODAY.m&&FULL_DONE.has(day);
+  const isUploadedOnlyDay=calCurMonth===TODAY.m&&UPLOADED_ONLY.has(day);
+  const isDone=isFullDoneDay||isUploadedOnlyDay;
+  const isToday=calCurMonth===TODAY.m&&day===TODAY.d;
+  const detail=document.getElementById('day-detail');
+  if(!detail) return;
+  if(!plan&&!isDone&&!isToday){detail.style.display='none';selectedDay=null;renderCal();return;}
+  selectedDay=day;renderCal();
+  if(!plan){detail.style.display='none';return;}
+  const weekDays=['日','一','二','三','四','五','六'];
+  const weekDay=weekDays[new Date(calYear,calCurMonth,day).getDay()];
+  const pointsHtml=plan.points.map(p=>`<div style="display:flex;gap:6px;margin-bottom:5px"><div style="width:4px;height:4px;border-radius:50%;background:#5B5FC7;flex-shrink:0;margin-top:5px"></div><span style="font-size:12px;color:#374151;line-height:1.4">${p}</span></div>`).join('');
+  let actionBtn;
+  if(isFullDoneDay){
+    actionBtn=`<div style="display:flex;align-items:center;gap:8px;background:#EDFCF2;border-radius:10px;padding:10px 14px"><span style="font-size:18px">✅</span><div style="font-size:13px;font-weight:600;color:#16A34A">已完成</div></div>`;
+  } else if(isUploadedOnlyDay){
+    actionBtn=`<button class="btn btn-primary" style="height:40px;font-size:13px;background:linear-gradient(135deg,#F97316,#EA580C)" onclick="go('s-list')">📝 登记错题</button>`;
+  } else {
+    actionBtn=`<button class="btn btn-primary" style="height:40px;font-size:13px" onclick="go('s-chapter')">📷 上传作业</button>`;
+  }
+  detail.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+    <div><span style="font-size:10px;color:#9CA3AF">${calCurMonth+1}月${day}日 · 周${weekDay}</span><div style="font-size:13px;font-weight:700;color:#111827;margin-top:1px">${plan.topic}</div></div>
+    <span style="background:#EEF0FF;color:#5B5FC7;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;margin-left:8px;white-space:nowrap">${plan.chapter}</span>
+  </div>
+  <div style="background:#F9FAFB;border-radius:10px;padding:10px;margin-bottom:8px"><div style="font-size:10px;color:#9CA3AF;margin-bottom:5px;font-weight:600">本日训练要点</div>${pointsHtml}</div>
+  ${actionBtn}`;
+  detail.style.display='block';
+}
+document.addEventListener('DOMContentLoaded',()=>{renderCal();setTimeout(()=>calDayClick(TODAY.d),0);});
+renderCal();
+setTimeout(()=>calDayClick(TODAY.d),0);
+</script>
+</body>
+</html>

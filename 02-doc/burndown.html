@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>燃尽图 · AI 错题集</title>
+<style>
+:root{
+  --bg:#0d1117;--s1:#161b22;--s2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;
+  --now:#f472b6;--accent:#7c3aed;--blue:#58a6ff;
+  --teal:#2dd4bf;--green:#3fb950;--yellow:#d29922;--orange:#fb923c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding:20px;max-width:1400px;margin:0 auto}
+
+/* header */
+.hd{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.hd-title{font-size:17px;font-weight:700}
+.badge{background:var(--now);color:#000;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.hd-date{color:var(--muted);font-size:12px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.sv{font-size:20px;font-weight:700}.sl{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* chart */
+.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;position:relative;user-select:none}
+.chart-hint{font-size:11px;color:var(--muted);margin-bottom:6px}
+#chart{width:100%;height:180px;display:block;cursor:pointer}
+#tip{position:absolute;background:#1f2937;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;pointer-events:none;display:none;z-index:10;white-space:nowrap}
+
+/* milestone nav */
+.ms-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.ms-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.ms-btn:hover{border-color:var(--muted);color:var(--text)}
+.ms-btn.active{color:#000;border-color:transparent;font-weight:700}
+
+/* panel */
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.panel-hd{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.panel-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.panel-info{flex:1}
+.panel-name{font-size:16px;font-weight:700}
+.panel-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.panel-goal{font-size:12px;color:var(--text);margin-top:5px;padding:8px 10px;background:var(--s2);border-radius:6px;border-left:3px solid}
+.panel-progress{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
+.prog-bar{width:120px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s}
+.prog-text{font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* task grid */
+.task-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.cat{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px}
+.cat-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+.cat-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.cat-cnt{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:700}
+.task{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #21262d}
+.task:last-child{border-bottom:none}
+.cb{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border);flex-shrink:0;margin-top:2px;cursor:pointer;transition:all .15s;appearance:none;-webkit-appearance:none;background:transparent}
+.cb:checked{border-color:var(--green);background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='%23000' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center/10px no-repeat}
+.tl{font-size:12.5px;line-height:1.4;flex:1}
+.tl.done{text-decoration:line-through;color:var(--muted)}
+
+/* now pulse */
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px #f472b630}50%{box-shadow:0 0 0 7px #f472b610}}
+.now-dot{animation:pulse 2s infinite}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <span class="hd-title">AI 错题集 · 燃尽图</span>
+  <span class="badge" id="wk-badge">WEEK 1 / 26</span>
+  <span class="hd-date">2026-05-01 · M0 第 1 天</span>
+</div>
+
+<div class="stats" id="stats-bar"></div>
+
+<div class="chart-wrap">
+  <div class="chart-hint">点击里程碑色块或周次标签，查看对应任务 ↓</div>
+  <svg id="chart" viewBox="0 0 960 180" preserveAspectRatio="none"></svg>
+  <div id="tip"></div>
+</div>
+
+<div class="ms-nav" id="ms-nav"></div>
+
+<div class="panel" id="panel"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════════ */
+const MS = [
+  {
+    id:'M0', name:'M0 · 地基就绪', weeks:'1–2', sw:0, ew:2,
+    dates:'2026-05-01 ~ 2026-05-14', color:'#f472b6',
+    goal:'NestJS 架构迁移 + 华杯知识体系导入 + 种子用户招募 5 个家庭',
+    cats:[
+      { name:'后端基础', color:'#a78bfa', tasks:[
+        'NestJS 项目迁移（Express → NestJS）',
+        '模块骨架创建（projects / knowledge / ai / auth / wechat）',
+        '现有路由迁移至 NestJS Controllers',
+        'Prisma Schema 扩展（ProjectType / KnowledgeSystem / KnowledgeNode / LearningProject）',
+        'prisma migrate dev 执行（M0 迁移文件）',
+        'Seed 脚本：华杯知识体系 v1（~50 节点）',
+      ]},
+      { name:'后端 API', color:'#58a6ff', tasks:[
+        'GET /knowledge-systems/:typeId（三层知识树）',
+        'POST /projects（创建项目，status: intake）',
+        'GET /projects/active',
+        'GET /projects/:id',
+        'POST /projects/:id/intake（提交问卷 → status: assessing）',
+        'ai/intake.prompt.ts（Haiku 能力初判）',
+      ]},
+      { name:'前端', color:'#2dd4bf', tasks:[
+        'project/setup 页（DatePicker 设置备赛截止日）',
+        'project/intake 页（4-6 题固定结构化问卷）',
+        'home 页（状态A：引导卡 / 状态C：继续按钮）',
+      ]},
+      { name:'内容', color:'#d29922', tasks:[
+        'AI 生成华杯奥数知识体系 v1（基于公开考纲）',
+        '创始人亲自校验知识体系（~50 节点）',
+        '教研合伙人候选名单整理（股权绑定）',
+      ]},
+      { name:'用户', color:'#3fb950', tasks:[
+        '招募 5 个华杯备赛家庭，加入内测微信群',
+        '完成 5 次非正式访谈（20 分钟/家庭）',
+      ]},
+    ]
+  },
+  {
+    id:'M1', name:'M1 · 第一信任节点', weeks:'3–5', sw:2, ew:5,
+    dates:'2026-05-15 ~ 2026-06-04', color:'#818cf8',
+    goal:'诊断套题上线，能力报告生成，5 个种子用户完整体验「定位→目标→评估」',
+    cats:[
+      { name:'后端 DB', color:'#a78bfa', tasks:[
+        'Prisma migrate M1（AbilityAssessment / AssessmentSession 表）',
+        '诊断题数据录入（低/中/高 3 套，每套 15-20 题，含 knowledgeNodeId）',
+      ]},
+      { name:'后端服务', color:'#58a6ff', tasks:[
+        'assessment.controller.ts + assessment.service.ts',
+        'AI 批改逻辑（每题调用 Haiku 判对错 + 知识点定位）',
+        '报告生成逻辑（汇总判题结果 → Sonnet 生成结构化报告 JSON）',
+        'POST /projects/:id/assessment（提交答案 → 生成报告 → status: planning）',
+        'POST /projects/:id/calibrate（校正对话 → 更新 weakPoints）',
+      ]},
+      { name:'AI Prompts', color:'#c084fc', tasks:[
+        'ai/grading.prompt.ts（单题判题，Haiku）',
+        'ai/ability-report.prompt.ts（能力报告，Sonnet + Prompt Cache，结构化 JSON）',
+        'ai/calibration.prompt.ts（校正对话，Sonnet，Socratic 风格）',
+      ]},
+      { name:'前端', color:'#2dd4bf', tasks:[
+        'project/assessment 做题界面（复用现有 problem-card 组件）',
+        'project/report 能力报告页（雷达图 + 薄弱点列表 + AI 校正对话框）',
+        'components/ai-chat/（流式渲染 + isComplete 自动触发下一步）',
+      ]},
+      { name:'用户', color:'#3fb950', tasks:[
+        '5 个种子家庭完成全流程体验（定位→目标→评估）',
+        '深度访谈 3 个家庭（围绕能力报告可信度）',
+        '根据反馈对报告做第一轮迭代',
+      ]},
+    ]
+  },
+  {
+    id:'M2a', name:'M2a · 计划生成', weeks:'6–7', sw:5, ew:7,
+    dates:'2026-06-05 ~ 2026-06-18', color:'#2dd4bf',
+    goal:'AI 基于能力画像生成个性化日历计划，家长/学生确认后 home 日历自动填充',
+    cats:[
+      { name:'后端 DB', color:'#a78bfa', tasks:[
+        'Prisma migrate M2a（StudyPlan / Milestone；TrainingPlan 追加 planId/nodeIds/milestoneId）',
+      ]},
+      { name:'计划引擎', color:'#58a6ff', tasks:[
+        'study-plan/plan-generator.service.ts（拓扑排序 + 薄弱点权重 + 20% 缓冲天）',
+        '12 个基础计划模板（3 能力层次 × 4 时间周期）',
+        'POST /projects/:id/generate-plan（触发规则引擎，返回计划预览）',
+        'POST /projects/:id/confirm-plan（确认 → 批量写 TrainingPlan → status: executing）',
+        'study-plan.controller.ts + study-plan.service.ts',
+      ]},
+      { name:'前端', color:'#2dd4bf', tasks:[
+        'project/plan-preview 页（里程碑时间线 + 每日任务预览）',
+        'components/milestone-timeline/（横向滚动，知识领域分组）',
+        'home 日历标记区分系统生成任务 vs 手动任务',
+      ]},
+    ]
+  },
+  {
+    id:'M2b', name:'M2b · 执行监督', weeks:'8–9', sw:7, ew:9,
+    dates:'2026-06-19 ~ 2026-07-02', color:'#22d3ee',
+    goal:'家长每日收到学习报告推送，遗留任务可见，执行监督闭环',
+    cats:[
+      { name:'后端', color:'#58a6ff', tasks:[
+        '微信订阅消息模板审批（「每日学习报告」）',
+        'wechat/daily-report.cron.ts（每晚 21:00 → AI 生日报 → 推送）',
+        'ai/daily-report.prompt.ts（Haiku，今日完成/未完成摘要，≤200字）',
+        'TrainingPlan 超时自动标记 overdue（每晚 Cron）',
+      ]},
+      { name:'前端', color:'#2dd4bf', tasks:[
+        'home 执行视图：今日任务面板 + 遗留任务数量气泡',
+        'project/detail 项目进度看板（里程碑进度条 + 完成率 + 遗留任务列表）',
+      ]},
+    ]
+  },
+  {
+    id:'M2c', name:'M2c · 里程碑复盘', weeks:'10–11', sw:9, ew:11,
+    dates:'2026-07-03 ~ 2026-07-16', color:'#06b6d4',
+    goal:'里程碑完成自动触发复盘（AI 3问 + 成就卡 + 勋章），MVP 完整闭环达成',
+    cats:[
+      { name:'后端 DB', color:'#a78bfa', tasks:[
+        'Prisma migrate M2c（MilestoneRetrospective / ProjectRetrospective 表）',
+      ]},
+      { name:'后端', color:'#58a6ff', tasks:[
+        '里程碑完成检测逻辑（Cron 内检测 → 自动触发复盘流程）',
+        'retrospective.controller.ts + retrospective.service.ts',
+        'ai/milestone-retro.prompt.ts（Haiku：AI 3问 + 成就卡内容）',
+        'GET /projects/:id/retrospective（生成/获取最终复盘报告）',
+      ]},
+      { name:'前端', color:'#2dd4bf', tasks:[
+        '里程碑复盘 Modal（AI 3问对话 → 成就卡动画 → 勋章解锁）',
+        'project/retrospective 最终复盘报告页',
+      ]},
+    ]
+  },
+  {
+    id:'M3', name:'M3 · 首批付费', weeks:'12–14', sw:11, ew:14,
+    dates:'2026-07-17 ~ 2026-08-06', color:'#fb923c',
+    goal:'首批付费转化，目标 50 注册 / 10-15 付费，验证付费意愿',
+    cats:[
+      { name:'支付系统', color:'#a78bfa', tasks:[
+        '微信支付接入（modules/payment/）',
+        '订阅状态管理（Student 追加 subscriptionStatus / subscriptionExpireAt）',
+        '订阅权益 Guard（executing 状态需订阅或在免费期内）',
+      ]},
+      { name:'免费期', color:'#58a6ff', tasks:[
+        '14 天免费体验计时（能力报告完成后写入 freeTrialStartAt）',
+        '免费期提醒 Cron（到期前 3 天 + 1 天推送微信）',
+      ]},
+      { name:'前端', color:'#2dd4bf', tasks:[
+        'pages/payment/（月付 79 元 / 年付 499 元双通道）',
+        '年付引导卡（第一个里程碑完成后弹出）',
+        '免费期倒计时 Banner（home 顶部）',
+      ]},
+      { name:'增长', color:'#3fb950', tasks:[
+        '启动小红书账号',
+        '第 1 篇：「华杯备赛 3 个月，我做了什么」',
+        '第 2 篇：「孩子奥数薄弱点诊断报告长这样」',
+        '第 3 篇：「培训班 500 元一节课，我用的方案是」',
+        '内测群家长引导发朋友圈（提供成就卡截图素材）',
+      ]},
+    ]
+  },
+  {
+    id:'M4', name:'M4 · 规模化增长', weeks:'15–22', sw:14, ew:22,
+    dates:'2026-08-07 ~ 2026-10-01', color:'#3fb950',
+    goal:'500 注册 / 50 付费，CAC ≤ 200 元，转介绍率 ≥ 30%',
+    cats:[
+      { name:'产品迭代', color:'#58a6ff', tasks:[
+        '根据 M3 反馈修复高优 Bug',
+        '能力报告视觉迭代（OG 图生成，适合截图分享）',
+        '微信日报打开率 A/B 测试（标题文案）',
+        '内部数据看板（付费转化率/日报打开率/完成率/留存）',
+      ]},
+      { name:'小红书矩阵', color:'#fb923c', tasks:[
+        '「华杯备赛每日打卡」系列（月均 4 篇）',
+        '「知识点解析」系列（余数/排列组合等，月均 3 篇）',
+        '「家长视角：备赛工具对比」（月均 2 篇）',
+        '「里程碑成就卡」（每次完成里程碑即发布）',
+      ]},
+      { name:'社群运营', color:'#d29922', tasks:[
+        '建立「华杯备赛」主题微信群（互助备赛群，非产品群）',
+        '每周群内分享 1 个知识点解析/备赛技巧',
+        '口碑传播钩子：发成就卡截图到朋友圈送 1 个月免费',
+      ]},
+      { name:'KOC 合作', color:'#c084fc', tasks:[
+        '筛选 2-3 位教育赛道素人博主（1-5 万粉，亲测类）',
+        '谈判合作（单条 < 2,000 元，转化 10-15 用户即回本）',
+        'KOC 内容发布（Week 16-18）',
+      ]},
+      { name:'用户运营', color:'#3fb950', tasks:[
+        '建立付费用户私域群（直接反馈通道）',
+        '每月一次用户共创会议（线上 30 分钟）',
+        '识别 3-5 个超级用户（高活跃 + 高传播）',
+      ]},
+    ]
+  },
+  {
+    id:'M5', name:'M5 · 融资准备', weeks:'23–26', sw:22, ew:26,
+    dates:'2026-10-02 ~ 2026-10-31', color:'#94a3b8',
+    goal:'复盘 6 个月全程，输出融资数据包，明确 Pre-A 核心叙事',
+    cats:[
+      { name:'数据复盘', color:'#58a6ff', tasks:[
+        '整理全量数据（注册/激活/付费/留存/CAC/LTV/转介绍率）',
+        '制作「6 个月验证路线图」（验证了什么 / 还没验证什么 / 为什么）',
+        '识别最有价值用户画像（付费率最高的家庭画像）',
+        '产品复盘（哪些功能真正带来留存，哪些是伪需求）',
+        '总结最有效的 1-2 个获客渠道',
+      ]},
+      { name:'融资材料', color:'#3fb950', tasks:[
+        '更新 BP（基于真实数据）',
+        '准备 Pre-A 材料（数据包 + 叙事 + 扩张计划）',
+        '明确下一轮资金用途（第 2 个项目类型 + 内容团队 + 更大规模获客）',
+      ]},
+    ]
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPUTED
+═══════════════════════════════════════════════════════════════ */
+const TOTAL_WEEKS = 26, CUR_WEEK = 1;
+// attach task count + running totals
+let rem = 0;
+MS.forEach(m => { m.total = m.cats.reduce((s,c)=>s+c.tasks.length,0); rem += m.total; });
+const TOTAL_TASKS = rem;
+rem = TOTAL_TASKS;
+MS.forEach(m => { m.before = rem; rem -= m.total; m.after = rem; });
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════ */
+let sel = 'M0';
+// persist done tasks in localStorage
+const KEY = 'bd_done';
+const done = new Set(JSON.parse(localStorage.getItem(KEY)||'[]'));
+function saveDone(){ localStorage.setItem(KEY, JSON.stringify([...done])); }
+
+/* ═══════════════════════════════════════════════════════════════
+   STATS BAR
+═══════════════════════════════════════════════════════════════ */
+function renderStats(){
+  const d = done.size;
+  document.getElementById('stats-bar').innerHTML = [
+    {v: TOTAL_TASKS-d,  l:'剩余总任务',  c:'var(--now)'},
+    {v: MS.find(m=>m.id===sel)?.total||0, l:'当前阶段任务', c:'var(--accent)'},
+    {v: d,              l:'已完成',       c:'var(--green)'},
+    {v: 13,             l:'M0 剩余天数',  c:'var(--now)'},
+    {v: '500',          l:'注册目标',     c:'var(--blue)'},
+    {v: '50',           l:'付费目标',     c:'var(--green)'},
+    {v: '<200',         l:'CAC 目标（元）',c:'var(--orange)'},
+    {v: '>30%',         l:'转介绍率目标', c:'var(--teal)'},
+  ].map(s=>`<div class="stat"><div class="sv" style="color:${s.c}">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHART
+═══════════════════════════════════════════════════════════════ */
+function drawChart(){
+  const svg = document.getElementById('chart');
+  const VW=960,VH=180, ml=46,mr=14,mt=16,mb=36;
+  const pw=VW-ml-mr, ph=VH-mt-mb;
+  const xS = w  => ml + (w/TOTAL_WEEKS)*pw;
+  const yS = t  => mt + ph - (t/TOTAL_TASKS)*ph;
+  let h='';
+
+  // milestone bands
+  MS.forEach(m=>{
+    const x1=xS(m.sw), x2=xS(m.ew), isSel=(m.id===sel);
+    h+=`<rect class="ms-zone" data-id="${m.id}"
+          x="${x1}" y="${mt}" width="${x2-x1}" height="${ph}"
+          fill="${m.color}${isSel?'28':'14'}"
+          stroke="${isSel?m.color:'none'}" stroke-width="${isSel?1.5:0}"
+          rx="2"/>`;
+  });
+
+  // grid y
+  [0,20,40,60,80,TOTAL_TASKS].forEach(t=>{
+    const y=yS(t);
+    h+=`<line x1="${ml}" y1="${y}" x2="${ml+pw}" y2="${y}" stroke="#30363d" stroke-width=".5"/>`;
+    h+=`<text x="${ml-5}" y="${y+4}" text-anchor="end" fill="#8b949e" font-size="9.5">${t}</text>`;
+  });
+
+  // week tick labels (clickable)
+  const ticks=[0,2,5,7,9,11,14,22,26];
+  ticks.forEach(w=>{
+    const x=xS(w);
+    h+=`<line x1="${x}" y1="${mt}" x2="${x}" y2="${mt+ph}" stroke="#30363d" stroke-width=".5" stroke-dasharray="3,3"/>`;
+    h+=`<text class="wk-lbl" data-week="${w}" x="${x}" y="${mt+ph+14}"
+          text-anchor="middle" fill="#8b949e" font-size="9.5" cursor="pointer">W${w}</text>`;
+  });
+
+  // milestone labels inside bands
+  MS.forEach(m=>{
+    const xm=(xS(m.sw)+xS(m.ew))/2;
+    h+=`<text x="${xm}" y="${mt+11}" text-anchor="middle" fill="${m.color}"
+          font-size="9" font-weight="700" pointer-events="none" opacity=".9">${m.id}</text>`;
+  });
+
+  // axes
+  h+=`<line x1="${ml}" y1="${mt}" x2="${ml}" y2="${mt+ph}" stroke="#30363d"/>`;
+  h+=`<line x1="${ml}" y1="${mt+ph}" x2="${ml+pw}" y2="${mt+ph}" stroke="#30363d"/>`;
+
+  // ideal line
+  h+=`<line x1="${xS(0)}" y1="${yS(TOTAL_TASKS)}" x2="${xS(TOTAL_WEEKS)}" y2="${yS(0)}"
+        stroke="#8b949e" stroke-width=".8" stroke-dasharray="5,4" opacity=".4"/>`;
+
+  // plan line (polyline)
+  const pts=[`${xS(0)},${yS(TOTAL_TASKS)}`];
+  MS.forEach(m=>pts.push(`${xS(m.ew)},${yS(Math.max(m.after,0))}`));
+  h+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linejoin="round"/>`;
+
+  // current marker
+  const cx=xS(CUR_WEEK), cy=yS(TOTAL_TASKS-done.size);
+  h+=`<circle cx="${cx}" cy="${cy}" r="5" fill="var(--now)" stroke="#0d1117" stroke-width="2" class="now-dot"/>`;
+  h+=`<circle cx="${cx}" cy="${cy}" r="9" fill="none" stroke="#f472b640" stroke-width="1.2" class="now-dot"/>`;
+  h+=`<text x="${cx+11}" y="${cy+4}" fill="var(--now)" font-size="10" font-weight="700">今天</text>`;
+
+  // legend
+  const lx=ml+pw-115, ly=mt+9;
+  h+=`<line x1="${lx}" y1="${ly}" x2="${lx+14}" y2="${ly}" stroke="var(--blue)" stroke-width="1.8"/>`;
+  h+=`<text x="${lx+17}" y="${ly+4}" fill="#8b949e" font-size="9">计划线</text>`;
+  h+=`<line x1="${lx+57}" y1="${ly}" x2="${lx+71}" y2="${ly}" stroke="#8b949e" stroke-width=".8" stroke-dasharray="4,3"/>`;
+  h+=`<text x="${lx+74}" y="${ly+4}" fill="#8b949e" font-size="9">理想线</text>`;
+
+  svg.innerHTML = h;
+
+  // click: milestone zones
+  svg.querySelectorAll('.ms-zone').forEach(el=>{
+    el.addEventListener('click',()=>{ select(el.dataset.id); });
+    el.addEventListener('mousemove',e=>{ showTip(e, el.dataset.id); });
+    el.addEventListener('mouseleave',()=>{ document.getElementById('tip').style.display='none'; });
+  });
+  // click: week labels
+  svg.querySelectorAll('.wk-lbl').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const w=+el.dataset.week;
+      const m=MS.find(m=>w>=m.sw&&w<=m.ew)||MS.find(m=>w<m.ew);
+      if(m) select(m.id);
+    });
+  });
+}
+
+function showTip(e, id){
+  const m=MS.find(x=>x.id===id); if(!m) return;
+  const tip=document.getElementById('tip');
+  const rect=e.currentTarget.closest('.chart-wrap').getBoundingClientRect();
+  const cx=e.clientX-rect.left+12, cy=e.clientY-rect.top-10;
+  const doneCount=[...done].filter(k=>k.startsWith(id+'|')).length;
+  tip.innerHTML=`<b style="color:${m.color}">${m.name}</b>　Week ${m.weeks}
+    <br>${m.dates}
+    <br>任务 ${doneCount}/${m.total} 已完成`;
+  tip.style.cssText=`display:block;left:${cx}px;top:${cy}px;position:absolute`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MILESTONE NAV
+═══════════════════════════════════════════════════════════════ */
+function renderNav(){
+  document.getElementById('ms-nav').innerHTML=MS.map(m=>`
+    <button class="ms-btn${m.id===sel?' active':''}" data-id="${m.id}"
+      style="${m.id===sel?`background:${m.color};border-color:${m.color}`:''}">
+      ${m.id}
+    </button>`).join('');
+  document.querySelectorAll('.ms-btn').forEach(b=>
+    b.addEventListener('click',()=>select(b.dataset.id)));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL
+═══════════════════════════════════════════════════════════════ */
+function renderPanel(){
+  const m=MS.find(x=>x.id===sel);
+  const doneCount=[...done].filter(k=>k.startsWith(m.id+'|')).length;
+  const pct=m.total?Math.round(doneCount/m.total*100):0;
+  const isCur=(m.id==='M0');
+
+  const cats=m.cats.map(cat=>{
+    const rows=cat.tasks.map((t,i)=>{
+      const k=`${m.id}|${cat.name}|${i}`;
+      const chk=done.has(k);
+      return `<label class="task">
+        <input type="checkbox" class="cb" data-key="${k}"${chk?' checked':''}
+          onchange="toggle(this)">
+        <span class="tl${chk?' done':''}">${t}</span>
+      </label>`;
+    }).join('');
+    const catDone=cat.tasks.filter((_,i)=>done.has(`${m.id}|${cat.name}|${i}`)).length;
+    return `<div class="cat">
+      <div class="cat-hd">
+        <span class="cat-name" style="color:${cat.color}">${cat.name}</span>
+        <span class="cat-cnt" style="background:${cat.color}22;color:${cat.color}">${catDone}/${cat.tasks.length}</span>
+      </div>${rows}</div>`;
+  }).join('');
+
+  document.getElementById('panel').innerHTML=`
+    <div class="panel-hd">
+      <div class="panel-dot${isCur?' now-dot':''}" style="background:${m.color}"></div>
+      <div class="panel-info">
+        <div class="panel-name">${m.name}</div>
+        <div class="panel-meta">Week ${m.weeks} · ${m.dates} · ${m.total} 项任务</div>
+        <div class="panel-goal" style="border-color:${m.color}">${m.goal}</div>
+      </div>
+      <div class="panel-progress">
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${m.color}"></div></div>
+        <span class="prog-text">${doneCount}/${m.total} (${pct}%)</span>
+      </div>
+    </div>
+    <div class="task-grid">${cats}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERACTIONS
+═══════════════════════════════════════════════════════════════ */
+function select(id){
+  sel=id;
+  drawChart(); renderNav(); renderPanel(); renderStats();
+}
+
+function toggle(cb){
+  const k=cb.dataset.key;
+  if(cb.checked){ done.add(k); cb.nextElementSibling.classList.add('done'); }
+  else { done.delete(k); cb.nextElementSibling.classList.remove('done'); }
+  saveDone();
+  renderStats();
+  // redraw current marker
+  const svg=document.getElementById('chart');
+  const allCircles=svg.querySelectorAll('.now-dot');
+  // quick reposition: just redraw chart silently
+  drawChart(); renderNav();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
+renderStats();
+drawChart();
+renderNav();
+renderPanel();
+</script>
+</body>
+</html>

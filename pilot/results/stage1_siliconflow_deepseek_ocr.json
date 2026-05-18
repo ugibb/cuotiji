@@ -1,0 +1,22 @@
+{
+  "model": "deepseek-ai/DeepSeek-OCR",
+  "model_key": "deepseek-ocr",
+  "pages_tested": 1,
+  "total_cost_cny": 0.001085,
+  "total_cost_usd": 0.00015,
+  "avg_cost_per_page_usd": 0.00015,
+  "estimated_full_pipeline_usd": 19.0,
+  "details": [
+    {
+      "image": "12级-2022版《学而思秘籍 小学数学思维培养》第1讲 数形结合_p26_img1.jpeg",
+      "char_count": 81,
+      "formula_count": 1,
+      "input_tokens": 969,
+      "output_tokens": 58,
+      "cost_cny": 0.001085,
+      "cost_usd": 0.00015,
+      "elapsed_s": 2.31,
+      "text_preview": "\n4. 统一文字大小（$15pt$）\n\n学而思秘籍 小学数学思维培养 12 级\n学而思秘籍\n拍照批改 秒判对错\n举一反三\n图片可以生成，为方便查看请脑补中文文本。"
+    }
+  ]
+}

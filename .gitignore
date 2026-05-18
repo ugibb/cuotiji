@@ -1,0 +1,45 @@
+# 环境变量 & API 密钥（绝不提交）
+pilot/.env
+.env
+*.env
+
+# 版权图片素材（禁止上传，119MB）
+pilot/results/figures_pymupdf/
+
+# MathPix 输出（含版权教材原文）
+pilot/results/mathpix_output/
+
+# HTML 报告（含 base64 内嵌版权图片，1.6MB）
+pilot/results/stage1_ocr_report.html
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 其他大文件
+*.pdf
+*.docx
+*.doc
+*.pptx
