@@ -288,7 +288,7 @@ Page<HomePageData, Record<string, unknown>>({
   },
 
   onStartSetup() {
-    wx.navigateTo({ url: '/pages/onboarding/index' })
+    wx.navigateTo({ url: '/pages/intake/index' })
   },
 
   onDayActionUpload() {
