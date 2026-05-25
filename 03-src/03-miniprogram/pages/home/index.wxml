@@ -1,15 +1,10 @@
 <view class="home-page">
 
-  <!-- 状态栏占位 -->
-  <view style="height:{{statusBarHeight}}px;background:{{hasPlan ? '#4338CA' : '#fff'}}"></view>
+  <!-- 顶部安全区占位（覆盖 statusBar + 胶囊按钮 navBar，避免重叠） -->
+  <view style="height:{{navAreaHeight}}px;background:{{hasPlan ? '#4338CA' : '#5B5FC7'}}"></view>
 
   <!-- ── 无项目：Landing 状态 ── -->
   <block wx:if="{{!hasPlan && !loading}}">
-
-    <!-- 简单顶栏 -->
-    <view class="landing-topbar">
-      <text class="landing-appname">AI 错题集 · 项目制学习</text>
-    </view>
 
     <!-- 渐变 Hero -->
     <view class="landing-hero">

@@ -8,6 +8,7 @@ function zeroPad(n: number): string {
 
 interface MinePageData {
   statusBarHeight: number
+  navAreaHeight: number
   userInfo: UserInfo | null
   student: Student | null
   loading: boolean
@@ -24,6 +25,7 @@ interface MinePageData {
 Page<MinePageData, Record<string, unknown>>({
   data: {
     statusBarHeight: 0,
+    navAreaHeight: 0,
     userInfo: null,
     student: null,
     loading: false,
@@ -39,9 +41,12 @@ Page<MinePageData, Record<string, unknown>>({
 
   onLoad() {
     const { statusBarHeight } = wx.getSystemInfoSync()
+    const menuButton = wx.getMenuButtonBoundingClientRect()
+    const navAreaHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
     const stored = wx.getStorageSync('notify_settings')
     this.setData({
       statusBarHeight,
+      navAreaHeight,
       notifyDaily: stored?.notifyDaily !== undefined ? stored.notifyDaily : true,
       parentBound: wx.getStorageSync('parent_bound') || false,
     })

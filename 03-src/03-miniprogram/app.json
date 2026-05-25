@@ -34,15 +34,11 @@
     "list": [
       {
         "pagePath": "pages/home/index",
-        "text": "首页",
-        "iconPath": "assets/icons/home.png",
-        "selectedIconPath": "assets/icons/home-active.png"
+        "text": "首页"
       },
       {
         "pagePath": "pages/mine/index",
-        "text": "我的",
-        "iconPath": "assets/icons/mine.png",
-        "selectedIconPath": "assets/icons/mine-active.png"
+        "text": "我的"
       }
     ]
   },

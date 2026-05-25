@@ -1,7 +1,7 @@
 <view class="mine-page">
 
-  <!-- 状态栏占位 -->
-  <view style="height:{{statusBarHeight}}px;background:#5B5FC7"></view>
+  <!-- 顶部安全区占位（statusBar + navBar） -->
+  <view style="height:{{navAreaHeight}}px;background:#5B5FC7"></view>
 
   <scroll-view class="scroll" scroll-y>
 

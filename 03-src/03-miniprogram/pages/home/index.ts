@@ -90,6 +90,7 @@ interface HomePageData {
   loading: boolean
   daysLeft: number
   statusBarHeight: number
+  navAreaHeight: number
   plan: PlanSummary | null
   m1Day: number
   m1Pct: number
@@ -112,6 +113,7 @@ Page<HomePageData, Record<string, unknown>>({
     loading: true,
     daysLeft: 0,
     statusBarHeight: 0,
+    navAreaHeight: 0,
     plan: null,
     m1Day: 0,
     m1Pct: 0,
@@ -130,10 +132,14 @@ Page<HomePageData, Record<string, unknown>>({
 
   onLoad() {
     const { statusBarHeight } = wx.getSystemInfoSync()
+    // 用胶囊按钮位置算出需要避让的顶部高度（statusBar + navBar）
+    const menuButton = wx.getMenuButtonBoundingClientRect()
+    const navAreaHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
     const now = new Date()
     const tStr = todayDateStr()
     this.setData({
       statusBarHeight,
+      navAreaHeight,
       daysLeft: calcDaysLeft(),
       selectedDate: tStr,
       selectedDayLabel: formatDayLabel(now),
