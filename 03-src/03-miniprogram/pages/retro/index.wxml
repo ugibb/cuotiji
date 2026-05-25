@@ -1,0 +1,78 @@
+<view class="page">
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- 成就卡 -->
+    <view class="achievement-card">
+      <view class="ach-deco">★</view>
+      <text class="ach-trophy">🏅</text>
+      <text class="ach-title">阶段一 · 已解锁！</text>
+      <text class="ach-sub">整除与余数 — 21天全打卡</text>
+      <view class="ach-stats">
+        <view class="ach-stat">
+          <text class="ach-val">21</text>
+          <text class="ach-label">打卡天数</text>
+        </view>
+        <view class="ach-stat">
+          <text class="ach-val">87%</text>
+          <text class="ach-label">任务完成率</text>
+        </view>
+        <view class="ach-stat">
+          <text class="ach-val">45→73</text>
+          <text class="ach-label">整除余数分</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI 3 问 -->
+    <view class="card">
+      <view class="q3-header">
+        <view class="ai-avatar-sm">AI</view>
+        <text class="q3-title">阶段复盘 · AI 3 问</text>
+      </view>
+
+      <!-- Q1 印象最深 -->
+      <text class="retro-q">Q1 · 这21天里，哪道题让你印象最深？</text>
+      <view class="user-answer-box">「韩信点兵」那道，搞懂之后感觉很有成就感</view>
+      <text class="ai-comment">中国剩余定理确实是这阶段的难点 ✓</text>
+
+      <!-- Q2 掌握几成 -->
+      <text class="retro-q">Q2 · 整除余数这块，你觉得掌握了几成？</text>
+      <view class="mastery-row">
+        <view class="mastery-btn {{mastery === '4' ? 'mastery-sel' : ''}}" bindtap="onMastery" data-v="4">4成以下</view>
+        <view class="mastery-btn {{mastery === '56' ? 'mastery-sel' : ''}}" bindtap="onMastery" data-v="56">5-6成</view>
+        <view class="mastery-btn {{mastery === '78' ? 'mastery-sel' : ''}}" bindtap="onMastery" data-v="78">7-8成</view>
+        <view class="mastery-btn {{mastery === '9' ? 'mastery-sel' : ''}}" bindtap="onMastery" data-v="9">9成+</view>
+      </view>
+
+      <!-- Q3 进入阶段二 -->
+      <text class="retro-q">Q3 · 进入阶段二之前，你最想说什么？</text>
+      <view class="choices">
+        <view class="choice {{intent === 'next' ? 'choice-sel' : ''}}" bindtap="onIntent" data-v="next">
+          <view class="radio {{intent === 'next' ? 'radio-sel' : ''}}">
+            <view wx:if="{{intent === 'next'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">想快点开始行程问题 🚀</text>
+        </view>
+        <view class="choice {{intent === 'review' ? 'choice-sel' : ''}}" bindtap="onIntent" data-v="review">
+          <view class="radio {{intent === 'review' ? 'radio-sel' : ''}}">
+            <view wx:if="{{intent === 'review'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">想再巩固一下余数</text>
+        </view>
+        <view class="choice {{intent === 'worry' ? 'choice-sel' : ''}}" bindtap="onIntent" data-v="worry">
+          <view class="radio {{intent === 'worry' ? 'radio-sel' : ''}}">
+            <view wx:if="{{intent === 'worry'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">有点担心进度</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="cta-wrap">
+      <button class="btn-primary" bindtap="onContinue">成就卡已到账 · 开始 M2 🎯</button>
+      <text class="cta-hint">成就卡已通过微信分享给家长</text>
+    </view>
+
+    <view style="height:60rpx"></view>
+  </scroll-view>
+</view>

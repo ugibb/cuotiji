@@ -1,0 +1,52 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/mine/index",
+    "pages/onboarding/index",
+    "pages/intake/index",
+    "pages/assessment/index",
+    "pages/report/index",
+    "pages/plan-preview/index",
+    "pages/project/index",
+    "pages/retro/index",
+    "pages/analysis/index",
+    "pages/review/index",
+    "pages/chapter/index",
+    "pages/camera/index",
+    "pages/loading/index",
+    "pages/summary/index",
+    "pages/problem-list/index",
+    "pages/problem-detail/index",
+    "pages/review-done/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#5B5FC7",
+    "navigationBarTitleText": "AI 错题集",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F6FA"
+  },
+  "tabBar": {
+    "color": "#9CA3AF",
+    "selectedColor": "#5B5FC7",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "assets/icons/mine.png",
+        "selectedIconPath": "assets/icons/mine-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

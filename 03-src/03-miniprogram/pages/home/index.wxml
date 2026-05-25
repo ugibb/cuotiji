@@ -1,0 +1,207 @@
+<view class="home-page">
+
+  <!-- 状态栏占位 -->
+  <view style="height:{{statusBarHeight}}px;background:{{hasPlan ? '#4338CA' : '#fff'}}"></view>
+
+  <!-- ── 无项目：Landing 状态 ── -->
+  <block wx:if="{{!hasPlan && !loading}}">
+
+    <!-- 简单顶栏 -->
+    <view class="landing-topbar">
+      <text class="landing-appname">AI 错题集 · 项目制学习</text>
+    </view>
+
+    <!-- 渐变 Hero -->
+    <view class="landing-hero">
+      <view class="landing-deco">华</view>
+      <view class="landing-content">
+        <text class="landing-greeting">你好，小朋友 👋</text>
+        <text class="landing-sub">华杯赛还有 <text class="landing-days">{{daysLeft}}</text> 天\nAI 已为你准备好专属备赛计划</text>
+      </view>
+      <view class="landing-stats">
+        <view class="stat-pill"><text class="stat-val">免费</text><text class="stat-label">14天体验</text></view>
+        <view class="stat-pill"><text class="stat-val">≈25min</text><text class="stat-label">完成诊断</text></view>
+        <view class="stat-pill"><text class="stat-val">每日</text><text class="stat-label">微信日报</text></view>
+      </view>
+    </view>
+
+    <!-- 价值主张 -->
+    <scroll-view class="page-scroll" scroll-y>
+      <view class="landing-card">
+        <text class="landing-card-title">培训班有 4 个结构性缺陷，我们逐一解决</text>
+        <view class="value-list">
+          <view class="value-item">
+            <text class="v-icon">🎯</text>
+            <view>
+              <text class="v-head">AI 诊断 → 精确到每个知识点薄弱程度</text>
+              <text class="v-sub">不是"进快班慢班"，是你专属的能力报告</text>
+            </view>
+          </view>
+          <view class="value-item">
+            <text class="v-icon">📅</text>
+            <view>
+              <text class="v-head">每日任务 + 遗忘曲线复习，全程追踪</text>
+              <text class="v-sub">下课了事 → 每天执行记录可见</text>
+            </view>
+          </view>
+          <view class="value-item">
+            <text class="v-icon">📲</text>
+            <view>
+              <text class="v-head">每日微信日报，家长全程可见</text>
+              <text class="v-sub">过程黑箱 → 实时透明</text>
+            </view>
+          </view>
+          <view class="value-item">
+            <text class="v-icon">💰</text>
+            <view>
+              <text class="v-head">全年 499 元 = 培训班一节课</text>
+              <text class="v-sub">一年费用 vs 培训班单次费用</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="landing-cta-wrap">
+        <button class="btn-primary" bindtap="onStartSetup">开始备赛，免费诊断能力 →</button>
+        <text class="cta-hint">14天免费体验 · 完成能力报告后开始计时</text>
+      </view>
+      <view style="height:60rpx"></view>
+    </scroll-view>
+  </block>
+
+  <!-- ── 有项目：执行态 ── -->
+  <block wx:elif="{{hasPlan}}">
+
+    <!-- 倒计时 Hero -->
+    <view class="exec-hero">
+      <view class="exec-hero-deco">{{plan.daysLeft}}</view>
+      <view class="exec-hero-main">
+        <view>
+          <text class="countdown-label">距 2026 华杯小学组竞赛</text>
+          <view class="countdown-row">
+            <text class="countdown-num">{{plan.daysLeft}}</text>
+            <text class="countdown-unit">天</text>
+          </view>
+        </view>
+        <view class="exec-hero-right">
+          <text class="ms-label">当前阶段</text>
+          <view class="ms-pill">M1 · 整除与余数</view>
+          <text class="ms-day-label">Day {{m1Day}} / 21</text>
+        </view>
+      </view>
+      <!-- M1 进度条 -->
+      <view class="exec-progress">
+        <view class="exec-progress-top">
+          <text class="exec-progress-label">M1 进度</text>
+          <text class="exec-progress-pct">{{m1Pct}}%</text>
+        </view>
+        <view class="exec-bar-track">
+          <view class="exec-bar-fill" style="width:{{m1Pct}}%"></view>
+        </view>
+        <view class="ms-seg-row">
+          <view class="ms-seg ms-seg-active"></view>
+          <view class="ms-seg"></view>
+          <view class="ms-seg"></view>
+        </view>
+        <view class="ms-seg-labels">
+          <text>M1 整除</text><text>M2 行程</text><text>M3 冲刺</text>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view class="page-scroll" scroll-y>
+
+      <!-- 今日任务 -->
+      <view class="today-card" wx:if="{{todayPlan}}">
+        <view class="today-header">
+          <text class="today-title">今日任务</text>
+          <text class="today-date">{{todayStr}}</text>
+        </view>
+        <text class="today-topic">{{todayPlan.topic || todayPlan.chapter.name}}</text>
+        <text class="today-est">预计 45 分钟 · 含 5 道练习题</text>
+        <button class="btn-primary today-btn" bindtap="onTodayAction">📷 拍照上传今日作业</button>
+      </view>
+
+      <!-- 训练日历 -->
+      <view class="card">
+        <view class="cal-top">
+          <text class="card-title">训练日历</text>
+          <view class="cal-nav">
+            <text bindtap="onPrevMonth" class="nav-btn">‹</text>
+            <text class="cal-month">{{monthLabel}}</text>
+            <text bindtap="onNextMonth" class="nav-btn">›</text>
+          </view>
+        </view>
+        <view class="weekdays">
+          <text>一</text><text>二</text><text>三</text>
+          <text>四</text><text>五</text><text>六</text><text>日</text>
+        </view>
+        <view class="calendar-grid">
+          <view
+            wx:for="{{calendarDays}}"
+            wx:key="index"
+            class="day-wrap"
+            data-date="{{item.date}}"
+            bindtap="onDayTap"
+          >
+            <view wx:if="{{item.date}}" class="day-circle {{item.circleClass}} {{item.date === selectedDate ? 'c-selected' : ''}}">
+              <text class="day-num {{item.numClass}}">{{item.day}}</text>
+            </view>
+            <view wx:if="{{item.date && item.isPast}}" class="day-underline"></view>
+            <view wx:elif="{{item.date && !item.isPast}}" class="day-underline day-underline-dim"></view>
+          </view>
+        </view>
+
+        <!-- 选中日详情 -->
+        <view class="day-detail" wx:if="{{selectedDate && selectedDayPlan}}">
+          <view class="detail-top">
+            <text class="detail-date">{{selectedDayLabel}}</text>
+            <view class="chapter-pill">{{selectedDayPlan.chapter.name}}</view>
+          </view>
+          <text class="detail-topic">{{selectedDayPlan.topic || selectedDayPlan.chapter.name}}</text>
+          <view wx:if="{{selectedDayStatus === 'done'}}" class="done-badge">
+            <text>✅</text><text class="done-text">已完成答疑登记</text>
+          </view>
+          <button wx:elif="{{selectedDayStatus === 'uploaded_pending'}}" class="btn-action-orange" bindtap="onDayActionReview">登记错题</button>
+          <button wx:else class="btn-action-primary" bindtap="onDayActionUpload">上传作业</button>
+        </view>
+      </view>
+
+      <!-- 项目进度入口 -->
+      <view class="card project-entry" bindtap="onGoProject">
+        <view class="project-entry-left">
+          <view class="project-icon">📊</view>
+          <view>
+            <text class="project-entry-title">查看项目进度看板</text>
+            <text class="project-entry-sub">M1 进行中 · {{m1Pct}}% · {{m1Day}}/21天</text>
+          </view>
+        </view>
+        <text class="project-arrow">›</text>
+      </view>
+
+      <!-- 最近完成 -->
+      <view class="card" wx:if="{{recentPractices.length > 0}}">
+        <text class="card-title">最近完成</text>
+        <view class="recent-list">
+          <view wx:for="{{recentPractices}}" wx:key="index" class="recent-item">
+            <view class="recent-info">
+              <text class="recent-topic">{{item.topic}}</text>
+              <text class="recent-date">{{item.date}} · {{item.totalCount}}题</text>
+            </view>
+            <view class="recent-scores">
+              <view wx:if="{{item.correctCount > 0}}" class="chip chip-green">{{item.correctCount}}对</view>
+              <view wx:if="{{item.wrongCount > 0}}" class="chip chip-red">{{item.wrongCount}}错</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view style="height:60rpx"></view>
+    </scroll-view>
+  </block>
+
+  <!-- 加载遮罩 -->
+  <view wx:if="{{loading}}" class="loading-mask">
+    <view class="loading-spinner"></view>
+  </view>
+
+</view>

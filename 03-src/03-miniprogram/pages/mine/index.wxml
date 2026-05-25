@@ -1,0 +1,85 @@
+<view class="mine-page">
+
+  <!-- 状态栏占位 -->
+  <view style="height:{{statusBarHeight}}px;background:#5B5FC7"></view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- 用户 Hero -->
+    <view class="user-hero">
+      <view class="hero-row">
+        <view class="avatar-wrap">
+          <image wx:if="{{student && student.avatar}}" src="{{student.avatar}}" class="avatar-img" mode="aspectFill" />
+          <view wx:else class="avatar-text">
+            <text>{{student ? student.name[0] : '?'}}</text>
+          </view>
+        </view>
+        <view class="user-info">
+          <text class="user-name">{{student ? student.name : '加载中'}}</text>
+          <text class="user-sub">{{student ? student.grade + ' 年级' : ''}} · 华杯备赛中</text>
+        </view>
+        <text class="edit-btn">编辑</text>
+      </view>
+
+      <!-- 3 统计 -->
+      <view class="stats-row">
+        <view class="stat-block">
+          <text class="stat-val">{{m1Progress}}</text>
+          <text class="stat-label">M1进度</text>
+        </view>
+        <view class="stat-block">
+          <text class="stat-val">{{streakDays}}</text>
+          <text class="stat-label">连续打卡</text>
+        </view>
+        <view class="stat-block">
+          <text class="stat-val">{{errorCount}}</text>
+          <text class="stat-label">错题登记</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="content">
+
+      <!-- 当前项目 -->
+      <view class="card project-card" bindtap="onGoProject" wx:if="{{hasPlan}}">
+        <view class="project-header">
+          <text class="project-status">● 进行中</text>
+          <text class="project-name">华杯奥数备赛计划</text>
+        </view>
+        <view class="project-meta">
+          <text>M1 · 整除与余数</text>
+          <text>{{m1Pct}}% · Day {{m1Day}}/21</text>
+        </view>
+        <view class="progress-track">
+          <view class="progress-fill" style="width:{{m1Pct}}%"></view>
+        </view>
+      </view>
+
+      <!-- 家长通知设置 -->
+      <view class="card notify-card">
+        <text class="card-title">家长通知设置</text>
+        <view class="notify-row notify-border">
+          <text class="notify-label">每日复盘完成后推送</text>
+          <switch checked="{{notifyDaily}}" color="#5B5FC7" data-key="notifyDaily" bindchange="onToggleNotify" />
+        </view>
+        <view class="notify-row">
+          <text class="notify-label">绑定家长微信</text>
+          <text class="notify-link" bindtap="onBindParent">{{parentBound ? '已绑定 ›' : '去绑定 ›'}}</text>
+        </view>
+      </view>
+
+      <!-- 退出登录 -->
+      <view class="logout-wrap">
+        <button class="btn-logout" bindtap="onLogout">退出登录</button>
+      </view>
+
+      <view class="version">
+        <text class="version-text">AI 错题集 · v1.0.0</text>
+      </view>
+
+    </view>
+
+    <view style="height:80rpx"></view>
+  </scroll-view>
+
+</view>

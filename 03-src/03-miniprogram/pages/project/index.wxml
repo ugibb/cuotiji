@@ -1,0 +1,106 @@
+<view class="page">
+
+  <!-- 项目头部 Hero -->
+  <view class="project-hero">
+    <text class="hero-name">华杯小学奥数 2026</text>
+    <text class="hero-sub">目标：冲刺获奖 · 2026年11月20日</text>
+    <view class="hero-stats">
+      <view class="h-stat">
+        <text class="h-stat-val">{{plan.daysLeft}}</text>
+        <text class="h-stat-label">剩余天数</text>
+      </view>
+      <view class="h-stat">
+        <text class="h-stat-val">{{progressPct}}%</text>
+        <text class="h-stat-label">总进度</text>
+      </view>
+      <view class="h-stat">
+        <text class="h-stat-val">{{streakDays}}天</text>
+        <text class="h-stat-label">连续打卡</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- M1 进行中 -->
+    <view class="ms-card ms-m1">
+      <view class="ms-header">
+        <view class="ms-badge ms-badge-blue">M1 进行中</view>
+        <text class="ms-title">整除与余数</text>
+      </view>
+      <text class="ms-date">4月22日 — 5月12日</text>
+      <view class="ms-progress-row">
+        <text class="ms-progress-text">已完成 {{m1Completed}} / 21 天</text>
+        <text class="ms-pct" style="color:#5B5FC7">{{m1Pct}}%</text>
+      </view>
+      <view class="progress-track">
+        <view class="progress-fill" style="width:{{m1Pct}}%;background:#5B5FC7"></view>
+      </view>
+      <view class="ms-footer">
+        <text class="ms-footer-text">整除判断 ✓ · 余数运算 ✓ · 同余性质 进行中</text>
+        <view class="retro-btn" bindtap="onRetro">预览复盘</view>
+      </view>
+    </view>
+
+    <!-- M2 待开始 -->
+    <view class="ms-card ms-m2 ms-pending">
+      <view class="ms-header">
+        <view class="ms-badge ms-badge-amber">M2 待开始</view>
+        <text class="ms-title">行程·应用综合</text>
+      </view>
+      <text class="ms-date">5月13日 — 6月6日</text>
+      <view class="progress-track" style="background:#F3F4F6">
+        <view class="progress-fill" style="width:0%"></view>
+      </view>
+    </view>
+
+    <!-- M3 待开始 -->
+    <view class="ms-card ms-m3 ms-pending">
+      <view class="ms-header">
+        <view class="ms-badge ms-badge-green">M3 待开始</view>
+        <text class="ms-title">综合冲刺</text>
+      </view>
+      <text class="ms-date">6月7日 — 6月27日</text>
+      <view class="progress-track" style="background:#F3F4F6">
+        <view class="progress-fill" style="width:0%"></view>
+      </view>
+    </view>
+
+    <!-- 知识点热力图 -->
+    <view class="card">
+      <text class="card-title">知识点掌握热力图</text>
+      <view class="heatmap">
+        <view class="hm-cell" style="background:#5B5FC7"></view>
+        <view class="hm-cell" style="background:#818CF8"></view>
+        <view class="hm-cell" style="background:#A5B4FC"></view>
+        <view class="hm-cell" style="background:#E0E7FF"></view>
+        <view class="hm-cell" style="background:#E0E7FF"></view>
+        <view class="hm-cell" style="background:#F3F4F6"></view>
+        <view class="hm-cell" style="background:#F3F4F6"></view>
+        <view class="hm-cell" style="background:#818CF8"></view>
+        <view class="hm-cell" style="background:#5B5FC7"></view>
+        <view class="hm-cell" style="background:#A5B4FC"></view>
+        <view class="hm-cell" style="background:#F3F4F6"></view>
+        <view class="hm-cell" style="background:#E0E7FF"></view>
+        <view class="hm-cell" style="background:#A5B4FC"></view>
+        <view class="hm-cell" style="background:#F3F4F6"></view>
+      </view>
+      <view class="heatmap-legend">
+        <view class="legend-item">
+          <view class="l-dot" style="background:#5B5FC7"></view>
+          <text>已掌握</text>
+        </view>
+        <view class="legend-item">
+          <view class="l-dot" style="background:#A5B4FC"></view>
+          <text>学习中</text>
+        </view>
+        <view class="legend-item">
+          <view class="l-dot" style="background:#F3F4F6"></view>
+          <text>未开始</text>
+        </view>
+      </view>
+    </view>
+
+    <view style="height:60rpx"></view>
+  </scroll-view>
+</view>

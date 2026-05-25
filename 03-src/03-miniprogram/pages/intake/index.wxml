@@ -1,0 +1,148 @@
+<view class="page">
+
+  <!-- 步骤条 -->
+  <view class="flow-bar">
+    <view class="flow-seg seg-done"></view>
+    <view class="flow-seg seg-now"></view>
+    <view class="flow-seg"></view>
+    <view class="flow-seg"></view>
+    <view class="flow-seg"></view>
+  </view>
+  <text class="step-label">第 2 步，共 5 步 · 4 个问题，约 1 分钟</text>
+
+  <scroll-view class="scroll" scroll-y>
+    <text class="intro">先聊几个问题，让 AI 了解你 👋</text>
+
+    <!-- Q1 -->
+    <view class="card">
+      <text class="q-title">Q1 · 之前学过多久奥数？</text>
+      <view class="choices" id="q1">
+        <view class="choice {{q1 === 'none' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q1" data-val="none">
+          <view class="radio {{q1 === 'none' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q1 === 'none'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">从来没学过</text>
+        </view>
+        <view class="choice {{q1 === 'lt1' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q1" data-val="lt1">
+          <view class="radio {{q1 === 'lt1' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q1 === 'lt1'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">学了不到 1 年</text>
+        </view>
+        <view class="choice {{q1 === '1to2' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q1" data-val="1to2">
+          <view class="radio {{q1 === '1to2' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q1 === '1to2'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">学了 1-2 年</text>
+        </view>
+        <view class="choice {{q1 === 'gt2' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q1" data-val="gt2">
+          <view class="radio {{q1 === 'gt2' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q1 === 'gt2'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">2 年以上</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Q2 -->
+    <view class="card">
+      <text class="q-title">Q2 · 哪类题目你觉得最难？</text>
+      <view class="choices">
+        <view class="choice {{q2 === 'number_theory' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q2" data-val="number_theory">
+          <view class="radio {{q2 === 'number_theory' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q2 === 'number_theory'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">整除 / 余数 / 数论</text>
+        </view>
+        <view class="choice {{q2 === 'travel' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q2" data-val="travel">
+          <view class="radio {{q2 === 'travel' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q2 === 'travel'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">行程 / 速度 / 应用</text>
+        </view>
+        <view class="choice {{q2 === 'geometry' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q2" data-val="geometry">
+          <view class="radio {{q2 === 'geometry' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q2 === 'geometry'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">几何 / 图形</text>
+        </view>
+        <view class="choice {{q2 === 'all_same' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q2" data-val="all_same">
+          <view class="radio {{q2 === 'all_same' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q2 === 'all_same'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">都差不多难</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Q3 -->
+    <view class="card">
+      <text class="q-title">Q3 · 每周能投入多少时间？</text>
+      <view class="choices">
+        <view class="choice {{q3 === 'lt3' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q3" data-val="lt3">
+          <view class="radio {{q3 === 'lt3' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q3 === 'lt3'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">3 小时以内</text>
+        </view>
+        <view class="choice {{q3 === '3to5' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q3" data-val="3to5">
+          <view class="radio {{q3 === '3to5' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q3 === '3to5'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">3-5 小时</text>
+        </view>
+        <view class="choice {{q3 === '5to8' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q3" data-val="5to8">
+          <view class="radio {{q3 === '5to8' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q3 === '5to8'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">5-8 小时</text>
+        </view>
+        <view class="choice {{q3 === 'gt8' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q3" data-val="gt8">
+          <view class="radio {{q3 === 'gt8' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q3 === 'gt8'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">8 小时以上</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Q4 -->
+    <view class="card">
+      <text class="q-title">Q4 · 距华杯，你现在的信心是？</text>
+      <view class="choices">
+        <view class="choice {{q4 === 'zero' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q4" data-val="zero">
+          <view class="radio {{q4 === 'zero' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q4 === 'zero'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">完全没把握，从零开始</text>
+        </view>
+        <view class="choice {{q4 === 'some' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q4" data-val="some">
+          <view class="radio {{q4 === 'some' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q4 === 'some'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">有一点基础，需要系统强化</text>
+        </view>
+        <view class="choice {{q4 === 'confident' ? 'choice-sel' : ''}}" bindtap="onPick" data-q="q4" data-val="confident">
+          <view class="radio {{q4 === 'confident' ? 'radio-sel' : ''}}">
+            <view wx:if="{{q4 === 'confident'}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">挺有信心，冲刺阶段</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI hint -->
+    <view class="ai-hint">
+      <text class="ai-hint-icon">🤖</text>
+      <text class="ai-hint-text">根据你的回答，AI 初步判断你处于<text style="font-weight:700">中初级</text>水平——接下来的诊断测试会更精准确认，放心作答即可。</text>
+    </view>
+
+    <view style="height:200rpx"></view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <button class="btn-primary {{canNext ? '' : 'btn-disabled'}}" bindtap="onNext">开始诊断测试（15题，约15分钟）→</button>
+  </view>
+
+</view>

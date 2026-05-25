@@ -1,0 +1,112 @@
+<view class="page">
+
+  <!-- 步骤条 -->
+  <view class="header">
+    <view class="flow-bar">
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-now"></view>
+    </view>
+    <text class="step-label">第 5 步，共 5 步 · 计划已生成，确认后立即开始</text>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- 计划总览 -->
+    <view class="card overview-card">
+      <view class="overview-stats">
+        <view class="stat-col">
+          <text class="stat-num">{{plan.totalDays}}</text>
+          <text class="stat-label">学习天数</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-col">
+          <text class="stat-num">3</text>
+          <text class="stat-label">里程碑</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-col">
+          <text class="stat-num">≈1.5h</text>
+          <text class="stat-label">每日时长</text>
+        </view>
+      </view>
+      <view class="goal-row">
+        <text class="goal-icon">🎯</text>
+        <text class="goal-text">目标：华杯小学组 · 冲刺获奖 · 2026年11月20日</text>
+      </view>
+    </view>
+
+    <!-- M1 -->
+    <view class="ms-card ms-m1">
+      <view class="ms-header">
+        <view class="ms-left">
+          <view class="ms-tag ms-tag-blue">M1</view>
+          <text class="ms-title">整除与余数</text>
+        </view>
+        <text class="ms-days">第 1-21 天</text>
+      </view>
+      <text class="ms-date">4月22日 — 5月12日 · 21个学习日</text>
+      <view class="ms-tags">
+        <view class="chip chip-blue">整除判断</view>
+        <view class="chip chip-blue">余数运算</view>
+        <view class="chip chip-blue">同余性质</view>
+        <view class="chip chip-blue">中国剩余定理入门</view>
+      </view>
+      <text class="ms-goal ms-goal-blue">重点突破 · 整除余数 45→75分</text>
+    </view>
+
+    <!-- M2 -->
+    <view class="ms-card ms-m2">
+      <view class="ms-header">
+        <view class="ms-left">
+          <view class="ms-tag ms-tag-amber">M2</view>
+          <text class="ms-title">行程·应用综合</text>
+        </view>
+        <text class="ms-days">第 22-46 天</text>
+      </view>
+      <text class="ms-date">5月13日 — 6月6日 · 25个学习日</text>
+      <view class="ms-tags">
+        <view class="chip chip-amber">相遇追及</view>
+        <view class="chip chip-amber">流水行船</view>
+        <view class="chip chip-amber">综合应用</view>
+      </view>
+      <text class="ms-goal ms-goal-amber">提升阶段 · 应用综合 55→72分</text>
+    </view>
+
+    <!-- M3 -->
+    <view class="ms-card ms-m3">
+      <view class="ms-header">
+        <view class="ms-left">
+          <view class="ms-tag ms-tag-green">M3</view>
+          <text class="ms-title">综合冲刺</text>
+        </view>
+        <text class="ms-days">第 47-67 天</text>
+      </view>
+      <text class="ms-date">6月7日 — 6月27日 · 21个学习日</text>
+      <view class="ms-tags">
+        <view class="chip chip-green">真题模拟</view>
+        <view class="chip chip-green">弱点专项</view>
+        <view class="chip chip-green">冲刺训练</view>
+      </view>
+      <text class="ms-goal ms-goal-green">冲刺阶段 · 综合实战演练</text>
+    </view>
+
+    <!-- 提示 -->
+    <view class="hint-card">
+      <text class="hint-line">📌 每天最少完成 <text style="font-weight:700">1 题</text>，最多 <text style="font-weight:700">3 个知识点</text></text>
+      <text class="hint-line">📱 每晚 21:00 微信日报自动推送给家长</text>
+      <text class="hint-line">🔁 遗忘曲线自动安排复习，不用手动管</text>
+    </view>
+
+    <view style="height:200rpx"></view>
+  </scroll-view>
+
+  <view class="bottom-bar">
+    <button class="btn-primary {{saving ? 'btn-disabled' : ''}}" bindtap="onConfirm">
+      {{saving ? '计划生成中…' : '确认计划，开始备赛 🚀'}}
+    </button>
+  </view>
+
+</view>
