@@ -1,0 +1,241 @@
+/* ── 弱点地图页 ── */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F5F6FA;
+}
+
+/* ── 自定义导航栏 ── */
+.nav-bar-wrap {
+  background: #fff;
+  flex-shrink: 0;
+  border-bottom: 1rpx solid #EDEEF2;
+}
+
+.nav-bar {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+}
+
+.nav-back {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.nav-back-icon {
+  font-size: 52rpx;
+  font-weight: 300;
+  color: #333;
+  line-height: 1;
+  margin-top: -4rpx;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.nav-right {
+  width: 80rpx;
+  text-align: right;
+  font-size: 24rpx;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+/* ── 筛选胶囊 ── */
+.filter-bar {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx 28rpx 20rpx;
+}
+
+.filter-pill {
+  padding: 10rpx 28rpx;
+  border-radius: 100rpx;
+  font-size: 24rpx;
+  color: #6B7280;
+  background: #F3F4F6;
+  font-weight: 500;
+}
+
+.pill-active {
+  background: #5B5FC7;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── 加载 ── */
+.loading-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.loading-spinner {
+  width: 64rpx;
+  height: 64rpx;
+  border: 6rpx solid rgba(91, 95, 199, 0.15);
+  border-top-color: #5B5FC7;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 空状态 ── */
+.empty-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 60rpx;
+  overflow: hidden;
+}
+
+.empty-emoji {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #9CA3AF;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 16rpx;
+}
+
+.empty-count {
+  font-size: 24rpx;
+  color: #C3C4D0;
+}
+
+/* ── 列表 ── */
+.list {
+  flex: 1;
+  overflow: hidden;
+  height: 0;
+}
+
+.total-bar {
+  padding: 20rpx 28rpx 8rpx;
+}
+
+.total-text {
+  font-size: 22rpx;
+  color: #9CA3AF;
+}
+
+/* ── 弱点卡片 ── */
+.wp-card {
+  background: #fff;
+  border-radius: 16rpx;
+  margin: 12rpx 24rpx 0;
+  padding: 28rpx 28rpx 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.wp-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 16rpx;
+}
+
+.wp-rank {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rank-1 { background: #5B5FC7; }
+.rank-2 { background: #9B9FE4; }
+.rank-3 { background: #C8CAF0; }
+
+.rank-num {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: #fff;
+}
+
+.wp-info {
+  flex: 1;
+}
+
+.wp-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.wp-meta {
+  font-size: 22rpx;
+  color: #9CA3AF;
+}
+
+.wp-badge {
+  background: #FFF1F1;
+  border-radius: 10rpx;
+  padding: 8rpx 16rpx;
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+  flex-shrink: 0;
+}
+
+.wp-badge-num {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #E54747;
+}
+
+.wp-badge-label {
+  font-size: 20rpx;
+  color: #E54747;
+  font-weight: 600;
+}
+
+/* ── 进度条 ── */
+.bar-track {
+  height: 8rpx;
+  background: #F3F4F6;
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5B5FC7, #7B7FE7);
+  border-radius: 4rpx;
+  min-width: 8rpx;
+  transition: width 0.4s ease;
+}

@@ -1,0 +1,14 @@
+{
+  "name": "cuoti-miniprogram",
+  "version": "1.0.0",
+  "description": "奥数练习册微信小程序",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "echo 'no unit tests for miniprogram yet'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "miniprogram-api-typings": "^3.12.3"
+  }
+}

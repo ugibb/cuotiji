@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "module": "CommonJS",
+    "target": "ES6",
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "typeRoots": ["./typings"],
+    "lib": ["ES2017"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
+}

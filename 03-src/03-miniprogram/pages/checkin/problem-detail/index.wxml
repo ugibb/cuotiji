@@ -1,0 +1,160 @@
+<view class="page">
+
+  <!-- ── 自定义导航栏 ── -->
+  <view class="nav-wrap">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">第 {{problem.seq}} 题</text>
+      <text class="nav-progress">{{problem.seq}}/{{total}}</text>
+    </view>
+  </view>
+
+  <!-- ── 可滚动主体 ── -->
+  <scroll-view class="content" scroll-y scroll-into-view="{{scrollAnchor}}" enable-flex>
+
+    <view wx:if="{{loading}}" class="page-loading">
+      <view class="page-spinner"></view>
+    </view>
+
+    <block wx:if="{{!loading && problem}}">
+
+      <!-- ① 题目卡 -->
+      <view class="section">
+        <text class="section-label">题目</text>
+        <view class="question-card">
+          <text class="question-text">{{problem.ocrText || '（题目识别中）'}}</text>
+        </view>
+      </view>
+
+      <!-- ② 答案区（wrong / correct，unknown 不显示） -->
+      <block wx:if="{{problem.result !== 'unknown'}}">
+
+        <!-- 做错：并排两列 -->
+        <view wx:if="{{problem.result === 'wrong'}}" class="answer-row-wrap">
+          <view class="answer-box box-wrong">
+            <text class="answer-box-label label-wrong">你的答案</text>
+            <text class="answer-box-val">{{problem.studentAnswer || '—'}}</text>
+          </view>
+          <view class="answer-box box-correct">
+            <text class="answer-box-label label-correct">正确答案</text>
+            <text class="answer-box-val">{{problem.correctAnswer || '—'}}</text>
+          </view>
+        </view>
+
+        <!-- 答对：单列 -->
+        <view wx:if="{{problem.result === 'correct'}}" class="answer-single">
+          <text class="answer-box-label label-correct">你的答案</text>
+          <view class="answer-box box-correct">
+            <text class="answer-val-correct">{{problem.studentAnswer}} ✓</text>
+          </view>
+        </view>
+
+        <!-- 判断 Banner -->
+        <view class="verdict verdict-{{problem.result}}">
+          <text class="verdict-icon">{{problem.result === 'correct' ? '✓' : '×'}}</text>
+          <text class="verdict-text">{{problem.result === 'correct' ? '答对了' : '做错了'}}</text>
+        </view>
+
+      </block>
+
+      <!-- ③ 分析区（wrong / correct，unknown 不显示） -->
+      <view wx:if="{{problem.result !== 'unknown'}}" class="analysis-card">
+
+        <!-- 知识点（所有结果） -->
+        <view wx:if="{{problem.knowledgePoint}}" class="analysis-item">
+          <text class="analysis-icon">🎯</text>
+          <view class="analysis-body">
+            <text class="analysis-label">知识点</text>
+            <text class="analysis-val">{{problem.knowledgePoint}}</text>
+          </view>
+        </view>
+
+        <!-- 做错：这道题的坑 -->
+        <view wx:if="{{problem.result === 'wrong' && problem.trapDesc}}" class="analysis-item">
+          <text class="analysis-icon">⚡</text>
+          <view class="analysis-body">
+            <text class="analysis-label">这道题的坑</text>
+            <text class="analysis-val">{{problem.trapDesc}}</text>
+          </view>
+        </view>
+
+        <!-- 做错：归因 -->
+        <view wx:if="{{problem.result === 'wrong' && problem.rootCause}}" class="analysis-item">
+          <text class="analysis-icon">🔍</text>
+          <view class="analysis-body">
+            <text class="analysis-label">归因</text>
+            <text class="analysis-val">{{problem.rootCause}}</text>
+          </view>
+        </view>
+
+        <!-- 答对：解题逻辑 -->
+        <view wx:if="{{problem.result === 'correct' && problem.solutionText}}" class="analysis-item">
+          <text class="analysis-icon">💡</text>
+          <view class="analysis-body">
+            <text class="analysis-label">解题逻辑</text>
+            <text class="analysis-val">{{problem.solutionText}}</text>
+          </view>
+        </view>
+
+      </view>
+
+      <!-- ④ AI 辅导对话区 -->
+      <view class="dialogue-section">
+        <text class="dialogue-header">AI TUTORING · 辅导对话</text>
+
+        <!-- 空状态 -->
+        <view wx:if="{{dialogues.length === 0 && !sending}}" class="dialogue-empty">
+          <text>开始和 AI 讨论这道题吧</text>
+        </view>
+
+        <!-- 气泡列表 -->
+        <view
+          wx:for="{{dialogues}}"
+          wx:key="id"
+          class="bubble-row {{item.role === 'ai' ? 'row-ai' : 'row-student'}}"
+        >
+          <!-- AI 头像 -->
+          <view wx:if="{{item.role === 'ai'}}" class="ai-avatar">AI</view>
+          <!-- 气泡 -->
+          <view class="bubble bubble-{{item.role}}">
+            <text class="bubble-text">{{item.content}}</text>
+          </view>
+        </view>
+
+        <!-- AI 思考中 -->
+        <view wx:if="{{sending}}" class="bubble-row row-ai">
+          <view class="ai-avatar">AI</view>
+          <view class="bubble bubble-ai bubble-typing">
+            <text class="bubble-text">思考中{{dots}}</text>
+          </view>
+        </view>
+
+        <!-- 提示文字 -->
+        <text class="dialogue-hint">{{hintText}}</text>
+
+        <!-- 滚动锚点 -->
+        <view id="bottom-anchor" style="height:8rpx"></view>
+      </view>
+
+    </block>
+
+  </scroll-view>
+
+  <!-- ── 底部按住说话 ── -->
+  <view class="speak-bar">
+    <view
+      class="speak-btn {{recording ? 'speaking' : ''}}"
+      bindtouchstart="onSpeakStart"
+      bindtouchend="onSpeakEnd"
+      bindtouchcancel="onSpeakCancel"
+    >
+      <text class="speak-icon">{{recording ? '⬆️' : '🎙'}}</text>
+      <text class="speak-text">{{recording ? '松开发送' : '按住说话'}}</text>
+    </view>
+    <view style="height:{{safeAreaBottom}}px"></view>
+  </view>
+
+</view>

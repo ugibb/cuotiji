@@ -1,0 +1,288 @@
+/* ── 拍照页：全屏暗色相机界面 ── */
+
+.camera-page {
+  min-height: 100vh;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ── 状态栏占位 ── */
+.status-bar {
+  background: #111;
+  flex-shrink: 0;
+}
+
+/* ── 顶部导航栏 ── */
+.top-bar {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28rpx;
+  background: #111;
+  flex-shrink: 0;
+}
+
+.top-btn {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-btn-icon {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 300;
+}
+
+.top-title {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5rpx;
+}
+
+.top-btn-help {
+  width: auto;
+  padding: 0 8rpx;
+}
+
+.top-btn-help-text {
+  font-size: 28rpx;
+  color: rgba(255,255,255,0.85);
+  font-weight: 400;
+}
+
+/* ── Tab 切换栏（半透明胶囊 + 白底选中块）── */
+.tab-bar {
+  display: flex;
+  align-self: center;
+  margin: 16rpx 0 20rpx;
+  padding: 6rpx;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 40rpx;
+  flex-shrink: 0;
+}
+
+.tab-item {
+  padding: 10rpx 40rpx;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.tab-item.tab-active {
+  background: #fff;
+  color: #111;
+}
+
+/* ── 取景框区域 ── */
+.viewfinder {
+  flex: 1;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+}
+
+.finder-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 四角 L 形标记 */
+.corner {
+  position: absolute;
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.corner-tl {
+  top: 56rpx;
+  left: 56rpx;
+  border-top: 4rpx solid #fff;
+  border-left: 4rpx solid #fff;
+}
+
+.corner-tr {
+  top: 56rpx;
+  right: 56rpx;
+  border-top: 4rpx solid #fff;
+  border-right: 4rpx solid #fff;
+}
+
+.corner-bl {
+  bottom: 56rpx;
+  left: 56rpx;
+  border-bottom: 4rpx solid #fff;
+  border-left: 4rpx solid #fff;
+}
+
+.corner-br {
+  bottom: 56rpx;
+  right: 56rpx;
+  border-bottom: 4rpx solid #fff;
+  border-right: 4rpx solid #fff;
+}
+
+/* 提示文字 */
+.finder-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.hint-line {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  letter-spacing: 1rpx;
+}
+
+/* ── 底部操作栏 ── */
+.bottom-bar {
+  height: 220rpx;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 64rpx;
+  flex-shrink: 0;
+}
+
+/* 相册按钮 */
+.album-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  width: 100rpx;
+}
+
+.album-icon {
+  font-size: 84rpx;
+  color: rgba(255,255,255,0.7);
+  line-height: 1;
+}
+
+.album-label {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* 拍摄按钮（圆形） */
+.capture-btn {
+  width: 136rpx;
+  height: 136rpx;
+  border-radius: 50%;
+  border: 5rpx solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.capture-inner {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* 拍照后：重拍 + 确认 */
+.capture-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.retake-btn {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.7);
+  border: 1rpx solid rgba(255,255,255,0.4);
+  padding: 10rpx 28rpx;
+  border-radius: 32rpx;
+}
+
+.confirm-btn {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #4CAF50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 40rpx;
+}
+
+.confirm-btn.uploading {
+  background: rgba(76,175,80,0.5);
+}
+
+/* 右侧对称占位 */
+.bottom-spacer {
+  width: 100rpx;
+}
+
+/* ── 上传进度浮层 ── */
+.upload-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+
+.upload-progress-box {
+  width: 480rpx;
+  background: #1e1e1e;
+  border-radius: 16rpx;
+  padding: 48rpx 40rpx;
+}
+
+.upload-progress-label {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+  margin-bottom: 24rpx;
+  letter-spacing: 1rpx;
+}
+
+.upload-bar-track {
+  height: 6rpx;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3rpx;
+  overflow: hidden;
+}
+
+.upload-bar-fill {
+  height: 100%;
+  background: #fff;
+  border-radius: 3rpx;
+  transition: width 0.3s ease;
+}

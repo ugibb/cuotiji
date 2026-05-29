@@ -1,0 +1,145 @@
+/* ── AI 批改等待页（浅色，参照高保真原型） ── */
+
+.loading-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.safe-top {
+  flex-shrink: 0;
+}
+
+/* 主内容区 —— 垂直撑满，内容上方留白 */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 48rpx 0;
+}
+
+/* ── Spinner ── */
+.spinner-wrap {
+  margin-bottom: 48rpx;
+}
+
+.spinner {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  border: 5rpx solid rgba(91, 108, 249, 0.15);
+  border-top-color: #5b6cf9;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 标题 ── */
+.main-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+  text-align: center;
+  letter-spacing: 0.5rpx;
+  margin-bottom: 16rpx;
+}
+
+.main-sub {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  margin-bottom: 72rpx;
+}
+
+/* ── 步骤列表 ── */
+.steps-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 36rpx;
+}
+
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+/* 图标区（固定宽度，居中对齐） */
+.step-icon-wrap {
+  width: 48rpx;
+  height: 48rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 完成：绿色 ✓ */
+.icon-done {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #4dbc6c;
+}
+
+/* 进行中：蓝紫色点 */
+.icon-active {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #5b6cf9;
+  letter-spacing: 2rpx;
+}
+
+/* 待开始：灰色数字 */
+.icon-pending {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #c8c8c8;
+}
+
+/* ── 步骤文字 ── */
+.step-label {
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.step-done {
+  color: #4dbc6c;
+  font-weight: 500;
+}
+
+.step-active {
+  color: #5b6cf9;
+  font-weight: 600;
+}
+
+.step-pending {
+  color: #c8c8c8;
+  font-weight: 400;
+}
+
+/* ── 底部跳过按钮 ── */
+.skip-area {
+  padding: 40rpx 48rpx 0;
+  flex-shrink: 0;
+}
+
+.skip-btn {
+  width: 100%;
+  height: 96rpx;
+  border-radius: 48rpx;
+  border: 2rpx solid #d8d8d8;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #444;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  box-sizing: border-box;
+}

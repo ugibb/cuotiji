@@ -1,0 +1,61 @@
+<view class="page">
+
+  <!-- 固定头部 -->
+  <view class="page-header">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">‹</view>
+      <text class="nav-title">诊断测试</text>
+      <text class="nav-count">{{answered}}/{{total}}</text>
+    </view>
+    <view class="flow-bar">
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-now"></view>
+      <view class="flow-seg"></view>
+      <view class="flow-seg"></view>
+    </view>
+    <text class="step-label">第 2/4 步 · 共 {{total}} 道测试题，全部作答后提交</text>
+  </view>
+  <!-- 头部等高占位 -->
+  <view style="height:{{headerHeight}}px"></view>
+
+  <scroll-view class="scroll" scroll-y>
+    <text class="intro">通关小挑战要开始了，放轻松，看你能点亮几关～ </text>
+
+    <!-- 题目列表 -->
+    <view wx:for="{{questions}}" wx:key="id" class="card">
+      <view class="q-header">
+        <text class="q-num">第 {{index + 1}} 题</text>
+        <view class="topic-chip topic-{{item.topicColor}}">{{item.topic}}</view>
+      </view>
+      <view class="q-body">
+        <text class="q-text">{{item.question}}</text>
+      </view>
+      <view class="choices">
+        <view
+          wx:for="{{item.options}}"
+          wx:key="label"
+          wx:for-item="opt"
+          wx:for-index="oi"
+          class="choice {{answers[item.id] === opt.label ? 'choice-sel' : ''}}"
+          bindtap="onPick"
+          data-qid="{{item.id}}"
+          data-label="{{opt.label}}"
+        >
+          <view class="radio {{answers[item.id] === opt.label ? 'radio-sel' : ''}}">
+            <view wx:if="{{answers[item.id] === opt.label}}" class="radio-dot"></view>
+          </view>
+          <text class="choice-text">{{opt.label}}. {{opt.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view style="height:200rpx"></view>
+  </scroll-view>
+
+  <!-- 底部 -->
+  <view class="bottom-bar">
+    <button class="btn-primary {{answered >= total ? '' : 'btn-disabled'}}" bindtap="onSubmit">提交答案，查看能力报告（{{answered}}/{{total}}） →</button>
+  </view>
+
+</view>

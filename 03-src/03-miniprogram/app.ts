@@ -15,6 +15,7 @@ interface AppGlobal {
   intakeAnswers: IntakeAnswers | null
   assessmentAnswers: Record<number, string>
   abilityReport: AbilityReport | null
+  aiOpeningMsg: string | null
   activePlan: ActiveSprintPlan | null
 }
 
@@ -30,10 +31,11 @@ const app = {
       planDate: null as string | null,
       problems: [] as import('./types/index').Problem[]
     },
-    baseUrl: 'http://127.0.0.1:3001/api',
+    baseUrl: 'http://127.0.0.1:3002/api',
     intakeAnswers: null as IntakeAnswers | null,
     assessmentAnswers: {} as Record<number, string>,
     abilityReport: null as AbilityReport | null,
+    aiOpeningMsg: null as string | null,
     activePlan: null as ActiveSprintPlan | null,
   } as AppGlobal,
 

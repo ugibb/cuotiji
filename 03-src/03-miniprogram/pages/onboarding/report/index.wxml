@@ -1,0 +1,89 @@
+<view class="page">
+
+  <!-- 固定头部 -->
+  <view class="page-header">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">‹</view>
+      <text class="nav-title">能力报告</text>
+      <view style="width:72rpx"></view>
+    </view>
+    <view class="flow-bar">
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-now"></view>
+      <view class="flow-seg"></view>
+    </view>
+    <text class="step-label">第 3/4 步 · 能力报告已生成</text>
+  </view>
+  <!-- 头部等高占位 -->
+  <view style="height:{{headerHeight}}px"></view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- 总体定级 -->
+    <view class="card">
+      <view class="level-row">
+        <view class="level-badge">
+          <text class="level-char">{{report.levelChar}}</text>
+        </view>
+        <view class="level-info">
+          <text class="level-name">{{report.level}}水平</text>
+          <text class="level-desc">{{report.levelDesc}}</text>
+        </view>
+        <view class="score-box">
+          <text class="score-val">{{report.totalScore}}</text>
+          <text class="score-label">综合分</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 雷达图 -->
+    <view class="card">
+      <text class="card-title">能力雷达图</text>
+      <view class="radar-wrap">
+        <canvas canvas-id="radarCanvas" class="radar-canvas"></canvas>
+      </view>
+      <!-- 薄弱点列表 -->
+      <view class="domain-list">
+        <view wx:for="{{report.domains}}" wx:key="name" class="domain-item domain-{{item.status}}">
+          <view>
+            <text class="domain-name">{{item.status === 'weak' ? '🔴' : item.status === 'medium' ? '🟡' : '🟢'}} {{item.name}}</text>
+            <text class="domain-sub">{{item.desc}}</text>
+          </view>
+          <text class="domain-score">{{item.score}}<text class="domain-unit">分</text></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI 校正对话 -->
+    <view class="card">
+      <text class="card-title">有什么不准确的？</text>
+      <text class="card-sub">告诉 AI，它会调整你的能力画像</text>
+      <view class="chat-area">
+        <view class="ai-bubble">
+          <view class="ai-avatar">AI</view>
+          <view class="ai-msg">{{aiOpeningMsg}}</view>
+        </view>
+        <view wx:if="{{userReply}}" class="user-bubble">
+          <view class="user-msg">{{userReply}}</view>
+        </view>
+        <view wx:if="{{aiAdjust}}" class="ai-bubble">
+          <view class="ai-avatar">AI</view>
+          <view class="ai-msg">{{aiAdjust}}</view>
+        </view>
+      </view>
+      <view class="chat-input-row">
+        <input class="chat-input" value="{{inputVal}}" placeholder="告诉 AI 哪个地方不准确…" bindinput="onInput" bindconfirm="onSendReply" />
+        <view class="send-btn" bindtap="onSendReply">发送</view>
+      </view>
+    </view>
+
+    <view style="height:200rpx"></view>
+  </scroll-view>
+
+  <view class="bottom-bar">
+    <button class="btn-primary" bindtap="onConfirm">确认画像，生成个性化计划 →</button>
+  </view>
+
+</view>

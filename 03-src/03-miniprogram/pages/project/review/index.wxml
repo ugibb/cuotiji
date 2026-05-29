@@ -1,0 +1,116 @@
+<view class="page">
+
+  <!-- ── 自定义导航栏 ── -->
+  <view class="nav-wrap">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">每日复习</text>
+      <text class="nav-counter" wx:if="{{!loading && !allDone && problems.length > 0}}">{{current + 1}}/{{problems.length}}</text>
+      <view class="nav-counter" wx:else></view>
+    </view>
+    <!-- 进度条紧贴导航栏底部 -->
+    <view class="prog-track">
+      <view class="prog-fill" style="width: {{!loading && !allDone && problems.length > 0 ? (current + 1) / problems.length * 100 : 0}}%"></view>
+    </view>
+  </view>
+
+  <!-- ── 加载中 ── -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="spinner"></view>
+    <text class="loading-text">加载中…</text>
+  </view>
+
+  <!-- ── 复习完成 ── -->
+  <view wx:elif="{{allDone}}" class="done-wrap">
+    <view class="done-medal">
+      <text class="done-medal-emoji">🏆</text>
+    </view>
+    <text class="done-count">{{problems.length}}</text>
+    <text class="done-count-sub">道题全部复习完成</text>
+    <text class="done-title">今日复习完成</text>
+    <text class="done-sub">坚持每天复习，知识才能扎实掌握</text>
+
+    <view wx:if="{{!checkedInToday}}" class="checkin-btn" bindtap="onCheckIn">
+      <text class="checkin-btn-text">📅  今日打卡</text>
+    </view>
+
+    <view wx:else class="checked-badge">
+      <text class="checked-badge-text">✓  今日已打卡</text>
+      <text wx:if="{{streak > 0}}" class="streak-text">🔥 连续 {{streak}} 天</text>
+    </view>
+
+    <view style="height:{{safeAreaBottom + 40}}px"></view>
+  </view>
+
+  <!-- ── 复习区 ── -->
+  <view wx:else class="review-wrap">
+
+    <!-- 卡片区 -->
+    <view class="card-scene" bindtap="onFlipCard">
+      <view class="card {{flipped ? 'card--flipped' : ''}}">
+
+        <!-- 正面：题目 -->
+        <view class="card-face front">
+          <view class="front-top">
+            <text class="front-label">题目</text>
+            <view wx:if="{{problems[current].knowledgePoint}}" class="kp-chip">
+              <text class="kp-chip-text">{{problems[current].knowledgePoint}}</text>
+            </view>
+          </view>
+          <text class="q-text">{{problems[current].ocrText || '（题目内容见图片）'}}</text>
+          <view class="front-footer">
+            <text class="front-footer-text">点击查看参考答案  ↓</text>
+          </view>
+        </view>
+
+        <!-- 背面：答案 + 解析（可滚动） -->
+        <view class="card-face back">
+          <scroll-view scroll-y class="back-scroll">
+            <view class="answer-block" wx:if="{{problems[current].correctAnswer}}">
+              <text class="answer-label">参考答案--</text>
+              <text class="answer-val">{{problems[current].correctAnswer}}</text>
+            </view>
+            <view class="back-divider" wx:if="{{problems[current].trapDesc || problems[current].solutionText || problems[current].rootCause}}"></view>
+            <view class="analysis-item" wx:if="{{problems[current].trapDesc}}">
+              <text class="analysis-tag">⚡ 易错点</text>
+              <text class="analysis-body">{{problems[current].trapDesc}}</text>
+            </view>
+            <view class="analysis-item" wx:if="{{problems[current].solutionText}}">
+              <text class="analysis-tag">🔍 解题过程</text>
+              <text class="analysis-body">{{problems[current].solutionText}}</text>
+            </view>
+            <view class="analysis-item" wx:if="{{problems[current].rootCause}}">
+              <text class="analysis-tag">🎯 错误根因</text>
+              <text class="analysis-body">{{problems[current].rootCause}}</text>
+            </view>
+            <view style="height:32rpx"></view>
+          </scroll-view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- 底部操作浮层（严格固定，与卡片独立） -->
+    <view class="bottom-bar">
+      <view wx:if="{{flipped}}" class="action-row">
+        <view class="btn-practice {{marking ? 'btn-disabled' : ''}}" bindtap="onNeedsPractice">
+          <text class="btn-icon">↺</text>
+          <text class="btn-label">还需练习</text>
+        </view>
+        <view class="btn-mastered {{marking ? 'btn-disabled' : ''}}" bindtap="onMastered">
+          <text class="btn-icon btn-icon-w">✓</text>
+          <text class="btn-label btn-label-w">已掌握</text>
+        </view>
+      </view>
+      <view wx:else class="hint-row">
+        <text class="hint-text">查看答案后，再进行标记</text>
+      </view>
+      <view style="height:{{safeAreaBottom}}px"></view>
+    </view>
+
+  </view>
+
+</view>

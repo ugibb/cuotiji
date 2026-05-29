@@ -56,7 +56,7 @@
         </view>
       </view>
       <view class="landing-cta-wrap">
-        <button class="btn-primary" bindtap="onStartSetup">开始备赛，免费诊断能力 →</button>
+        <button class="btn-primary" bindtap="onStartSetup">免费能力诊断 →</button>
         <text class="cta-hint">14天免费体验 · 完成能力报告后开始计时</text>
       </view>
       <view style="height:60rpx"></view>
@@ -105,19 +105,10 @@
 
     <scroll-view class="page-scroll" scroll-y>
 
-      <!-- 今日任务 -->
-      <view class="today-card" wx:if="{{todayPlan}}">
-        <view class="today-header">
-          <text class="today-title">今日任务</text>
-          <text class="today-date">{{todayStr}}</text>
-        </view>
-        <text class="today-topic">{{todayPlan.topic || todayPlan.chapter.name}}</text>
-        <text class="today-est">预计 45 分钟 · 含 5 道练习题</text>
-        <button class="btn-primary today-btn" bindtap="onTodayAction">📷 拍照上传今日作业</button>
-      </view>
-
-      <!-- 训练日历 -->
+      <!-- 训练日历 + 今日任务（合并卡） -->
       <view class="card">
+
+        <!-- 日历头 -->
         <view class="cal-top">
           <text class="card-title">训练日历</text>
           <view class="cal-nav">
@@ -134,31 +125,44 @@
           <view
             wx:for="{{calendarDays}}"
             wx:key="index"
-            class="day-wrap"
+            class="day-wrap {{item.date === selectedDate ? 'day-selected' : ''}}"
             data-date="{{item.date}}"
             bindtap="onDayTap"
           >
-            <view wx:if="{{item.date}}" class="day-circle {{item.circleClass}} {{item.date === selectedDate ? 'c-selected' : ''}}">
+            <view wx:if="{{item.date}}" class="day-circle {{item.circleClass}}">
               <text class="day-num {{item.numClass}}">{{item.day}}</text>
             </view>
-            <view wx:if="{{item.date && item.isPast}}" class="day-underline"></view>
-            <view wx:elif="{{item.date && !item.isPast}}" class="day-underline day-underline-dim"></view>
+            <view wx:if="{{item.date && item.underlineClass}}" class="day-underline {{item.underlineClass}}"></view>
           </view>
         </view>
 
-        <!-- 选中日详情 -->
+        <!-- 选中日详情（含今日） -->
         <view class="day-detail" wx:if="{{selectedDate && selectedDayPlan}}">
           <view class="detail-top">
             <text class="detail-date">{{selectedDayLabel}}</text>
             <view class="chapter-pill">{{selectedDayPlan.chapter.name}}</view>
           </view>
           <text class="detail-topic">{{selectedDayPlan.topic || selectedDayPlan.chapter.name}}</text>
-          <view wx:if="{{selectedDayStatus === 'done'}}" class="done-badge">
-            <text>✅</text><text class="done-text">已完成答疑登记</text>
+          <view wx:if="{{selectedDayPlan.keyPoints && selectedDayPlan.keyPoints.length}}" class="kp-wrap">
+            <text class="kp-title">本日训练要点</text>
+            <view wx:for="{{selectedDayPlan.keyPoints}}" wx:key="*this" class="kp-item">
+              <text class="kp-bullet">•</text>
+              <text class="kp-text">{{item}}</text>
+            </view>
           </view>
+          <button wx:if="{{selectedDayStatus === 'done'}}" class="btn-action-green" bindtap="onDayActionView">查看打卡记录</button>
           <button wx:elif="{{selectedDayStatus === 'uploaded_pending'}}" class="btn-action-orange" bindtap="onDayActionReview">登记错题</button>
-          <button wx:else class="btn-action-primary" bindtap="onDayActionUpload">上传作业</button>
+          <button wx:else class="btn-action-red" bindtap="onDayActionUpload">拍照上传作业</button>
         </view>
+
+        <!-- 无训练计划日期说明 -->
+        <view class="day-no-plan" wx:if="{{selectedDate && !selectedDayPlan}}">
+          <text class="no-plan-emoji">🌿</text>
+          <text class="no-plan-title">今日无训练安排</text>
+          <text class="no-plan-sub">{{selectedDayLabel}}，休息调整\n保持状态，明天继续加油</text>
+        </view>
+
+
       </view>
 
       <!-- 项目进度入口 -->
@@ -168,6 +172,30 @@
           <view>
             <text class="project-entry-title">查看项目进度看板</text>
             <text class="project-entry-sub">M1 进行中 · {{m1Pct}}% · {{m1Day}}/21天</text>
+          </view>
+        </view>
+        <text class="project-arrow">›</text>
+      </view>
+
+      <!-- 弱点地图入口 -->
+      <view class="card project-entry" bindtap="onGoWeaknessMap">
+        <view class="project-entry-left">
+          <view class="project-icon weakness-icon">🗺️</view>
+          <view>
+            <text class="project-entry-title">弱点地图</text>
+            <text class="project-entry-sub">查看易错知识点分布与掌握情况</text>
+          </view>
+        </view>
+        <text class="project-arrow">›</text>
+      </view>
+
+      <!-- 每日复习入口 -->
+      <view class="card project-entry" bindtap="onGoDailyReview">
+        <view class="project-entry-left">
+          <view class="project-icon review-icon">📖</view>
+          <view>
+            <text class="project-entry-title">每日复习</text>
+            <text class="project-entry-sub">针对错题与弱点的每日巩固练习</text>
           </view>
         </view>
         <text class="project-arrow">›</text>

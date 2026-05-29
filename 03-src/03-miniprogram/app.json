@@ -1,23 +1,23 @@
 {
   "pages": [
     "pages/home/index",
-    "pages/mine/index",
-    "pages/onboarding/index",
-    "pages/intake/index",
-    "pages/assessment/index",
-    "pages/report/index",
-    "pages/plan-preview/index",
+    "pages/onboarding/goals/index",
+    "pages/onboarding/assessment/index",
+    "pages/onboarding/report/index",
+    "pages/onboarding/plan/index",
+    "pages/checkin/camera/index",
+    "pages/checkin/loading/index",
+    "pages/checkin/summary/index",
+    "pages/checkin/problem-list/index",
+    "pages/checkin/problem-detail/index",
+    "pages/checkin/review-done/index",
     "pages/project/index",
-    "pages/retro/index",
-    "pages/analysis/index",
-    "pages/review/index",
-    "pages/chapter/index",
-    "pages/camera/index",
-    "pages/loading/index",
-    "pages/summary/index",
-    "pages/problem-list/index",
-    "pages/problem-detail/index",
-    "pages/review-done/index"
+    "pages/project/retro/index",
+    "pages/project/analysis/index",
+    "pages/project/review/index",
+
+
+    "pages/mine/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

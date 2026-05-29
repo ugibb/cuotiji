@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>奥数项目制学习系统 · 全集 ER 模型</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --head: #4338ca;
+      --tag: #eef2ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      color: var(--head);
+      border-left: 4px solid var(--head);
+      padding-left: 10px;
+    }
+    h3 { margin: 18px 0 8px; font-size: 16px; }
+    .meta { color: var(--muted); font-size: 14px; }
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      background: var(--tag);
+      color: var(--head);
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      padding: 2px 10px;
+      margin-right: 8px;
+    }
+    .prefix-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-right: 4px;
+    }
+    .p-usr  { background:#dbeafe; color:#1e40af; }
+    .p-knl  { background:#d1fae5; color:#065f46; }
+    .p-onb  { background:#fef3c7; color:#92400e; }
+    .p-stu  { background:#fce7f3; color:#9d174d; }
+    .p-pla  { background:#ede9fe; color:#4c1d95; }
+    .p-pre  { background:#f1f5f9; color:#334155; }
+    pre {
+      margin: 0;
+      background: #0b1020;
+      color: #d1d5db;
+      border-radius: 10px;
+      padding: 14px;
+      overflow: auto;
+      font-size: 13px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f3f4f6; }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      background: #fff;
+    }
+    summary { cursor: pointer; font-weight: 600; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 封面 -->
+  <div class="card">
+    <h1>奥数项目制学习系统 · 全集 ER 模型</h1>
+    <div class="meta">
+      来源文档：<code>04-knowledge-system-arch.md</code> + <code>040-tech-design.md</code> + <code>050-项目制学习蓝图.md</code><br/>
+      最后更新：2026-05-28 · 表命名规范：域前缀隔离
+    </div>
+    <div style="margin-top:12px;">
+      <span class="tag">标准库（生产）PBL_STD</span>
+      <span class="tag">预处理库（版权隔离）PBL_PREP</span>
+      <span class="tag">项目制学习 + 错题执行闭环</span>
+    </div>
+  </div>
+
+  <!-- 域前缀规范 -->
+  <div class="card">
+    <h2>0. 域前缀命名规范</h2>
+    <table>
+      <thead>
+        <tr><th>前缀</th><th>域</th><th>说明</th><th>代表表</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="prefix-badge p-usr">usr_</span></td>
+          <td>身份账号</td>
+          <td>家长与学生档案</td>
+          <td>usr_users, usr_students</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-knl">knl_</span></td>
+          <td>知识与题库</td>
+          <td>知识体系主干 + 题库（静态内容）</td>
+          <td>knl_modules, knl_topics, knl_skills, knl_questions, knl_chapters</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-onb">onb_</span></td>
+          <td>评测 + 能力画像</td>
+          <td>诊断测评、能力报告、技能掌握度</td>
+          <td>onb_ability_assessments, onb_question_pools, onb_skill_mastery</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-stu">stu_</span></td>
+          <td>学生执行</td>
+          <td>每日作业、错题、对话、打卡</td>
+          <td>stu_assignments, stu_problems, stu_ai_dialogues</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-pla">pla_</span></td>
+          <td>项目与计划</td>
+          <td>项目实例、冲刺计划、里程碑</td>
+          <td>pla_learning_projects, pla_sprint_plans, pla_milestones</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-pre">pre_</span></td>
+          <td>预处理库（隔离）</td>
+          <td>版权原材料解析、人工审核、同步闸门</td>
+          <td>pre_source_lessons, pre_questions, pre_lecture_kp</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 用例口径 -->
+  <div class="card">
+    <h2>1. 用例口径确认</h2>
+    <table>
+      <thead>
+        <tr><th>项</th><th>确认结果</th><th>本 ER 口径</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>知识点粒度</td>
+          <td>7大板块 + 章节 + 知识点</td>
+          <td><code>knl_modules</code>(7板块) → <code>knl_topics</code>(章节) → <code>knl_skills</code>(知识点)</td>
+        </tr>
+        <tr>
+          <td>解题方法</td>
+          <td>一题多解</td>
+          <td><code>knl_question_solutions</code>，method_seq 区分方法1..n</td>
+        </tr>
+        <tr>
+          <td>AI 对话</td>
+          <td>统一可行，其他数据关联对话ID</td>
+          <td>统一表 <code>stu_ai_dialogues</code>，context_type 区分场景</td>
+        </tr>
+        <tr>
+          <td>评测题库</td>
+          <td>规则筛选 + 显式题池并存</td>
+          <td><code>onb_question_pools</code> + <code>onb_pool_question_map</code></td>
+        </tr>
+        <tr>
+          <td>能力画像</td>
+          <td>归入评测域管理</td>
+          <td><code>onb_skill_mastery</code>, <code>onb_topic_scores</code></td>
+        </tr>
+        <tr>
+          <td>双库隔离</td>
+          <td>标准库 + 预处理库分开部署</td>
+          <td>PBL_STD / PBL_PREP，小程序只访问标准库</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ER 关系总览 -->
+  <div class="card">
+    <h2>2. ER 关系总览（文本拓扑）</h2>
+    <pre>
+── 标准库 (PBL_STD) ──────────────────────────────────────────────────────
+
+[usr_] 身份
+  usr_users 1 ── N usr_students
+
+[knl_] 知识与题库
+  knl_systems 1 ── N knl_modules 1 ── N knl_topics 1 ── N knl_skills
+  knl_topics  1 ── N knl_chapters          (兼容层)
+  knl_questions N ── N knl_skills          (via knl_question_skill_map)
+  knl_questions 1 ── N knl_question_solutions
+
+[onb_] 评测 + 能力画像
+  onb_question_pools N ── N knl_questions  (via onb_pool_question_map)
+  pla_learning_projects 1 ── 1 onb_ability_assessments
+  onb_ability_assessments 1 ── N onb_assessment_sessions
+  onb_assessment_sessions 1 ── N onb_assessment_results
+  onb_assessment_results N ── 1 knl_questions
+  onb_assessment_results N ── 1 knl_skills
+  usr_students N ── N knl_skills           (via onb_skill_mastery)
+  usr_students N ── N knl_topics           (via onb_topic_scores)
+
+[pla_] 项目与计划
+  usr_students  1 ── N pla_learning_projects
+  pla_types     1 ── N pla_learning_projects
+  pla_learning_projects 1 ── 1 pla_sprint_plans
+  pla_sprint_plans 1 ── N pla_milestones
+  pla_milestones 1 ── 1 pla_milestone_retros
+  pla_learning_projects 1 ── 1 pla_project_retros
+
+[stu_] 学生执行
+  pla_sprint_plans 1 ── N stu_training_plans
+  stu_training_plans 1 ── N stu_training_plan_items
+  stu_training_plan_items N ── 1 knl_skills
+  stu_training_plan_items N ── 0..1 knl_questions
+  usr_students 1 ── N stu_assignments
+  stu_assignments 1 ── N stu_problems
+  stu_problems N ── N knl_skills          (via stu_wrong_answer_skill_map)
+  stu_assignments 1 ── 1 stu_review_sessions
+  usr_students 1 ── N stu_ai_dialogues    (context_type + context_id)
+  usr_students 1 ── N stu_daily_check_ins
+
+── 预处理库 (PBL_PREP) ───────────────────────────────────────────────────
+
+  pre_source_lessons 1 ── N pre_lecture_methods
+  pre_source_lessons 1 ── N pre_lecture_kp
+  pre_source_lessons 1 ── N pre_questions
+  pre_material_topics 1 ── N pre_questions
+  pre_questions N ── N pre_lecture_kp     (via pre_question_kp_map)
+  pre_questions N ── 1 knl_questions      (sync_to_std after review_status=approved)
+    </pre>
+  </div>
+
+  <!-- 库边界 -->
+  <div class="card">
+    <h2>3. 库边界与同步闸门</h2>
+    <table>
+      <thead>
+        <tr><th>库</th><th>用途</th><th>代表表</th><th>对小程序可见</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>预处理库 PBL_PREP</td>
+          <td>教材解析、题目提取、人工审核</td>
+          <td>pre_source_lessons, pre_questions, pre_lecture_kp</td>
+          <td>不可见</td>
+        </tr>
+        <tr>
+          <td>标准库 PBL_STD</td>
+          <td>小程序在线业务与题库服务</td>
+          <td>knl_questions, stu_assignments, pla_milestones, onb_skill_mastery</td>
+          <td>可见（小程序只连标准库）</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted">同步条件：<code>pre_questions.review_status = 'approved'</code> 且 <code>stem_latex IS NOT NULL</code> 才可同步到 <code>knl_questions</code>。</p>
+  </div>
+
+  <!-- 分域速查 -->
+  <div class="card">
+    <h2>4. 分域关系速查</h2>
+    <table>
+      <thead>
+        <tr><th>域</th><th>核心表</th><th>关键关系</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="prefix-badge p-usr">usr_</span> 身份账号</td>
+          <td>usr_users, usr_students</td>
+          <td>usr_users(1) → usr_students(N)</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-knl">knl_</span> 知识与题库</td>
+          <td>knl_modules, knl_topics, knl_skills, knl_chapters, knl_questions, knl_question_skill_map, knl_question_solutions</td>
+          <td>modules→topics→skills；questions(N)↔skills(N)</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-onb">onb_</span> 评测 + 画像</td>
+          <td>onb_ability_assessments, onb_assessment_sessions, onb_assessment_results, onb_question_pools, onb_pool_question_map, onb_skill_mastery, onb_topic_scores</td>
+          <td>project(1)→assessment(1)→sessions(N)→results(N)；students(N)↔skills(N)掌握度</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-pla">pla_</span> 项目与计划</td>
+          <td>pla_types, pla_learning_projects, pla_sprint_plans, pla_milestones, pla_milestone_retros, pla_project_retros</td>
+          <td>student(1)→projects(N)→sprint_plan(1)→milestones(N)</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-stu">stu_</span> 学生执行</td>
+          <td>stu_training_plans, stu_training_plan_items, stu_assignments, stu_problems, stu_dialogues, stu_ai_dialogues, stu_review_sessions, stu_wrong_answer_skill_map, stu_daily_check_ins</td>
+          <td>sprint_plan→training_plans→items；assignments→problems→wrong_answer_skill_map</td>
+        </tr>
+        <tr>
+          <td><span class="prefix-badge p-pre">pre_</span> 预处理库</td>
+          <td>pre_source_lessons, pre_material_topics, pre_lecture_methods, pre_lecture_kp, pre_questions, pre_question_kp_map, pre_skill_gaps</td>
+          <td>source_lessons→pre_questions →(审核通过)→ knl_questions</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 表结构字段全集 -->
+  <div class="card">
+    <h2>5. 表结构字段（全集）</h2>
+    <p class="muted">标记：PK=主键，FK=外键，UQ=唯一约束。仅列核心字段，JSONB 字段保留版本追溯。</p>
+
+    <details open>
+      <summary><span class="prefix-badge p-usr">usr_</span> 身份与学生</summary>
+      <table>
+        <thead><tr><th>表</th><th>核心字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>usr_users</td>
+            <td>id(PK BIGSERIAL), openid(UQ VARCHAR64), nickname, parent_phone, created_at, updated_at</td>
+            <td>家长微信账号</td>
+          </tr>
+          <tr>
+            <td>usr_students</td>
+            <td>id(PK BIGSERIAL), user_id(FK), name, grade(SMALLINT), avatar, is_default, onboarding_answers(JSONB), created_at, updated_at</td>
+            <td>学生档案；onboarding_answers 存初始问卷</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details>
+      <summary><span class="prefix-badge p-knl">knl_</span> 知识体系与题库</summary>
+      <table>
+        <thead><tr><th>表</th><th>核心字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>knl_systems</td>
+            <td>id(PK), name(UQ), description, is_active</td>
+            <td>知识体系（如"小学数学竞赛体系"）</td>
+          </tr>
+          <tr>
+            <td>knl_modules</td>
+            <td>id(PK), system_id(FK), name, description, exam_weight, olympiad_weight, sort_order</td>
+            <td>七大板块（固定7条）</td>
+          </tr>
+          <tr>
+            <td>knl_topics</td>
+            <td>id(PK), module_id(FK), name, description, grade_start, grade_end, difficulty, sort_order</td>
+            <td>章节（如"第15讲 同余"）</td>
+          </tr>
+          <tr>
+            <td>knl_skills</td>
+            <td>id(PK), topic_id(FK), name, grade_start, grade_end, difficulty, prerequisites(JSONB), error_types(JSONB)</td>
+            <td>知识点最小单元</td>
+          </tr>
+          <tr>
+            <td>knl_chapters</td>
+            <td>id(PK SERIAL), code(UQ), name, subtitle, grade, sort_order, is_active, topic_id(FK→knl_topics)</td>
+            <td>执行态章节入口，兼容现有 API；逐步由 knl_topics 直接驱动</td>
+          </tr>
+          <tr>
+            <td>knl_questions</td>
+            <td>id(PK BIGSERIAL), source_material, source_question_no, grade, difficulty, stem_latex, options(JSONB), answer_latex, solution_latex, trap_desc, error_hints, created_at</td>
+            <td>标准题库（无版权原文）；options 支持选择题</td>
+          </tr>
+          <tr>
+            <td>knl_question_skill_map</td>
+            <td>PK(question_id FK, skill_id FK), is_primary, confidence</td>
+            <td>题目与知识点多对多</td>
+          </tr>
+          <tr>
+            <td>knl_question_solutions</td>
+            <td>id(PK), question_id(FK), method_seq, title, summary, solution_latex, is_primary, created_at, UQ(question_id, method_seq)</td>
+            <td>一题多解</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details>
+      <summary><span class="prefix-badge p-onb">onb_</span> 评测 + 能力画像</summary>
+      <table>
+        <thead><tr><th>表</th><th>核心字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>onb_question_pools</td>
+            <td>id(PK), grade, difficulty_band(high|mid|low), pool_name, version, is_active, created_at</td>
+            <td>评测题池（可运营维护）</td>
+          </tr>
+          <tr>
+            <td>onb_pool_question_map</td>
+            <td>PK(pool_id FK, question_id FK), order_num</td>
+            <td>题池与题目映射</td>
+          </tr>
+          <tr>
+            <td>onb_ability_assessments</td>
+            <td>id(PK), project_id(FK/UQ), intake_data(JSONB), ability_level, weak_points(JSONB), report_data(JSONB), calibrated(BOOL)</td>
+            <td>能力评估总档（一项目一份）</td>
+          </tr>
+          <tr>
+            <td>onb_assessment_sessions</td>
+            <td>id(PK), assessment_id(FK), questions(JSONB), answers(JSONB), ai_grading(JSONB), completed_at</td>
+            <td>诊断会话（可多次）</td>
+          </tr>
+          <tr>
+            <td>onb_assessment_results</td>
+            <td>id(PK), session_id(FK), question_id(FK), skill_id(FK), student_answer, correct_answer, is_correct, topic_score_contribution</td>
+            <td>逐题结果</td>
+          </tr>
+          <tr>
+            <td>onb_skill_mastery</td>
+            <td>PK(student_id FK, skill_id FK), mastery_level, initial_score, target_score, current_score, updated_at</td>
+            <td>技能级掌握度（随作业结果持续回写）</td>
+          </tr>
+          <tr>
+            <td>onb_topic_scores</td>
+            <td>PK(student_id FK, topic_id FK), score, trend, updated_at</td>
+            <td>章节雷达图得分</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details>
+      <summary><span class="prefix-badge p-pla">pla_</span> 项目与计划</summary>
+      <table>
+        <thead><tr><th>表</th><th>核心字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>pla_types</td>
+            <td>id(PK), name, subject, grade_range, description, is_active</td>
+            <td>项目类型模板（如"华杯备赛"）</td>
+          </tr>
+          <tr>
+            <td>pla_learning_projects</td>
+            <td>id(PK), student_id(FK), type_id(FK), target_date, goal_level, status, created_at</td>
+            <td>学生项目实例</td>
+          </tr>
+          <tr>
+            <td>pla_sprint_plans</td>
+            <td>id(PK), project_id(FK/UQ), generated_at, confirmed_at, total_days, plan_data(JSONB), competition_name, goal_type, target_score, overall_level, daily_minutes</td>
+            <td>学习总计划（原 sprint_plans）</td>
+          </tr>
+          <tr>
+            <td>pla_milestones</td>
+            <td>id(PK), sprint_plan_id(FK), seq, name, focus_topic_ids(JSONB), focus_skill_ids(JSONB), start_date, end_date, duration_days, score_before, score_target, score_after, status, completed_at, UQ(sprint_plan_id, seq)</td>
+            <td>里程碑节点</td>
+          </tr>
+          <tr>
+            <td>pla_milestone_retros</td>
+            <td>id(PK), milestone_id(FK/UQ), checkin_days, task_completion_rate, score_before, score_after, q1_memorable_topic, q2_mastery_rating, q3_next_feeling, achievement_sent, created_at</td>
+            <td>里程碑复盘</td>
+          </tr>
+          <tr>
+            <td>pla_project_retros</td>
+            <td>id(PK), project_id(FK/UQ), student_report(JSONB), platform_metrics(JSONB), generated_at</td>
+            <td>项目终局复盘</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details>
+      <summary><span class="prefix-badge p-stu">stu_</span> 学生执行与错题闭环</summary>
+      <table>
+        <thead><tr><th>表</th><th>核心字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>stu_training_plans</td>
+            <td>id(PK), student_id(FK), sprint_plan_id(FK), milestone_id(FK), chapter_id(FK), plan_date, topic, key_points(JSONB), created_at, UQ(student_id, sprint_plan_id, plan_date)</td>
+            <td>日历计划（每日一行）</td>
+          </tr>
+          <tr>
+            <td>stu_training_plan_items</td>
+            <td>id(PK), plan_id(FK), skill_id(FK), question_id(FK), item_type(new_practice|review), order_num, completed, completed_at</td>
+            <td>每日任务项（可关联具体题目）</td>
+          </tr>
+          <tr>
+            <td>stu_assignments</td>
+            <td>id(PK), student_id(FK), chapter_id(FK), plan_date, image_url, image_url_thumb, status(assignment_status), total_count, correct_count, wrong_count, unknown_count, mood_text, created_at, updated_at</td>
+            <td>作业提交与批改状态</td>
+          </tr>
+          <tr>
+            <td>stu_problems</td>
+            <td>id(PK), assignment_id(FK), seq, ocr_text, student_answer, correct_answer, result(problem_result), knowledge_point, trap_desc, solution_text, root_cause, review_status, review_stage, next_review_at, mastered_at, created_at</td>
+            <td>逐题判题结果（含 Ebbinghaus 复习）</td>
+          </tr>
+          <tr>
+            <td>stu_dialogues</td>
+            <td>id(PK), problem_id(FK), role(ai|student), content, audio_url, created_at</td>
+            <td>题目级对话（旧表，向后兼容）</td>
+          </tr>
+          <tr>
+            <td>stu_ai_dialogues</td>
+            <td>id(PK), student_id(FK), project_id(FK), context_type(VARCHAR32), context_id(BIGINT), role(ai|student), content, audio_url, created_at</td>
+            <td>统一 AI 对话（context_type：assessment_report / milestone_retro / problem_chat）</td>
+          </tr>
+          <tr>
+            <td>stu_review_sessions</td>
+            <td>id(PK), assignment_id(FK/UQ), started_at, completed_at, summary_text, notified_parent, notified_at</td>
+            <td>作业复盘会话</td>
+          </tr>
+          <tr>
+            <td>stu_wrong_answer_skill_map</td>
+            <td>PK(problem_id FK, skill_id FK), root_cause_type, diagnosed_at</td>
+            <td>错因归因映射</td>
+          </tr>
+          <tr>
+            <td>stu_daily_check_ins</td>
+            <td>id(PK), student_id(FK), check_date(DATE), streak, created_at, UQ(student_id, check_date)</td>
+            <td>每日打卡与连续天数</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details>
+      <summary><span class="prefix-badge p-pre">pre_</span> 预处理库（独立部署，版权隔离）</summary>
+      <table>
+        <thead><tr><th>表</th><th>核心字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>pre_source_lessons</td>
+            <td>id(PK), material_set, grade, level, semester, lesson_num, lesson_name, file_path, file_type, is_scanned, stage, created_at</td>
+            <td>原始教材索引（对应 31G 文件目录）</td>
+          </tr>
+          <tr>
+            <td>pre_material_topics</td>
+            <td>id(PK), material_set, grade, level, topic_name, description, std_skill_ids(JSONB), mapped_at, created_at</td>
+            <td>材料自有主题（映射到 knl_skills）</td>
+          </tr>
+          <tr>
+            <td>pre_lecture_methods</td>
+            <td>id(PK), lesson_id(FK), seq, title, summary, created_at, UQ(lesson_id, seq)</td>
+            <td>讲义"好方法"（解题策略）</td>
+          </tr>
+          <tr>
+            <td>pre_lecture_kp</td>
+            <td>id(PK), lesson_id(FK), seq, title, content_latex, created_at, UQ(lesson_id, seq)</td>
+            <td>讲义知识点片段</td>
+          </tr>
+          <tr>
+            <td>pre_questions</td>
+            <td>id(PK), lesson_id(FK), material_topic_id(FK), method_id(FK), question_type, grade, level, difficulty, stem_raw, answer_raw, solution_raw, stem_latex, answer_latex, solution_latex, options(JSONB), skill_ids_ai(JSONB), review_status(pending|approved|rejected), reviewer_note, reviewed_at, synced_to_std, synced_at, std_question_id, created_at</td>
+            <td>暂存题目（含完整审核与同步状态）</td>
+          </tr>
+          <tr>
+            <td>pre_question_kp_map</td>
+            <td>PK(question_id FK, kp_id FK)</td>
+            <td>题目与讲义知识点多对多</td>
+          </tr>
+          <tr>
+            <td>pre_skill_gaps</td>
+            <td>id(PK), material_set, description, question_count, suggested_skill, resolution, created_at</td>
+            <td>知识缺口候选（待补充到 knl_skills）</td>
+          </tr>
+        </tbody>
+      </table>
+    </details>
+  </div>
+
+  <!-- 约束建议 -->
+  <div class="card">
+    <h2>6. 统一约束建议</h2>
+    <ul>
+      <li><strong>域前缀强制隔离：</strong>跨域操作通过外键显式定义，不允许跨域直接 JOIN 无关表。</li>
+      <li><strong>多对多复合主键：</strong><code>knl_question_skill_map</code>、<code>stu_wrong_answer_skill_map</code>、<code>onb_pool_question_map</code>、<code>pre_question_kp_map</code> 必须使用复合主键。</li>
+      <li><strong>JSONB 快照字段：</strong><code>report_data</code>、<code>plan_data</code>、<code>student_report</code>、<code>onboarding_answers</code> 保留完整版本，不做规范化分解。</li>
+      <li><strong>chapters 兼容过渡：</strong><code>knl_chapters.topic_id → knl_topics.id</code>；现有 API 继续用 chapters，逐步迁移到直接用 knl_topics。</li>
+      <li><strong>双轨评测题来源：</strong>默认按 <code>grade + difficulty</code> 规则筛题，关键项目绑定 <code>onb_question_pools</code> 固定题池。</li>
+      <li><strong>统一 AI 对话：</strong><code>stu_ai_dialogues.context_type</code> 枚举：<code>assessment_report</code> / <code>milestone_retro</code> / <code>problem_chat</code> / <code>plan_confirm</code>。</li>
+      <li><strong>同步闸门严格：</strong>仅 <code>pre_questions.review_status = 'approved' AND stem_latex IS NOT NULL</code> 才可同步到 <code>knl_questions</code>。</li>
+      <li><strong>能力画像回写：</strong><code>onb_skill_mastery</code> 和 <code>onb_topic_scores</code> 由作业批改后自动触发更新，不由前端写入。</li>
+    </ul>
+    <p class="muted">SQL 文件：<code>03-src/02-server/prisma/std_init.sql</code>（标准库）/ <code>prep_init.sql</code>（预处理库）/ <code>std_seed.sql</code> / <code>prep_seed.sql</code></p>
+  </div>
+
+</div>
+</body>
+</html>

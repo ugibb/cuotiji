@@ -1,0 +1,80 @@
+<view class="page">
+
+  <!-- 固定头部 -->
+  <view class="page-header">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">‹</view>
+      <text class="nav-title">确认备赛计划</text>
+      <view style="width:72rpx"></view>
+    </view>
+    <view class="flow-bar">
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-done"></view>
+      <view class="flow-seg seg-now"></view>
+    </view>
+    <text class="step-label">第 4/4 步 · 计划已生成，确认后立即开始</text>
+  </view>
+  <!-- 头部等高占位 -->
+  <view style="height:{{headerHeight}}px"></view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- 计划总览 -->
+    <view class="card overview-card">
+      <view class="overview-stats">
+        <view class="stat-col">
+          <text class="stat-num">{{plan.totalDays}}</text>
+          <text class="stat-label">学习天数</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-col">
+          <text class="stat-num">{{plan.milestoneCount}}</text>
+          <text class="stat-label">里程碑</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-col">
+          <text class="stat-num">{{plan.dailyTime}}</text>
+          <text class="stat-label">每日时长</text>
+        </view>
+      </view>
+      <view class="goal-row">
+        <text class="goal-icon">🎯</text>
+        <text class="goal-text">{{plan.goalText}}</text>
+      </view>
+    </view>
+
+    <!-- 里程碑列表 -->
+    <view wx:for="{{plan.milestones}}" wx:key="id" wx:for-item="ms" class="ms-card ms-{{ms.tagColor}}">
+      <view class="ms-header">
+        <view class="ms-left">
+          <view class="ms-tag ms-tag-{{ms.tagColor}}">{{ms.id}}</view>
+          <text class="ms-title">{{ms.title}}</text>
+        </view>
+        <text class="ms-days">{{ms.dayRange}}</text>
+      </view>
+      <text class="ms-date">{{ms.dateRange}}</text>
+      <view class="ms-tags">
+        <view wx:for="{{ms.tags}}" wx:key="*this" class="chip chip-{{ms.tagColor}}">{{item}}</view>
+      </view>
+      <text class="ms-goal ms-goal-{{ms.tagColor}}">{{ms.goal}}</text>
+    </view>
+
+    <!-- 提示 -->
+    <view class="hint-card">
+      <text class="hint-line">📌 每天最少完成 <text style="font-weight:700">1 题</text>，最多 <text style="font-weight:700">3 个知识点</text></text>
+      <text class="hint-line">📱 每晚 21:00 微信日报自动推送给家长</text>
+      <text class="hint-line">🔁 遗忘曲线自动安排复习，不用手动管</text>
+    </view>
+
+    <view style="height:200rpx"></view>
+  </scroll-view>
+
+  <view class="bottom-bar">
+    <button class="btn-primary {{saving ? 'btn-disabled' : ''}}" bindtap="onConfirm">
+      {{saving ? '计划生成中…' : '确认计划，启动训练项目 🚀'}}
+    </button>
+  </view>
+
+</view>

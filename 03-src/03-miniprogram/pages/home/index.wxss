@@ -151,10 +151,6 @@
 
 .landing-cta-wrap {
   padding: 24rpx 32rpx 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 16rpx;
 }
 
 .cta-hint {
@@ -162,6 +158,7 @@
   font-size: 22rpx;
   color: #9CA3AF;
   text-align: center;
+  margin-top: 16rpx;
 }
 
 /* ── Active: Hero 倒计时区 ── */
@@ -308,44 +305,46 @@
 }
 
 /* ── 今日任务卡 ── */
-.today-card {
-  background: #fff;
-  border-radius: 32rpx;
-  margin: 20rpx 32rpx 0;
-  padding: 28rpx 32rpx;
+.today-in-card {
+  margin-bottom: 4rpx;
 }
 
-.today-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12rpx;
+.today-cal-divider {
+  height: 1rpx;
+  background: #F0F1F5;
+  margin: 24rpx 0;
 }
 
-.today-title {
-  font-size: 26rpx;
-  font-weight: 800;
-  color: #111827;
+/* 训练要点列表 */
+.kp-wrap {
+  margin-bottom: 24rpx;
 }
 
-.today-date {
-  font-size: 20rpx;
-  color: #9CA3AF;
-}
-
-.today-topic {
-  display: block;
-  font-size: 32rpx;
-  font-weight: 800;
-  color: #111827;
-  margin-bottom: 8rpx;
-}
-
-.today-est {
+.kp-title {
   display: block;
   font-size: 22rpx;
   color: #9CA3AF;
-  margin-bottom: 20rpx;
+  margin-bottom: 14rpx;
+}
+
+.kp-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+  margin-bottom: 10rpx;
+}
+
+.kp-bullet {
+  font-size: 24rpx;
+  color: #5B5FC7;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.kp-text {
+  font-size: 26rpx;
+  color: #374151;
+  line-height: 1.5;
 }
 
 /* ── 通用卡片 ── */
@@ -392,14 +391,15 @@
 
 .weekdays {
   display: flex;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
 }
 
 .weekdays text {
   flex: 1;
   text-align: center;
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #9CA3AF;
+  letter-spacing: 1rpx;
 }
 
 .calendar-grid {
@@ -412,26 +412,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rpx 0;
+  padding: 10rpx 0;
 }
 
 .day-circle {
-  width: 52rpx;
-  height: 52rpx;
+  width: 62rpx;
+  height: 62rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.c-done    { background: #EDFCF2; }
+.c-done    { background: #DCFCE7; }
 .c-miss    { background: #FEE2E2; }
 .c-pending { background: #FFEDD5; }
+.c-future  { background: #F3F4F6; }
 .c-today   { border: 2rpx solid #5B5FC7; }
-.c-selected { box-shadow: 0 0 0 3rpx rgba(91, 95, 199, 0.45); }
+
+.day-selected .day-circle {
+  background: #4338CA;
+}
+
+.day-selected .day-num {
+  color: #fff;
+  font-weight: 800;
+}
 
 .day-num {
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: 500;
   color: #374151;
   line-height: 1;
@@ -440,20 +449,21 @@
 .n-done    { color: #16A34A; font-weight: 700; }
 .n-miss    { color: #DC2626; font-weight: 700; }
 .n-pending { color: #EA580C; font-weight: 700; }
-.n-noplan  { color: #D1D5DB; }
-.n-today   { color: #5B5FC7; font-weight: 800; }
+.n-noplan  { color: #C4C9D4; }
+.n-today   { font-weight: 900; }
 
 .day-underline {
-  width: 28rpx;
-  height: 6rpx;
-  border-radius: 3rpx;
-  background: #818CF8;
-  margin-top: 4rpx;
+  width: 45rpx;
+  height: 8rpx;
+  border-radius: 100rpx;
+  margin-top: 6rpx;
 }
 
-.day-underline-dim {
-  background: rgba(10, 31, 61, 0.1);
-}
+.ul-green  { background: #4ADE80; }
+.ul-red    { background: #F87171; }
+.ul-orange { background: #FB923C; }
+.ul-gray   { background: #CBD5E1; }
+.ul-dim    { background: #E2E8F0; }
 
 /* ── 选中日详情 ── */
 .day-detail {
@@ -467,6 +477,33 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10rpx;
+}
+
+/* ── 无计划日期详情 ── */
+.day-no-plan {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #F0F1F5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 0 8rpx;
+  gap: 10rpx;
+}
+
+.no-plan-emoji { font-size: 48rpx; }
+
+.no-plan-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #374151;
+}
+
+.no-plan-sub {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  text-align: center;
+  line-height: 1.6;
 }
 
 .detail-date {
@@ -506,11 +543,26 @@
   color: #16A34A;
 }
 
+.btn-action-green {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 50rpx;
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-action-green::after { border: none; }
+
 .btn-action-orange {
   width: 100%;
   height: 88rpx;
   border-radius: 50rpx;
-  background: linear-gradient(135deg, #F97316, #EA580C);
+  background: linear-gradient(135deg, #FB923C, #EA580C);
   color: #fff;
   font-size: 28rpx;
   font-weight: 700;
@@ -520,6 +572,21 @@
   justify-content: center;
 }
 .btn-action-orange::after { border: none; }
+
+.btn-action-red {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 50rpx;
+  background: linear-gradient(135deg, #F87171, #DC2626);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-action-red::after { border: none; }
 
 .btn-action-primary {
   width: 100%;
@@ -579,6 +646,14 @@
   color: #D1D5DB;
 }
 
+.weakness-icon {
+  background: #FFF4EC;
+}
+
+.review-icon {
+  background: #F0FDF4;
+}
+
 /* ── 最近完成 ── */
 .recent-list {
   display: flex;
@@ -635,20 +710,20 @@
 
 /* ── 通用主按钮 ── */
 .btn-primary {
-  width: 104rpx;
-  height: 104rpx;
-  border-radius: 52rpx;
+  width: 100% !important;
+  height: 100rpx;
+  border-radius: 50rpx;
   background: linear-gradient(135deg, #5B5FC7, #4338CA);
   color: #fff;
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 700;
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 1rpx;
+  text-align: center;
+  box-sizing: border-box;
 }
 .btn-primary::after { border: none; }
+
+.today-btn { font-size: 28rpx; }
 
 /* ── Loading 遮罩 ── */
 .loading-mask {

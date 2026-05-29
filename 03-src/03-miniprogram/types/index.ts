@@ -135,6 +135,7 @@ export interface CalendarDay {
   isPast?: boolean
   circleClass?: string
   numClass?: string
+  underlineClass?: string
 }
 
 // ─── Onboarding / Setup Types ───────────────────────────────────────────────
@@ -142,7 +143,7 @@ export interface CalendarDay {
 export type CompetitionTarget = 'entry' | 'award' | 'top'
 export type StudyExperience = 'none' | 'lt1' | '1to2' | 'gt2'
 export type HardestTopic = 'number_theory' | 'travel' | 'geometry' | 'all_same'
-export type WeeklyHours = 'lt3' | '3to5' | '5to8' | 'gt8'
+export type WeeklyHours = 'lt30min' | '30to60min' | '1to2h' | 'gt2h'
 export type ConfidenceLevel = 'zero' | 'some' | 'confident'
 
 export interface OnboardingSetup {
@@ -169,7 +170,7 @@ export interface QuestionOption {
 export interface AssessmentQuestion {
   id: number
   topic: string
-  topicColor: 'blue' | 'amber' | 'green'
+  topicColor: 'blue' | 'amber' | 'green' | 'purple' | 'teal' | 'rose'
   question: string
   options: QuestionOption[]
   correctOption: string // 'A' | 'B' | 'C' | 'D'
@@ -180,6 +181,7 @@ export interface DomainScore {
   name: string
   score: number
   status: 'strong' | 'medium' | 'weak'
+  desc: string
 }
 
 // Ability report generated after assessment
@@ -187,6 +189,7 @@ export interface AbilityReport {
   level: '初级' | '中级' | '高级'
   levelChar: string
   totalScore: number
+  levelDesc: string
   domains: DomainScore[]
   radarPoints: string // SVG polygon points for data polygon
 }

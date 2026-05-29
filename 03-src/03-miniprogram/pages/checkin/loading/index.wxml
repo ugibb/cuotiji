@@ -1,0 +1,42 @@
+<view class="loading-page">
+
+  <!-- 顶部安全区 -->
+  <view style="height:{{statusBarHeight}}px" class="safe-top"></view>
+
+  <!-- 主内容区（垂直居中分布） -->
+  <view class="content">
+
+    <!-- 旋转 Spinner -->
+    <view class="spinner-wrap">
+      <view class="spinner"></view>
+    </view>
+
+    <!-- 标题 + 副标题 -->
+    <text class="main-title">AI 正在批改作业...</text>
+    <text class="main-sub">通常需要 10-20 秒</text>
+
+    <!-- 四步骤进度列表 -->
+    <view class="steps-list">
+
+      <view wx:for="{{steps}}" wx:key="id" class="step-row">
+        <!-- 状态图标 -->
+        <view class="step-icon-wrap">
+          <text wx:if="{{item.status === 'done'}}" class="icon-done">✓</text>
+          <text wx:elif="{{item.status === 'active'}}" class="icon-active">{{dots}}</text>
+          <text wx:else class="icon-pending">{{item.id}}</text>
+        </view>
+        <!-- 步骤文字 -->
+        <text class="step-label step-{{item.status}}">{{item.label}}</text>
+      </view>
+
+    </view>
+
+  </view>
+
+  <!-- 底部跳过按钮 -->
+  <view class="skip-area">
+    <view class="skip-btn" bindtap="onSkip">跳过，直接查看结果</view>
+    <view style="height:{{safeAreaBottom}}px"></view>
+  </view>
+
+</view>

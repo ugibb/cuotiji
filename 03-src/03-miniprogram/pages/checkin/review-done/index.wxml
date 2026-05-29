@@ -1,0 +1,49 @@
+<view class="page">
+
+  <!-- 顶部安全区 -->
+  <view style="height:{{statusBarHeight}}px" class="safe-top"></view>
+
+  <!-- 主内容（垂直居中） -->
+  <view class="main">
+
+    <!-- 奖杯 -->
+    <text class="trophy">🏆</text>
+
+    <!-- 标题 -->
+    <text class="title">今日复盘完成！</text>
+
+    <!-- 摘要：数字高亮 -->
+    <view class="summary-block">
+      <view class="sum-line">
+        <text class="sum-plain">今天攻克了 </text>
+        <text class="sum-hl">{{wrongCount}} 个</text>
+        <text class="sum-plain">错题归因，</text>
+      </view>
+      <view class="sum-line">
+        <text class="sum-plain">搞懂了 </text>
+        <text class="sum-hl">{{unknownCount}} 道</text>
+        <text class="sum-plain">不会的题。</text>
+      </view>
+      <view wx:if="{{weakTopic}}" class="sum-line">
+        <text class="sum-plain">{{weakTopic}}——明天再冲一次！</text>
+      </view>
+    </view>
+
+    <!-- 家长通知卡 -->
+    <view class="notify-card">
+      <text class="notify-icon">📱</text>
+      <view class="notify-body">
+        <text class="notify-title">已推送给家长</text>
+        <text class="notify-sub">今日复盘小结已通过微信通知发送</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 底部按钮区 -->
+  <view class="footer">
+    <view class="btn-home" bindtap="onGoHome">返回首页</view>
+    <view style="height:{{safeAreaBottom}}px"></view>
+  </view>
+
+</view>

@@ -1,0 +1,255 @@
+/* ============================================================
+   Global Design System — 靛蓝瓷 (Indigo Porcelain)
+   ink  = #0a1f3d  paper = #f1f3f5
+   ============================================================ */
+page {
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: 28rpx;
+  color: #0a1f3d;
+  background-color: #f1f3f5;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ── */
+.container { padding: 32rpx; min-height: 100vh; }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+
+/* ── Card ── */
+.card {
+  background: #ffffff;
+  border-radius: 12rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid rgba(10,31,61,0.08);
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: #0a1f3d;
+  color: #f1f3f5;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  padding: 28rpx 0;
+  width: 100%;
+  text-align: center;
+  letter-spacing: 2rpx;
+}
+.btn-primary::after { border: none; }
+
+.btn-ghost {
+  background: transparent;
+  color: #0a1f3d;
+  border: 1rpx solid rgba(10,31,61,0.4);
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 26rpx 0;
+  width: 100%;
+  text-align: center;
+  letter-spacing: 2rpx;
+}
+.btn-ghost::after { border: none; }
+
+.btn-danger {
+  background: transparent;
+  color: #991b1b;
+  border: 1rpx solid rgba(153,27,27,0.4);
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 26rpx 0;
+  width: 100%;
+  text-align: center;
+}
+.btn-danger::after { border: none; }
+
+/* ── Typography ── */
+.h-hero {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #0a1f3d;
+  line-height: 1.0;
+  letter-spacing: -2rpx;
+}
+.h-xl {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #0a1f3d;
+  line-height: 1.1;
+  letter-spacing: -1rpx;
+}
+.h-md {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #0a1f3d;
+  line-height: 1.25;
+}
+.kicker {
+  font-size: 20rpx;
+  font-weight: 600;
+  color: rgba(10,31,61,0.5);
+  text-transform: uppercase;
+  letter-spacing: 5rpx;
+  margin-bottom: 12rpx;
+  display: block;
+}
+.lead {
+  font-size: 30rpx;
+  color: rgba(10,31,61,0.75);
+  line-height: 1.7;
+  font-weight: 400;
+}
+.meta {
+  font-size: 22rpx;
+  color: rgba(10,31,61,0.45);
+  letter-spacing: 3rpx;
+  text-transform: uppercase;
+}
+.big-num {
+  font-size: 88rpx;
+  font-weight: 900;
+  color: #0a1f3d;
+  line-height: 0.9;
+  letter-spacing: -3rpx;
+}
+
+/* ── Stat card ── */
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid rgba(10,31,61,0.18);
+}
+.stat-label {
+  font-size: 19rpx;
+  font-weight: 600;
+  color: rgba(10,31,61,0.45);
+  text-transform: uppercase;
+  letter-spacing: 4rpx;
+}
+.stat-nb {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #0a1f3d;
+  line-height: 0.92;
+  letter-spacing: -3rpx;
+}
+.stat-unit {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: rgba(10,31,61,0.55);
+  letter-spacing: 0;
+  margin-left: 4rpx;
+}
+.stat-note {
+  font-size: 24rpx;
+  color: rgba(10,31,61,0.6);
+  line-height: 1.5;
+  margin-top: 6rpx;
+}
+
+/* ── Callout ── */
+.callout {
+  border-left: 4rpx solid rgba(10,31,61,0.35);
+  padding: 20rpx 24rpx;
+  background: rgba(10,31,61,0.04);
+  border-radius: 0 8rpx 8rpx 0;
+  font-size: 28rpx;
+  color: #0a1f3d;
+  line-height: 1.65;
+}
+.callout-src {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: rgba(10,31,61,0.45);
+  letter-spacing: 3rpx;
+  text-transform: uppercase;
+}
+
+/* ── Section title ── */
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0a1f3d;
+  margin-bottom: 20rpx;
+}
+
+/* ── Rule ── */
+.rule {
+  width: 100%;
+  height: 1rpx;
+  background: rgba(10,31,61,0.1);
+  margin: 24rpx 0;
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: 4rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+.badge-correct {
+  background: rgba(22,101,52,0.08);
+  color: #166534;
+  border: 1rpx solid rgba(22,101,52,0.2);
+}
+.badge-wrong {
+  background: rgba(153,27,27,0.06);
+  color: #991b1b;
+  border: 1rpx solid rgba(153,27,27,0.2);
+}
+.badge-unknown {
+  background: rgba(146,64,14,0.06);
+  color: #92400e;
+  border: 1rpx solid rgba(146,64,14,0.2);
+}
+
+/* ── Text colors ── */
+.text-primary   { color: #0a1f3d; }
+.text-secondary { color: rgba(10,31,61,0.55); }
+.text-success   { color: #166534; }
+.text-error     { color: #991b1b; }
+.text-warning   { color: #92400e; }
+.text-meta      { color: rgba(10,31,61,0.4); font-size: 22rpx; letter-spacing: 2rpx; }
+
+/* ── Margin utils ── */
+.mt-8  { margin-top: 8rpx; }
+.mt-16 { margin-top: 16rpx; }
+.mt-24 { margin-top: 24rpx; }
+.mt-32 { margin-top: 32rpx; }
+.mt-40 { margin-top: 40rpx; }
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  color: rgba(10,31,61,0.35);
+}
+.empty-state text { margin-top: 12rpx; font-size: 28rpx; }
+
+/* ── Loading spinner ── */
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(10,31,61,0.12);
+  border-top-color: #0a1f3d;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

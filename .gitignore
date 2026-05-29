@@ -1,16 +1,33 @@
 # 环境变量 & API 密钥（绝不提交）
 pilot/.env
+03-src/01-pilot/.env
+03-src/01-pilot/.env-
+03-src/02-server/.env
 .env
 *.env
 
+# Node.js 依赖
+node_modules/
+**/node_modules/
+
+# 服务端运行时产物
+03-src/02-server/coverage/
+03-src/02-server/uploads/
+
 # 版权图片素材（禁止上传，119MB）
 pilot/results/figures_pymupdf/
+03-src/01-pilot/results/figures_pymupdf/
 
 # MathPix 输出（含版权教材原文）
 pilot/results/mathpix_output/
+03-src/01-pilot/results/mathpix_output/
 
 # HTML 报告（含 base64 内嵌版权图片，1.6MB）
 pilot/results/stage1_ocr_report.html
+03-src/01-pilot/results/stage1_ocr_report.html
+
+# 误生成文件
+01-init/POST http:/
 
 # Python
 __pycache__/

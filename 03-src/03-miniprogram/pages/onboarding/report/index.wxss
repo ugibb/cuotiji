@@ -1,0 +1,164 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #F5F6FA;
+}
+.page-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+}
+
+.nav-bar {
+  background: #fff;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 16rpx;
+  border-bottom: 1rpx solid #F0F1F5;
+}
+.nav-back {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: #5B5FC7;
+}
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+}
+.flow-bar { display: flex; gap: 8rpx; padding: 20rpx 32rpx 0; background: #fff; flex-shrink: 0; }
+.flow-seg { flex: 1; height: 8rpx; border-radius: 4rpx; background: #E5E7EB; }
+.seg-done { background: #5B5FC7; }
+.seg-now { background: #A5B4FC; }
+.step-label { display: block; background: #fff; padding: 8rpx 32rpx 16rpx; font-size: 22rpx; color: #9CA3AF; flex-shrink: 0; }
+
+.scroll { flex: 1; padding: 16rpx 0 0; }
+
+.card {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 28rpx 32rpx;
+  margin: 0 32rpx 24rpx;
+}
+.card-title { display: block; font-size: 30rpx; font-weight: 700; color: #111827; margin-bottom: 8rpx; }
+.card-sub { display: block; font-size: 24rpx; color: #9CA3AF; margin-bottom: 24rpx; }
+
+/* 定级 */
+.level-row { display: flex; align-items: center; gap: 24rpx; }
+.level-badge {
+  width: 96rpx; height: 96rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #5B5FC7, #4338CA);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.level-char { font-size: 40rpx; font-weight: 900; color: #fff; }
+.level-info { flex: 1; }
+.level-name { display: block; font-size: 32rpx; font-weight: 800; color: #111827; }
+.level-desc { display: block; font-size: 24rpx; color: #6B7280; margin-top: 4rpx; }
+.score-box { text-align: right; }
+.score-val { display: block; font-size: 44rpx; font-weight: 900; color: #5B5FC7; line-height: 1; }
+.score-label { display: block; font-size: 20rpx; color: #9CA3AF; }
+
+/* 雷达图 */
+.radar-wrap { display: flex; justify-content: center; padding: 16rpx 0 24rpx; }
+.radar-canvas { width: 600rpx; height: 600rpx; }
+
+/* 薄弱点列表 */
+.domain-list { display: flex; flex-direction: column; gap: 12rpx; }
+.domain-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  border-radius: 20rpx;
+}
+.domain-weak { background: #FEF2F2; }
+.domain-medium { background: #FFFBEB; }
+.domain-strong { background: #EDFCF2; }
+.domain-name { display: block; font-size: 24rpx; font-weight: 700; }
+.domain-weak .domain-name { color: #DC2626; }
+.domain-medium .domain-name { color: #D97706; }
+.domain-strong .domain-name { color: #16A34A; }
+.domain-sub { display: block; font-size: 22rpx; color: #9CA3AF; margin-top: 4rpx; }
+.domain-score { font-size: 36rpx; font-weight: 900; }
+.domain-weak .domain-score { color: #DC2626; }
+.domain-medium .domain-score { color: #D97706; }
+.domain-strong .domain-score { color: #16A34A; }
+.domain-unit { font-size: 22rpx; font-weight: 500; }
+
+/* Chat */
+.chat-area { margin-bottom: 20rpx; }
+.ai-bubble { display: flex; gap: 20rpx; margin-bottom: 28rpx; }
+.ai-avatar {
+  width: 64rpx; height: 64rpx; border-radius: 50%;
+  background: linear-gradient(135deg, #5B5FC7, #4338CA);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 22rpx; font-weight: 700; flex-shrink: 0;
+}
+.ai-msg {
+  max-width: 480rpx;
+  background: #fff;
+  border-radius: 8rpx 32rpx 32rpx 32rpx;
+  padding: 22rpx 28rpx;
+  font-size: 26rpx;
+  color: #111827;
+  line-height: 1.7;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+}
+.user-bubble { display: flex; justify-content: flex-end; margin-bottom: 28rpx; }
+.user-msg {
+  max-width: 440rpx;
+  background: #5B5FC7;
+  border-radius: 32rpx 8rpx 32rpx 32rpx;
+  padding: 22rpx 28rpx;
+  font-size: 26rpx;
+  color: #fff;
+  line-height: 1.7;
+}
+.chat-input-row {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+  background: #F5F6FA;
+  border-radius: 24rpx;
+  padding: 12rpx 20rpx;
+}
+.chat-input { flex: 1; font-size: 26rpx; color: #111827; }
+.send-btn {
+  font-size: 26rpx;
+  color: #5B5FC7;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* 底部 */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #F0F1F5;
+}
+.btn-primary {
+  width: 100% !important;
+  height: 100rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 50rpx;
+  background: linear-gradient(135deg, #5B5FC7, #4338CA);
+  color: #fff; border: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-primary::after { border: none; }

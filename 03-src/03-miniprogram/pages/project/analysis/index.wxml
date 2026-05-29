@@ -1,0 +1,69 @@
+<view class="page">
+
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar-wrap">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">弱点地图</text>
+      <text class="nav-right" wx:if="{{weakpoints.length > 0}}">Top {{weakpoints.length}}</text>
+      <text class="nav-right" wx:else> </text>
+    </view>
+    <!-- 筛选胶囊 -->
+    <view class="filter-bar">
+      <view class="filter-pill {{timeRange === 'week' ? 'pill-active' : ''}}" data-range="week" bindtap="onTimeRangeChange">本周</view>
+      <view class="filter-pill {{timeRange === 'month' ? 'pill-active' : ''}}" data-range="month" bindtap="onTimeRangeChange">本月</view>
+      <view class="filter-pill {{timeRange === 'all' ? 'pill-active' : ''}}" data-range="all" bindtap="onTimeRangeChange">全部</view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-spinner"></view>
+  </view>
+
+  <!-- 数据不足 -->
+  <view wx:elif="{{!hasEnoughData}}" class="empty-wrap">
+    <text class="empty-emoji">📊</text>
+    <text class="empty-title">积累更多错题</text>
+    <text class="empty-hint">至少需要 3 道错题才能生成薄弱点分析</text>
+    <text class="empty-count">当前共 {{totalWrong}} 道错题</text>
+  </view>
+
+  <!-- 弱点列表 -->
+  <scroll-view wx:else scroll-y class="list">
+    <view class="total-bar">
+      <text class="total-text">共 {{totalWrong}} 道错题 · 展示最弱 {{weakpoints.length}} 个章节</text>
+    </view>
+
+    <view
+      class="wp-card"
+      wx:for="{{weakpoints}}"
+      wx:key="chapterId"
+      bindtap="onChapterTap"
+      data-chapter-id="{{item.chapterId}}"
+    >
+      <view class="wp-row">
+        <view class="wp-rank {{index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : 'rank-3'}}">
+          <text class="rank-num">{{index + 1}}</text>
+        </view>
+        <view class="wp-info">
+          <text class="wp-name">{{item.chapterName}}</text>
+          <text class="wp-meta">近 7 天 {{item.recentWrong}} 道 · 最近：{{item.lastWrongDate}}</text>
+        </view>
+        <view class="wp-badge">
+          <text class="wp-badge-num">{{item.totalWrong}}</text>
+          <text class="wp-badge-label">错</text>
+        </view>
+      </view>
+      <view class="bar-track">
+        <view class="bar-fill" style="width: {{item.weaknessScore / maxScore * 100}}%"></view>
+      </view>
+    </view>
+
+    <view style="height:40rpx"></view>
+  </scroll-view>
+
+</view>

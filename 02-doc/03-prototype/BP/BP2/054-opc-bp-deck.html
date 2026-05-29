@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>让孩子更好地驾驭AI · OPC · AI TRACK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Sans+SC:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fafaf8;--paper-rgb:250,250,248;
+    --ink:#0a0a0a;--ink-rgb:10,10,10;
+    --grey-1:#f0f0ee;--grey-2:#d4d4d2;--grey-3:#737373;
+    --accent:#002FA7;--accent-rgb:0,47,167;--accent-on:#ffffff;
+    --accent-bright:#5B7BFF;
+    --text-primary:#0a0a0a;--text-secondary:#525252;--text-helper:#737373;
+    --text-placeholder:#a3a3a3;--text-on-color:#ffffff;
+    --border-subtle:#e0e0e0;--border-strong:#a3a3a3;
+    --sans:"Inter","Helvetica Neue","Helvetica","Arial","Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;
+    --sans-zh:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","微软雅黑",sans-serif;
+    --mono:"JetBrains Mono","IBM Plex Mono","SF Mono","Cascadia Code","Consolas","Courier New",ui-monospace,monospace;
+    --sp-3:8px;--sp-4:12px;--sp-5:16px;--sp-6:24px;--sp-7:32px;--sp-8:40px;--sp-9:48px;--sp-10:64px;--sp-11:80px;--sp-12:96px;--sp-13:160px;
+    --ease-prod:cubic-bezier(.2,0,.38,.9);--ease-exp:cubic-bezier(.4,.14,.3,1);
+    --ease-entry-prod:cubic-bezier(0,0,.38,.9);--ease-entry-exp:cubic-bezier(0,0,.3,1);
+    --dur-fast-1:.07s;--dur-fast-2:.11s;--dur-mod-1:.15s;--dur-mod-2:.24s;--dur-slow-1:.4s;--dur-slow-2:.7s;
+    --nav-safe-bottom:8vh;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink);font-family:var(--sans),var(--sans-zh);font-feature-settings:"ss01","cv11";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;opacity:.55;mix-blend-mode:multiply;pointer-events:none}
+  body.dark-bg canvas.bg{mix-blend-mode:screen;opacity:.42}
+  body.low-power canvas.bg,body.low-power canvas.ascii-bg{display:none!important}
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:5.5vh 5vw 7vh 5vw;display:flex;flex-direction:column;overflow:hidden;background:var(--paper);color:var(--ink)}
+  .slide.grey{background:var(--grey-1)}
+  .slide.dark{background:var(--ink);color:var(--paper)}
+  .slide.accent{background:var(--accent);color:var(--accent-on)}
+  .slide.accent .accent-block{background:var(--accent-on);color:var(--accent)}
+  .slide.hero{background:transparent}
+  .slide.hero.dark{background:rgba(var(--ink-rgb),.92);color:var(--paper)}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.18;margin:0}
+  .rule.thick{height:2px;opacity:.85}
+  .rule.accent{background:var(--accent);opacity:1;height:2px}
+  .rule.v{width:1px;height:100%;margin:0}
+  .dots{background-image:radial-gradient(currentColor 1px,transparent 1px);background-size:12px 12px;opacity:.18}
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;opacity:.7;margin-bottom:auto}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;padding-top:2vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .kicker{font-family:var(--mono);font-size:14px;letter-spacing:.24em;text-transform:uppercase;opacity:.65;margin-bottom:2.4vh;display:inline-flex;align-items:center;gap:.8em}
+  .kicker::before{content:"";width:24px;height:1px;background:currentColor;opacity:.6}
+  .kicker.accent{color:var(--accent);opacity:1;font-weight:600}
+  .tag{display:inline-block;font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;padding:5px 10px;border:1px solid currentColor;opacity:.85}
+  .tag.accent{background:var(--accent);color:var(--accent-on);border-color:transparent;opacity:1}
+  .h-hero{font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:11vw;line-height:.92;letter-spacing:-.04em}
+  .h-hero-zh{font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:8.4vw;line-height:.96;letter-spacing:-.025em}
+  .h-xl{font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:6vw;line-height:1;letter-spacing:-.03em}
+  .h-xl-zh{font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:5vw;line-height:1.05;letter-spacing:-.025em}
+  .h-md{font-family:var(--sans),var(--sans-zh);font-weight:300;font-size:2.6vw;line-height:1.18;letter-spacing:-.015em}
+  .h-sub{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:2.2vw;line-height:1.3;letter-spacing:-.01em;opacity:.7}
+  .lead{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:1.55vw;line-height:1.4;letter-spacing:-.005em;opacity:.86}
+  .body{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.08vw);line-height:1.6;letter-spacing:0;opacity:.78}
+  .body-sm{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(16px,.92vw);line-height:1.55;opacity:.7}
+  .meta{font-family:var(--mono);font-size:max(14px,.82vw);letter-spacing:.18em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.4em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(14px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.65}
+  .kpi-big{font-family:var(--sans);font-weight:800;font-size:11vw;line-height:.85;letter-spacing:-.04em;font-feature-settings:"tnum"}
+  .kpi-mid{font-family:var(--sans);font-weight:700;font-size:6vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat-card{display:flex;flex-direction:column;gap:.6vh;align-items:flex-start;padding-top:1.6vh;border-top:2px solid currentColor}
+  .stat-card.accent-top{border-top-color:var(--accent);border-top-width:3px}
+  .stat-card .stat-label{font-family:var(--mono);font-size:max(14px,.82vw);letter-spacing:.24em;text-transform:uppercase;opacity:.6}
+  .stat-card .stat-nb{font-family:var(--sans);font-weight:800;font-size:5.6vw;line-height:.88;letter-spacing:-.035em;font-feature-settings:"tnum";margin-top:.4vh}
+  .stat-card .stat-note{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(16px,.98vw);line-height:1.5;opacity:.7;margin-top:.6vh}
+  .accent-block{background:var(--accent);color:var(--accent-on);padding:2.4vh 2vw}
+  .ink-block{background:var(--ink);color:var(--paper);padding:2.4vh 2vw}
+  .grey-block{background:var(--grey-1);padding:2.4vh 2vw}
+  .mark{background:var(--accent);color:var(--accent-on);padding:0 .2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1vw}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .step{display:flex;flex-direction:column;gap:.6vh;padding-top:1.2vh;border-top:2px solid currentColor}
+  .step.accent-top{border-top-color:var(--accent);border-top-width:3px}
+  .step-nb{font-family:var(--mono);font-weight:500;font-size:max(14px,1vw);opacity:.5;letter-spacing:.04em}
+  .step-title{font-family:var(--sans),var(--sans-zh);font-weight:700;font-size:1.4vw;letter-spacing:-.01em;line-height:1.2}
+  .step-desc{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(16px,.94vw);line-height:1.45;opacity:.7}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:2vh 1.2vw;align-items:start}
+  .span-2{grid-column:span 2}.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-2-4-8{display:grid;grid-template-columns:4fr 8fr;gap:3vw 4vh;align-items:start}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3vw 4vh;align-items:start}
+  .grid-3-3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(0,1fr);gap:2.4vh 2vw}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:3vh 3vw;flex:1;align-content:center}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:3vh 2.4vw;flex:1;align-content:center}
+  .col{display:flex;flex-direction:column;gap:2vh}
+  .row{display:flex;align-items:center;gap:2vw}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .right{text-align:right;justify-self:end}
+  .nowrap{white-space:nowrap}
+  .callout{padding:2vh 2vw;border-left:3px solid var(--accent);font-family:var(--sans),var(--sans-zh);font-size:max(14px,1vw);line-height:1.55;opacity:.9}
+  .callout.ink{border-left-color:currentColor}
+  .callout .callout-src{display:block;margin-top:1.2vh;font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .geo-dot{width:.7vw;height:.7vw;border-radius:50%;background:var(--accent);display:inline-block;vertical-align:middle}
+  .geo-line{width:2vw;height:2px;background:var(--accent);display:inline-block;vertical-align:middle}
+  .frame-img{overflow:hidden;position:relative;background:var(--paper);width:100%}
+  .frame-img>img{width:100%;height:100%;object-fit:cover;display:block}
+  #nav{position:fixed;left:50%;bottom:2vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:0;background:transparent;border:0}
+  #nav .dot{width:6px;height:6px;background:rgba(0,0,0,.28);cursor:pointer;transition:all .25s ease;border:0;padding:0;border-radius:0}
+  #nav .dot:hover{background:rgba(0,0,0,.55)}
+  #nav .dot.active{background:var(--accent);width:18px}
+  body.dark-bg #nav .dot{background:rgba(255,255,255,.32)}
+  body.dark-bg #nav .dot.active{background:var(--accent)}
+  #hint{position:fixed;bottom:2.4vh;right:2.5vw;z-index:30;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.4;color:var(--ink)}
+  body.dark-bg #hint{color:var(--paper);opacity:.4}
+  #overview [data-anim]{opacity:1!important;transform:none!important}
+  #overview .slide *{animation:none!important;transition:none!important}
+  .card-fill{background:#f5f5f4;border:0;color:var(--text-primary)}
+  .card-ink{background:var(--ink);border:0;color:var(--paper)}
+  .card-accent{background:var(--accent);border:0;color:var(--accent-on)}
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+  /* canvas-mode */
+  body.canvas-mode{background:var(--paper)}
+  body.canvas-mode canvas.bg{display:none!important}
+  body.canvas-mode .slide{background:var(--paper);padding:0;align-items:stretch;justify-content:stretch}
+  body.canvas-mode .slide.hero{background:var(--paper)}
+  .canvas-card{width:100vw;height:100vh;background:var(--paper);color:var(--ink);padding:5.6vh 5vw 4.4vh;display:flex;flex-direction:column;position:relative;overflow:hidden;border-radius:0}
+  .slide.dark .canvas-card{background:var(--ink);color:var(--paper)}
+  .slide.accent .canvas-card{background:var(--accent);color:var(--accent-on)}
+  .slide.grey .canvas-card{background:var(--grey-1);color:var(--ink)}
+  .slide.split .canvas-card{padding:0;flex-direction:row}
+  canvas.ascii-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;mix-blend-mode:screen;opacity:.92}
+  .canvas-card>*:not(.ascii-bg){position:relative;z-index:1}
+  .slide.accent .canvas-card .chrome-min{color:rgba(255,255,255,.62)}
+  /* chrome-min */
+  .canvas-card .chrome-min{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text-helper);flex:0 0 auto;margin-bottom:var(--sp-9)}
+  .canvas-card .chrome-min.tight{margin-bottom:var(--sp-7)}
+  .canvas-card .chrome-min .l,.canvas-card .chrome-min .r{max-width:48vw;line-height:1.5}
+  .slide.dark .canvas-card .chrome-min{color:rgba(255,255,255,.62)}
+  /* kpi-thin */
+  .kpi-thin{font-family:var(--sans);font-weight:200;font-size:14vw;line-height:.92;letter-spacing:-.045em;font-feature-settings:"tnum"}
+  .kpi-thin .unit{font-size:.3em;font-weight:300;opacity:.55;margin-left:.15em;vertical-align:.6em}
+  .kpi-thin-sm{font-family:var(--sans);font-weight:250;font-size:5.6vw;line-height:1.04;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  /* t-tokens */
+  .t-cat{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text-helper);line-height:1.3}
+  .t-cat.accent{color:var(--accent)}
+  .t-meta{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text-helper);line-height:1.45}
+  .t-helper{font-family:var(--sans),var(--sans-zh);font-size:14px;font-weight:400;color:var(--text-helper);line-height:1.5}
+  .t-body-sm{font-family:var(--sans),var(--sans-zh);font-size:16px;font-weight:400;color:var(--text-secondary);line-height:1.55}
+  .t-body{font-family:var(--sans),var(--sans-zh);font-size:18px;font-weight:400;color:var(--text-primary);line-height:1.5}
+  .t-body-emp{font-family:var(--sans),var(--sans-zh);font-size:18px;font-weight:600;color:var(--text-primary);line-height:1.5}
+  .t-h-prod{font-family:var(--sans),var(--sans-zh);font-size:22px;font-weight:600;color:var(--text-primary);line-height:1.4;letter-spacing:-.01em}
+  .slide.dark .t-cat,.slide.dark .t-meta,.slide.dark .t-helper{color:rgba(255,255,255,.62)}
+  .slide.dark .t-body-sm{color:rgba(255,255,255,.78)}
+  .slide.dark .t-body,.slide.dark .t-body-emp,.slide.dark .t-h-prod{color:var(--paper)}
+  /* duo-compare */
+  .duo-compare{display:grid;grid-template-columns:1fr 1px 1fr;gap:0 3.4vw;flex:1;align-items:stretch;margin-top:6vh}
+  .duo-compare .vrule{background:var(--grey-2);width:1px;align-self:stretch}
+  .duo-compare .col{display:flex;flex-direction:column;gap:1.6vh;padding:0 .4vw}
+  .duo-compare .col-tag{font-family:var(--mono);font-size:max(14px,.78vw);letter-spacing:.16em;text-transform:uppercase;color:var(--grey-3);display:flex;align-items:center;gap:.6vw}
+  .duo-compare .col-tag .num{font-weight:600;color:var(--ink);border:1px solid var(--ink);padding:.2em .6em;font-size:.92em}
+  .duo-compare .col.accent .col-tag .num{color:var(--accent);border-color:var(--accent)}
+  .duo-compare .col-ttl{font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:3.6vw;line-height:1;letter-spacing:-.03em}
+  .duo-compare .col.accent .col-ttl{color:var(--accent)}
+  .duo-compare .col-desc{font-family:var(--sans),var(--sans-zh);font-size:max(16px,1.04vw);line-height:1.55;opacity:.78;max-width:30vw}
+  .duo-compare .col-list{list-style:none;display:flex;flex-direction:column;gap:1vh;margin-top:auto;padding-top:2vh;border-top:1px solid var(--grey-2)}
+  .duo-compare .col-list li{font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.5;padding-left:1.4em;position:relative}
+  .duo-compare .col-list li::before{content:"";position:absolute;left:0;top:.6em;width:.5em;height:1px;background:currentColor;opacity:.55}
+  .duo-compare .col.accent .col-list li::before{background:var(--accent);opacity:1}
+  /* split-half */
+  .split-half{display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;align-items:stretch}
+  .split-half>.half{padding:5vh 3.4vw;display:flex;flex-direction:column;min-width:0}
+  .split-half>.half.b-grey{background:var(--grey-1)}
+  .split-half>.half.b-accent{background:var(--accent);color:var(--accent-on)}
+  .split-half>.half.b-ink{background:var(--ink);color:var(--paper)}
+  .split-half>.half.b-accent .chrome-min{color:rgba(255,255,255,.62)}
+  /* sub-card */
+  .sub-grid-3-2{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:1.4vh 1.4vw;flex:1;align-content:stretch;margin-top:3vh}
+  .sub-card{background:var(--grey-1);padding:2.4vh 1.6vw 2vh;display:flex;flex-direction:column;position:relative;min-height:0}
+  .slide.dark .sub-card{background:rgba(255,255,255,.06)}
+  .sub-card.accent{background:var(--accent);color:var(--accent-on)}
+  .sub-card.ink{background:var(--ink);color:var(--paper)}
+  .sub-card .nb-corner{position:absolute;top:1.6vh;right:1.4vw;font-family:var(--mono);font-size:max(14px,.8vw);letter-spacing:.16em;opacity:.55}
+  .sub-card .ttl{font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.5vw);line-height:1.2;letter-spacing:-.015em;margin-bottom:1vh}
+  .sub-card .desc{font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;opacity:.78;margin-top:auto}
+  /* timeline */
+  .timeline-h{--tl-dot:8px;position:relative;flex:1;display:flex;align-items:center}
+  .timeline-h::before{content:"";position:absolute;top:50%;left:5%;right:5%;height:1px;transform:translateY(-50%);background:repeating-linear-gradient(to right,currentColor 0 4px,transparent 4px 8px);opacity:.35;pointer-events:none;z-index:0}
+  .timeline-h .tl-row{position:relative;width:100%;display:grid;grid-template-columns:repeat(5,1fr);align-items:center}
+  .timeline-h .th-node{position:relative;display:flex;justify-content:center}
+  .timeline-h .th-node .dot{width:var(--tl-dot);height:var(--tl-dot);border-radius:50%;background:var(--ink);z-index:1;position:relative}
+  .timeline-h .th-node.accent .dot{background:var(--accent)}
+  .timeline-h .th-node .label{position:absolute;left:50%;transform:translateX(-50%);width:13vw;text-align:center;display:flex;flex-direction:column;gap:.4vh}
+  .timeline-h .th-node.up .label{bottom:calc(50% + 22px)}
+  .timeline-h .th-node.down .label{top:calc(50% + 22px)}
+  .timeline-h .th-node .yr{font-family:var(--mono);font-size:max(14px,.78vw);letter-spacing:.05em;color:var(--text-helper);font-weight:500}
+  .timeline-h .th-node.accent .yr{color:var(--accent)}
+  .timeline-h .th-node .name{font-family:var(--sans);font-size:max(16px,1.05vw);font-weight:400;color:var(--text-primary);line-height:1.2;letter-spacing:-.005em}
+  .timeline-h .th-node.accent .name{color:var(--accent)}
+  .timeline-h .th-node .desc{font-family:var(--sans),var(--sans-zh);font-size:max(14px,.84vw);color:var(--text-secondary);font-weight:400;line-height:1.4}
+  /* h-bar-chart */
+  .h-bar-chart{display:grid;grid-template-columns:11em minmax(0,1fr) 8em;gap:1.6vh 1.6vw;align-items:center;margin-top:2.4vh;font-feature-settings:"tnum"}
+  .h-bar-chart .row-lbl{font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(14px,1vw);text-align:left}
+  .h-bar-chart .row-track{height:3.2vh;background:var(--grey-1);position:relative;overflow:hidden}
+  .h-bar-chart .row-fill{height:100%;background:var(--ink);transition:width 1s cubic-bezier(.5,0,.2,1)}
+  .h-bar-chart .row-fill.accent{background:var(--accent)}
+  .h-bar-chart .row-val{font-family:var(--sans);font-weight:250;font-size:max(16px,1.5vw);letter-spacing:-.02em;line-height:1}
+  /* dot-mat */
+  .dot-mat{--d:14px;background-image:radial-gradient(currentColor 1.4px,transparent 1.6px);background-size:var(--d) var(--d);opacity:.5}
+  .dot-mat.lg{--d:22px}
+  /* Windows fix */
+  body.is-win .kpi-thin{font-weight:300}
+  body.is-win [style*="font-weight:200"]{font-weight:300!important}
+  @media (max-width:900px){
+    .h-hero{font-size:16vw}.h-hero-zh{font-size:13vw}.h-xl{font-size:9vw}.h-xl-zh{font-size:8vw}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4,.grid-2-4-8{grid-template-columns:1fr}
+    .grid-12{grid-template-columns:repeat(6,1fr)}
+    .split-half{grid-template-columns:1fr}
+  }
+  @media print{
+    @page{size:A4 landscape;margin:0}
+    html,body{width:1920px!important;height:auto!important;overflow:visible!important;background:#fafaf8}
+    #deck{position:static!important;width:1920px!important;height:auto!important;display:block!important;transform:none!important;transition:none!important;overflow:visible!important}
+    section.slide{width:1920px!important;height:1080px!important;page-break-after:always!important;break-after:page!important;display:flex!important;position:relative!important;overflow:hidden!important;flex-shrink:0!important}
+    section.slide[style*="display:none"]{display:none!important;page-break-after:avoid!important}
+    #nav,#hint,#overview,#overview-btn{display:none!important}
+    canvas{display:none!important}
+    *{animation:none!important;transition:none!important}
+    [data-anim]{opacity:1!important;transform:none!important}
+    .ledger-row,.sub-card,.col,.vrule{opacity:1!important;transform:none!important}
+  }
+</style>
+</head>
+<body class="canvas-mode">
+<script>
+  if(/Win/i.test(navigator.platform||navigator.userAgentData?.platform||'')){document.body.classList.add('is-win')}
+  (function(){
+    const KEY='guizang-ppt-low-power';
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored=localStorage.getItem(KEY);
+    window.__lowPowerMode=stored==='1'||(stored===null&&reduced);
+    function updateHint(){const hint=document.getElementById('hint');if(hint)hint.textContent=`← → 翻页 · B ${window.__lowPowerMode?'动态':'静态'} · ESC 索引`}
+    window.__setLowPowerMode=function(on,opts={}){
+      window.__lowPowerMode=!!on;
+      document.body.classList.toggle('low-power',window.__lowPowerMode);
+      if(opts.persist!==false)localStorage.setItem(KEY,window.__lowPowerMode?'1':'0');
+      if(window.__lowPowerMode&&document.getAnimations)document.getAnimations().forEach(a=>a.cancel());
+      updateHint();
+      dispatchEvent(new CustomEvent('swiss-low-power-change',{detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide)window.__playSlide(window.__currentSlideIndex||0);
+    };
+    document.body.classList.toggle('low-power',window.__lowPowerMode);
+    addEventListener('DOMContentLoaded',updateHint,{once:true});
+  })();
+</script>
+
+<canvas id="bg-grid" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ===== 01 / 14 · Cover · accent IKB ===== -->
+<section class="slide accent" data-animate="hero">
+  <div class="canvas-card">
+    <canvas class="ascii-bg" aria-hidden="true"></canvas>
+    <div class="chrome-min">
+      <div class="l">AI × PBL · OPC 南沙 · AI TRACK</div>
+      <div class="r">26.05.20 · 01 / 13</div>
+    </div>
+    <div style="flex:1;padding:0;display:grid;grid-template-rows:auto 1fr auto;gap:2.6vh">
+      <div data-anim="kicker" class="t-meta" style="color:rgba(255,255,255,.78);letter-spacing:.22em">AI × PROJECT-BASED LEARNING · 南沙OPC入住申请</div>
+      <div style="align-self:center;display:flex;flex-direction:column;gap:0;text-align:center;max-width:92%">
+        <h1 data-anim="title" style="font-family:var(--sans),var(--sans-zh);font-weight:300;font-size:min(5.2vw,8.4vh);line-height:1.12;letter-spacing:-.03em;color:#fff;margin:0">AI 项目制学习(PBL)</h1>
+        <p data-anim="lead" style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:max(28px,2.6vw);line-height:1.55;letter-spacing:.14em;color:rgba(255,255,255,.88);margin:2.8vh 0 0;padding-top:2.6vh;border-top:1px solid rgba(255,255,255,.28)">让孩子更好地驾驭 AI</p>
+      </div>
+      <div data-anim="bottom" style="display:flex;justify-content:space-between;align-items:end;border-top:1px solid rgba(255,255,255,.22);padding-top:2vh">
+        <div class="t-meta" style="color:rgba(255,255,255,.6)">入住申请 · 南沙未来产业训练营OPC社区</div>
+        <div class="t-meta" style="color:rgba(255,255,255,.6)">→ swipe / arrow keys</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 / 14 · Duo Mirror dark · 时代命题 ===== -->
+<section class="slide dark" data-animate="duo-mirror">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">时代命题</div>
+      <div class="r">02 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:2.8vh">
+      <h2 style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(4.8vw,8vh);line-height:1;letter-spacing:-.025em;color:var(--paper)">结构性滞后</h2>
+    </div>
+    <div data-anim="up" style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:stretch">
+      <!-- 左: 过去 · 工业时代 -->
+      <div style="display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.16);padding:2.4vh 2vw">
+        <div style="display:flex;align-items:baseline;gap:1.2vw;margin-bottom:2vh">
+          <div style="font-family:var(--sans);font-weight:800;font-size:min(2.8vw,4.8vh);line-height:1;color:rgba(255,255,255,.22);letter-spacing:-.03em">旧</div>
+          <div style="font-family:var(--mono);font-size:max(12px,.82vw);letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.38)">工业时代模型</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;flex:1">
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:.4vh">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(17px,1.35vw);color:rgba(255,255,255,.55)">记住知识</div>
+            <div class="t-body-sm" style="color:rgba(255,255,255,.32)">低效重复的信息输入</div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:.4vh">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(17px,1.35vw);color:rgba(255,255,255,.55)">按步解题</div>
+            <div class="t-body-sm" style="color:rgba(255,255,255,.32)">标准化的流水线思维</div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:.4vh">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(17px,1.35vw);color:rgba(255,255,255,.55)">等待考试</div>
+            <div class="t-body-sm" style="color:rgba(255,255,255,.32)">滞后的能力评估反馈</div>
+          </div>
+        </div>
+        <div style="padding-top:2vh;border-top:1px solid rgba(255,255,255,.1);font-family:var(--sans),var(--sans-zh);font-style:italic;font-size:max(14px,.94vw);line-height:1.55;color:rgba(255,255,255,.3)">「孩子们正在学习AI已经做得更好的事。」</div>
+      </div>
+      <!-- 右: 现在 · AI时代（实心IKB蓝色块） -->
+      <div style="display:flex;flex-direction:column;background:var(--accent);padding:2.4vh 2vw">
+        <div style="display:flex;align-items:baseline;gap:1.2vw;margin-bottom:2vh">
+          <div style="font-family:var(--sans);font-weight:800;font-size:min(2.8vw,4.8vh);line-height:1;color:rgba(255,255,255,.55);letter-spacing:-.03em">新</div>
+          <div style="font-family:var(--mono);font-size:max(12px,.82vw);letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.78)">AI时代需求</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;flex:1">
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.22);display:flex;flex-direction:column;gap:.4vh">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.35vw);color:#fff">定义目标</div>
+            <div class="t-body-sm" style="color:rgba(255,255,255,.78)">清晰表达需求的能力</div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.22);display:flex;flex-direction:column;gap:.4vh">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.35vw);color:#fff">拆解计划</div>
+            <div class="t-body-sm" style="color:rgba(255,255,255,.78)">复杂问题解决的方法论</div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.22);display:flex;flex-direction:column;gap:.4vh">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.35vw);color:#fff">驾驭协作</div>
+            <div class="t-body-sm" style="color:rgba(255,255,255,.78)">驱动AI作为杠杆而非拐杖</div>
+          </div>
+        </div>
+        <div style="padding-top:2vh;border-top:1px solid rgba(255,255,255,.25);font-family:var(--sans),var(--sans-zh);font-style:italic;font-size:max(14px,.94vw);line-height:1.55;color:rgba(255,255,255,.88)">「真正的稀缺是驾驭AI解决真实问题。」</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 / 14 · PBL困局 light ===== -->
+<section class="slide" data-animate="four-cards">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">PBL困局</div>
+      <div class="r">03 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:2.4vh">
+      <div style="height:2px;background:var(--accent);width:36px;margin-bottom:2vh"></div>
+      <h2 class="h-md">PBL：被验证30年的"贵族教育"</h2>
+    </div>
+    <div data-anim="up" style="flex:1;display:grid;grid-template-columns:auto 1fr;gap:4.4vw;align-items:center">
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:.6vh">
+        <div style="font-family:var(--sans);font-weight:800;font-size:min(15vw,24vh);line-height:.9;letter-spacing:-.05em;color:var(--accent)">5%</div>
+        <div class="t-cat" style="color:var(--text-secondary)">中国家庭端渗透率</div>
+        <div style="font-family:var(--mono);font-size:max(10px,.68vw);color:var(--text-secondary);opacity:.6;letter-spacing:.08em;margin-top:.4vh">来源：艾瑞咨询 K12教育行业报告 2023</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1.6vh">
+        <div style="font-family:var(--sans),var(--sans-zh);font-weight:700;font-size:max(22px,1.85vw);line-height:1.15;color:var(--ink)">三道门槛，让PBL 无法规模化</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="padding:1.8vh 0;border-top:2px solid var(--ink);display:grid;grid-template-columns:2.4em 1fr;gap:1.2vw;align-items:start">
+            <div class="t-meta" style="color:var(--accent)">01</div>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);line-height:1.2;margin-bottom:.5vh">个性化能力诊断</div><div class="t-body-sm">依赖专家判断，每个孩子需要一对一评估，无法批量复制</div></div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid var(--border-subtle);display:grid;grid-template-columns:2.4em 1fr;gap:1.2vw;align-items:start">
+            <div class="t-meta" style="color:var(--accent)">02</div>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);line-height:1.2;margin-bottom:.5vh">定制化路径设计</div><div class="t-body-sm">课程设计需要专业能力，普通家长无力承担，人力成本极高</div></div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid var(--border-subtle);display:grid;grid-template-columns:2.4em 1fr;gap:1.2vw;align-items:start">
+            <div class="t-meta" style="color:var(--accent)">03</div>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);line-height:1.2;margin-bottom:.5vh">一对一跟踪反馈</div><div class="t-body-sm">持续陪伴需要大量人力，规模化就意味着质量大打折扣</div></div>
+          </div>
+        </div>
+        <div style="border-top:2px solid var(--accent);padding-top:1.6vh;font-family:var(--sans),var(--sans-zh);font-size:max(16px,1.1vw);line-height:1.6;color:var(--text-secondary)">AI大幅降低教学成本，<strong style="color:var(--ink);font-weight:600">让PBL的普及变得可能。</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 / 14 · Duo Mirror light · 传统PBL vs AI+PBL ===== -->
+<section class="slide" data-animate="duo-mirror">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">范式对比</div>
+      <div class="r">04 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:0">
+      <h2 style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(4.8vw,8vh);line-height:1;letter-spacing:-.025em">AI让PBL在家庭场景真正可操作</h2>
+    </div>
+    <div class="duo-compare">
+      <div class="col">
+        <div class="col-tag"><span class="num">旧</span> 传统PBL</div>
+        <div class="col-ttl">太贵<br/>太难<br/>看不见</div>
+        <ul class="col-list">
+          <li>能力诊断需专业教师</li>
+          <li>学习路径设计耗时数周</li>
+          <li>执行过程对家长完全是黑箱</li>
+          <li>复盘引导缺失，进步难以量化</li>
+        </ul>
+      </div>
+      <div class="vrule"></div>
+      <div class="col accent">
+        <div class="col-tag"><span class="num">新</span> AI + PBL</div>
+        <div class="col-ttl">可见<br/>可执行<br/>可复盘</div>
+        <ul class="col-list">
+          <li>多模态OCR实时分析弱点，零人力成本</li>
+          <li>知识图谱×LLM联合推理，分钟级路径生成</li>
+          <li>家长日报，每日进度实时可见</li>
+          <li>AI引导复盘，量化「开始前→结束后」成长</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 05 / 14 · Three Forces light · 全球先行者 ===== -->
+<section class="slide" data-animate="three-forces">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">全球先行者</div>
+      <div class="r">05 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:3.2vh">
+      <h2 style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(4.6vw,7.8vh);line-height:1;letter-spacing:-.025em">全球已有先行者<br/>中国还是空白</h2>
+    </div>
+    <div data-anim="up" style="display:grid;grid-template-columns:4fr 8fr;gap:3.4vw;flex:1;align-items:start">
+      <div style="background:var(--ink);color:var(--paper);padding:3.2vh 2vw;display:flex;flex-direction:column;gap:2vh;height:100%">
+        <div class="t-cat" style="color:rgba(255,255,255,.55)">GLOBAL SIGNAL</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(3.2vw,5.4vh);line-height:1;letter-spacing:-.025em">三家<br/>先行者<br/>已验证</div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:.8vh">
+          <div style="font-family:var(--mono);font-size:max(11px,.72vw);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:.4vh">VS 中国现状</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(14px,.9vw);line-height:1.5;color:rgba(255,255,255,.6)">· 猿辅导/作业帮：全学科AI，无PBL专注</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(14px,.9vw);line-height:1.5;color:rgba(255,255,255,.6)">· AI教育融资集中在口语/题库/写作</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(14px,.9vw);line-height:1.5;color:rgba(255,255,255,.6)">· 独立AI+PBL垂直产品：几乎为零</div>
+          <div style="margin-top:.6vh;font-family:var(--sans),var(--sans-zh);font-size:max(14px,.92vw);line-height:1.5;color:var(--accent-bright);font-weight:500">→ 战略窗口已开</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2vh">
+        <div class="card-fill" style="padding:2.4vh 2vw;border-top:2px solid var(--ink)">
+          <div style="font-family:var(--sans);font-weight:200;font-size:min(3.8vw,6.4vh);line-height:1;letter-spacing:-.04em;margin-bottom:1.4vh">01</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.4vw);margin-bottom:.8vh">Synthesis</div>
+          <div class="t-body-sm">SpaceX孵化，服务1000+所学校——验证「高难度真实任务+系统化框架」是可行的规模化产品逻辑</div>
+        </div>
+        <div class="card-fill" style="padding:2.4vh 2vw;border-top:2px solid var(--ink)">
+          <div style="font-family:var(--sans);font-weight:200;font-size:min(3.8vw,6.4vh);line-height:1;letter-spacing:-.04em;margin-bottom:1.4vh">02</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.4vw);margin-bottom:.8vh">Khan Academy × Khanmigo</div>
+          <div class="t-body-sm">AI导师服务全美60万+学生，验证AI可以替代部分专业辅导角色，且家庭接受度高</div>
+        </div>
+        <div class="card-fill" style="padding:2.4vh 2vw;border-top:3px solid var(--accent)">
+          <div style="font-family:var(--sans);font-weight:200;font-size:min(3.8vw,6.4vh);line-height:1;letter-spacing:-.04em;color:var(--accent);margin-bottom:1.4vh">03</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.4vw);margin-bottom:.8vh">Marbella AI</div>
+          <div class="t-body-sm">哈佛创新实验室孵化，AI+PBL结合最接近本产品方向——直接验证我们的产品逻辑在全球范围的可行性</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== 06 / 14 · Loop Form dark · 五步闭环 ===== -->
+<section class="slide dark" data-animate="loop-form">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">产品框架</div>
+      <div class="r">06 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:3.2vh">
+      <h2 style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(5vw,8.5vh);line-height:1;letter-spacing:-.025em;color:var(--paper)">五步闭环<br/>AI项目经理 for 孩子</h2>
+    </div>
+    <div data-anim="up" style="display:grid;grid-template-columns:5fr 7fr;gap:3.4vw;flex:1;align-items:center">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.2);display:grid;grid-template-columns:2.8em 1fr;gap:1.2vw;align-items:center">
+            <span class="t-meta" style="color:var(--accent-bright)">01</span>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);color:var(--paper);margin-bottom:.4vh">定位</div><div class="t-body-sm" style="color:rgba(255,255,255,.62)">明确起点能力 · 确定目标赛事</div></div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.2);display:grid;grid-template-columns:2.8em 1fr;gap:1.2vw;align-items:center">
+            <span class="t-meta" style="color:var(--accent-bright)">02</span>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);color:var(--paper);margin-bottom:.4vh">目标</div><div class="t-body-sm" style="color:rgba(255,255,255,.62)">拆解里程碑 · 知识图谱路径</div></div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.2);display:grid;grid-template-columns:2.8em 1fr;gap:1.2vw;align-items:center">
+            <span class="t-meta" style="color:var(--accent-bright)">03</span>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);color:var(--paper);margin-bottom:.4vh">计划</div><div class="t-body-sm" style="color:rgba(255,255,255,.62)">每日任务 · 遗忘曲线调度</div></div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.2);display:grid;grid-template-columns:2.8em 1fr;gap:1.2vw;align-items:center">
+            <span class="t-meta" style="color:var(--accent-bright)">04</span>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);color:var(--paper);margin-bottom:.4vh">执行</div><div class="t-body-sm" style="color:rgba(255,255,255,.62)">拍照上传 · OCR判题 · 日报推送</div></div>
+          </div>
+          <div style="padding:1.8vh 0;border-top:1px solid rgba(255,255,255,.2);border-bottom:2px solid var(--accent);display:grid;grid-template-columns:2.8em 1fr;gap:1.2vw;align-items:center">
+            <span class="t-meta" style="color:var(--accent-bright)">05</span>
+            <div><div style="font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.4vw);color:var(--paper);margin-bottom:.4vh">复盘</div><div class="t-body-sm" style="color:rgba(255,255,255,.62)">AI引导反思 · 量化成长可见性</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 320 320" width="min(30vw,48vh)" height="min(30vw,48vh)" style="overflow:visible">
+          <!-- 五边形轨迹 -->
+          <circle cx="160" cy="160" r="120" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1" stroke-dasharray="4 8"/>
+          <!-- 箭头（调整端点以适配 r=17 的节点） -->
+          <path d="M176 52 L257 108" stroke="rgba(255,255,255,.28)" stroke-width="1.5" fill="none" marker-end="url(#arr-d)"/>
+          <path d="M268 138 L239 239" stroke="rgba(255,255,255,.28)" stroke-width="1.5" fill="none" marker-end="url(#arr-d)"/>
+          <path d="M213 258 L107 258" stroke="rgba(255,255,255,.28)" stroke-width="1.5" fill="none" marker-end="url(#arr-d)"/>
+          <path d="M82 239 L53 139" stroke="rgba(255,255,255,.28)" stroke-width="1.5" fill="none" marker-end="url(#arr-d)"/>
+          <path d="M63 108 L144 52" stroke="rgba(255,255,255,.28)" stroke-width="1.5" fill="none" marker-end="url(#arr-d)"/>
+          <!-- 节点 01 · 定位 (顶部) -->
+          <circle cx="160" cy="40" r="17" fill="var(--accent)"/>
+          <text x="160" y="45" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="600" fill="white" letter-spacing=".06em">01</text>
+          <text x="160" y="14" text-anchor="middle" font-family="var(--sans)" font-size="15" font-weight="700" fill="white" letter-spacing="-.01em">定位</text>
+          <!-- 节点 02 · 目标 (右上) -->
+          <circle cx="273" cy="120" r="17" fill="var(--accent)"/>
+          <text x="273" y="125" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="600" fill="white" letter-spacing=".06em">02</text>
+          <text x="297" y="118" text-anchor="start" font-family="var(--sans)" font-size="15" font-weight="700" fill="white" letter-spacing="-.01em">目标</text>
+          <!-- 节点 03 · 计划 (右下) -->
+          <circle cx="233" cy="258" r="17" fill="var(--accent)"/>
+          <text x="233" y="263" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="600" fill="white" letter-spacing=".06em">03</text>
+          <text x="257" y="270" text-anchor="start" font-family="var(--sans)" font-size="15" font-weight="700" fill="white" letter-spacing="-.01em">计划</text>
+          <!-- 节点 04 · 执行 (左下) -->
+          <circle cx="87" cy="258" r="17" fill="var(--accent)"/>
+          <text x="87" y="263" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="600" fill="white" letter-spacing=".06em">04</text>
+          <text x="63" y="270" text-anchor="end" font-family="var(--sans)" font-size="15" font-weight="700" fill="white" letter-spacing="-.01em">执行</text>
+          <!-- 节点 05 · 复盘 (左上) -->
+          <circle cx="47" cy="120" r="17" fill="var(--accent)"/>
+          <text x="47" y="125" text-anchor="middle" font-family="var(--mono)" font-size="12" font-weight="600" fill="white" letter-spacing=".06em">05</text>
+          <text x="23" y="118" text-anchor="end" font-family="var(--sans)" font-size="15" font-weight="700" fill="white" letter-spacing="-.01em">复盘</text>
+          <!-- 中心 -->
+          <text x="160" y="154" text-anchor="middle" font-family="var(--sans)" font-weight="200" font-size="18" fill="rgba(255,255,255,.88)" letter-spacing="-.02em">AI项目经理</text>
+          <text x="160" y="172" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,.4)" letter-spacing=".14em">FOR KIDS</text>
+          <defs><marker id="arr-d" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,.3)"/></marker></defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- ===== 07 / 14 · Statement dark · 规模化天花板 ===== -->
+  <section class="slide dark" data-animate="statement">
+    <div class="canvas-card">
+      <div class="chrome-min">
+        <div class="l">技术破局</div>
+        <div class="r">07 / 13</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4vh">
+        <div data-anim="line" class="t-cat" style="color:rgba(255,255,255,.62)">TECHNOLOGY BREAKTHROUGH</div>
+        <h2 data-anim="title" style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(7.6vw,12.8vh);line-height:.96;letter-spacing:-.025em;color:var(--paper)">AI不只是降低成本<br/>而是拆掉了<br/><span style="font-style:italic;color:var(--accent-bright)">规模化天花板</span></h2>
+        <div data-anim="lead" style="display:flex;flex-direction:column;gap:1.2vh;max-width:56ch">
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,1.08vw);line-height:1.6;color:rgba(255,255,255,.72);padding-left:1.4em;position:relative"><span style="position:absolute;left:0;color:var(--accent-bright);font-weight:600">→</span>多模态识别：手写作业→知识点准确率&gt;95%，消灭能力诊断的人力成本</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,1.08vw);line-height:1.6;color:rgba(255,255,255,.72);padding-left:1.4em;position:relative"><span style="position:absolute;left:0;color:var(--accent-bright);font-weight:600">→</span>路径引擎：依据知识图谱推理，分钟级生成个性化学习方案</div>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,1.08vw);line-height:1.6;color:rgba(255,255,255,.72);padding-left:1.4em;position:relative"><span style="position:absolute;left:0;color:var(--accent-bright);font-weight:600">→</span>复盘标准化：AI驱动量化学生「能力变化」，让一对一的量化评估变得可能</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 08 / 14 · Stacked Ledger light · 技术内核 ===== -->
+  <section class="slide" data-animate="stacked-ledger">
+      <div class="canvas-card">
+        <div class="chrome-min">
+          <div class="l">技术内核</div>
+          <div class="r">08 / 13</div>
+        </div>
+        <div data-anim="line" style="margin-bottom:2.8vh">
+          <div style="height:2px;background:var(--accent);width:36px;margin-bottom:2vh"></div>
+          <h2 class="h-md">四大底层驱动</h2>
+        </div>
+        <div data-anim="ledger" style="display:flex;flex-direction:column;gap:0;flex:1;justify-content:center">
+          <div style="display:grid;grid-template-columns:14ch 16ch 1fr;align-items:center;padding:2vh 0;border-top:2px solid var(--ink);gap:2.4vw">
+            <div style="font-family:var(--mono);font-size:max(13px,.8vw);letter-spacing:.16em;text-transform:uppercase;color:var(--text-helper)">核心模块</div>
+            <div style="font-family:var(--mono);font-size:max(13px,.8vw);letter-spacing:.16em;text-transform:uppercase;color:var(--text-helper)">技术实现</div>
+            <div style="font-family:var(--mono);font-size:max(13px,.8vw);letter-spacing:.16em;text-transform:uppercase;color:var(--text-helper)">解决的问题</div>
+          </div>
+          <div style="display:grid;grid-template-columns:14ch 16ch 1fr;align-items:start;padding:2.2vh 0;border-top:1px solid var(--border-subtle);gap:2.4vw">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.3vw);line-height:1.2">多模态识别</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">手写识别<br/>语音聊天<br/>题型解析</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">消灭能力诊断的人力成本——专家级能力诊断 → 零边际成本</div>
+          </div>
+          <div style="display:grid;grid-template-columns:14ch 16ch 1fr;align-items:start;padding:2.2vh 0;border-top:1px solid var(--border-subtle);gap:2.4vw">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.3vw);line-height:1.2">知识图谱<br/>× LLM</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">知识点拓扑推理<br/>错题关联</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">分钟级个性化路径生成——路径设计从数周压缩到分钟</div>
+          </div>
+          <div style="display:grid;grid-template-columns:14ch 16ch 1fr;align-items:start;padding:2.2vh 0;border-top:1px solid var(--border-subtle);background:rgba(var(--accent-rgb),.05);gap:2.4vw;padding-left:1.2vw;margin:0 -1.2vw">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.3vw);line-height:1.2;color:var(--accent)">个性化<br/>路径引擎</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">遗忘曲线调度<br/>任务分配</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">持续跟踪，零人力监督——每日任务自动推送，进度实时透明</div>
+          </div>
+          <div style="display:grid;grid-template-columns:14ch 16ch 1fr;align-items:start;padding:2.2vh 0;border-top:1px solid var(--border-subtle);border-bottom:2px solid var(--accent);gap:2.4vw">
+            <div style="font-family:var(--sans),var(--sans-zh);font-weight:600;font-size:max(17px,1.3vw);line-height:1.2">苏格拉底<br/>对话引擎</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">LLM引导式提问<br/>反思引导</div>
+            <div style="font-family:var(--sans),var(--sans-zh);font-size:max(15px,.94vw);line-height:1.5;color:var(--text-secondary)">AI驱动复盘，量化成长可见性——「开始前→结束后」薄弱点变化</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  
+<!-- ===== 09 / 14 · Field Notes grey · 五大应用场景 ===== -->
+<section class="slide grey" data-animate="field-notes">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">应用场景</div>
+      <div class="r">09 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:3.2vh">
+      <h2 class="h-md">同一套框架——<br/><span style="color:var(--accent)">带有目标性的学习</span>，激发学习<span style="color:var(--accent)">自驱力</span></h2>
+    </div>
+    <div data-anim="up" class="sub-grid-3-2">
+      <div class="sub-card accent">
+        <div class="nb-corner" style="color:rgba(255,255,255,.7)">01</div>
+        <div class="ttl" style="color:var(--accent-on)">强基 / 科技特长生</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;color:rgba(255,255,255,.88);margin-top:auto">华杯、信奥赛、强基报名930万+，家庭焦虑度最高，付费意愿最强，是MVP第一战场</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.09)">
+        <div class="nb-corner">02</div>
+        <div class="ttl">AI创新竞赛</div>
+        <div class="desc">全国青少年AI竞赛体系正快速成型，PBL框架天然适配项目提交型赛制</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.16)">
+        <div class="nb-corner">03</div>
+        <div class="ttl">AI智能硬件</div>
+        <div class="desc">编程+硬件制作全流程——创意→设计→调试，五步闭环完整落地</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.23)">
+        <div class="nb-corner">04</div>
+        <div class="ttl">AI创意制作</div>
+        <div class="desc">短视频、绘本、音乐生成等创意项目，AI工具让制作门槛大幅降低</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.32)">
+        <div class="nb-corner" style="color:rgba(255,255,255,.7)">05</div>
+        <div class="ttl" style="color:#fff">学科专项提升</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;color:rgba(255,255,255,.85);margin-top:auto">数学、英语专项冲刺，以阶段性目标为锚，触发五步闭环完整执行</div>
+      </div>
+      <div class="sub-card ink">
+        <div class="nb-corner" style="color:rgba(255,255,255,.6)">∞</div>
+        <div class="ttl" style="color:var(--paper)">可扩展</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;color:rgba(255,255,255,.78);margin-top:auto">「有目标+截止日期」是普遍人类问题。同一套框架延伸至体育竞技、成人考证。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 10 / 14 · Stacked Ledger dark · 市场规模 ===== -->
+<section class="slide dark" data-animate="stacked-ledger">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">市场规模</div>
+      <div class="r">10 / 13</div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;flex:1">
+      <h2 style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(4.2vw,7vh);line-height:1;letter-spacing:-.025em;color:var(--paper);margin-bottom:3.2vh">相关赛道市场规模</h2>
+      <div data-anim="ledger" style="display:flex;flex-direction:column;gap:0;flex:1;justify-content:center">
+        <div class="ledger-row" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:2.2vh 0;border-top:1px solid rgba(255,255,255,.18)">
+          <div>
+            <div class="ledger-label" style="font-family:var(--mono);font-size:max(14px,.84vw);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:1.2vh">STEAM教育</div>
+            <div class="ledger-num" style="font-family:var(--sans);font-weight:250;font-size:min(6.4vw,10.6vh);line-height:.92;letter-spacing:-.04em;color:var(--paper)">¥647<span style="font-size:.3em;font-weight:300;opacity:.6;margin-left:.1em;vertical-align:.5em">亿</span></div>
+          </div>
+          <div class="ledger-icon" style="font-family:var(--mono);font-size:14px;letter-spacing:.14em;color:rgba(255,255,255,.38);text-transform:uppercase">2023</div>
+        </div>
+        <div class="ledger-row" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:2.2vh 0;border-top:1px solid rgba(255,255,255,.18)">
+          <div>
+            <div class="ledger-label" style="font-family:var(--mono);font-size:max(14px,.84vw);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:1.2vh">研学教育</div>
+            <div class="ledger-num" style="font-family:var(--sans);font-weight:250;font-size:min(6.4vw,10.6vh);line-height:.92;letter-spacing:-.04em;color:var(--paper)">¥1469<span style="font-size:.3em;font-weight:300;opacity:.6;margin-left:.1em;vertical-align:.5em">亿</span></div>
+          </div>
+          <div class="ledger-icon" style="font-family:var(--mono);font-size:14px;letter-spacing:.14em;color:rgba(255,255,255,.38);text-transform:uppercase">2023</div>
+        </div>
+        <div class="ledger-row" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:2.2vh 0;border-top:1px solid rgba(255,255,255,.18);border-bottom:2px solid var(--accent)">
+          <div>
+            <div class="ledger-label" style="font-family:var(--mono);font-size:max(14px,.84vw);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:1.2vh">机器人教育</div>
+            <div class="ledger-num" style="font-family:var(--sans);font-weight:250;font-size:min(6.4vw,10.6vh);line-height:.92;letter-spacing:-.04em;color:var(--paper)">¥44<span style="font-size:.3em;font-weight:300;opacity:.6;margin-left:.1em;vertical-align:.5em">亿</span></div>
+          </div>
+          <div class="ledger-icon" style="font-family:var(--mono);font-size:14px;letter-spacing:.14em;color:rgba(255,255,255,.38);text-transform:uppercase">2023</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:end;padding-top:2.4vh">
+        <div>
+          <div class="t-cat" style="color:rgba(255,255,255,.55);margin-bottom:1.2vh">相关赛道合计</div>
+          <div style="font-family:var(--sans);font-weight:250;font-size:min(7.2vw,12vh);line-height:.9;letter-spacing:-.04em;color:var(--accent-bright)">¥2000<span style="font-size:.3em;font-weight:300;opacity:.8;margin-left:.1em;vertical-align:.5em">亿+</span></div>
+        </div>
+        <div class="t-meta" style="color:rgba(255,255,255,.45);text-align:right">SOM 8–15亿<br/>（保守估算）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== 11 / 14 · Four Cards light · 为什么是南沙 ===== -->
+<section class="slide" data-animate="four-cards">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">为什么是南沙</div>
+      <div class="r">11 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:2.4vh">
+      <div style="height:2px;background:var(--accent);width:36px;margin-bottom:2vh"></div>
+      <h2 class="h-md">南沙优势：</h2>
+    </div>
+    <div data-anim="up" class="grid-4" style="flex:1">
+      <div class="sub-card accent">
+        <div class="nb-corner" style="color:rgba(255,255,255,.7)">01</div>
+        <div class="ttl" style="color:var(--accent-on)">B2B精准渠道</div>
+        <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:1vh">南沙公控 · 教育板块</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;color:rgba(255,255,255,.88);margin-top:auto">集团化运营建构教育生态，已落地11所凤凰花幼儿园（3000+学位）——践行国企担当提升南沙基础教育</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.1)">
+        <div class="nb-corner">02</div>
+        <div class="ttl">政策试验田</div>
+        <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh">1+8 大湾区模式</div>
+        <div class="desc" style="margin-top:auto">南沙大湾区AI创新试点，「思维能力培养」定位契合双减精神——AI教育工具处于政策鼓励区间</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.16)">
+        <div class="nb-corner">03</div>
+        <div class="ttl">高校资源</div>
+        <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh">港科大广州 · 中大</div>
+        <div class="desc" style="margin-top:auto">背靠港科大（广州）、中大、华南师大——引入高校课程与导师指导，持续提升 PBL 项目内容品质</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.23)">
+        <div class="nb-corner">04</div>
+        <div class="ttl">OPC生态支持</div>
+        <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh">租金免除 · 算力补贴</div>
+        <div class="desc" style="margin-top:auto">OPC社区资源加速冷启动，港澳家庭PBL接受度高，是扩展海外华人市场的桥头堡</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 12 / 14 · Manifesto dark · 我们是谁 ===== -->
+<section class="slide slide-hidden dark" data-animate="manifesto" style="display:none" aria-hidden="true">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">我们是谁</div>
+      <div class="r">12 / 13</div>
+    </div>
+    <div data-anim="line" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:3.2vh">
+      <div class="t-cat" style="color:var(--accent-bright)">FOUNDER · IDENTITY</div>
+      <div style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(6vw,10vh);line-height:.96;letter-spacing:-.025em;color:var(--paper)">懂技术<br/>更懂用户本能</div>
+    </div>
+    <div data-anim="up" style="background:var(--paper);color:var(--ink);padding:3.2vh 2.4vw;display:grid;grid-template-columns:1fr 1fr;gap:3.4vw;margin-top:3.2vh">
+      <div style="border-left:3px solid var(--accent);padding-left:1.6vw;display:flex;flex-direction:column;gap:1.2vh">
+        <div class="t-cat" style="margin-bottom:.4vh">技术背景</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(17px,1.3vw);font-weight:500;line-height:1.3;margin-bottom:.6vh">资深技术架构师</div>
+        <div class="t-body-sm">MVP已完成：错题集×微信小程序+Claude API，单人速度≈过去3-5人团队。系统蓝图完备，Phase 1 执行中。</div>
+      </div>
+      <div style="border-left:3px solid var(--accent);padding-left:1.6vw;display:flex;flex-direction:column;gap:1.2vh">
+        <div class="t-cat" style="margin-bottom:.4vh">第一批种子用户</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(17px,1.3vw);font-weight:500;line-height:1.3;margin-bottom:.6vh">身处南沙，活在场景中</div>
+        <div class="t-body-sm">孩子正在备考华杯，三个场景（奥数 / 铁人三项 / 雅思）已在家庭内部验证闭环。</div>
+      </div>
+    </div>
+    <div data-anim="lead" style="margin-top:2.4vh;padding:2vh 2.4vw;border-left:3px solid var(--accent-bright)">
+      <div style="font-family:var(--sans),var(--sans-zh);font-style:italic;font-size:max(17px,1.3vw);line-height:1.6;color:rgba(255,255,255,.82)">「这不是调研出来的方向，而是活在其中的真实需求。」</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 13 / 14 · Four Cards grey · 入驻诉求 ===== -->
+<section class="slide grey" data-animate="four-cards">
+  <div class="canvas-card">
+    <div class="chrome-min">
+      <div class="l">入驻诉求</div>
+      <div class="r">12 / 13</div>
+    </div>
+    <div data-anim="line" style="margin-bottom:2.4vh">
+      <div style="height:2px;background:var(--accent);width:36px;margin-bottom:2vh"></div>
+      <h2 class="h-md">我们需要</h2>
+    </div>
+    <div data-anim="up" class="sub-grid-3-2">
+      <div class="sub-card" style="background:rgba(0,47,167,.09)">
+        <div class="nb-corner">01</div>
+        <div class="ttl">工作空间</div>
+        <div class="desc" style="margin-top:auto">稳定的开发环境，专注推进产品完整闭环</div>
+      </div>
+      <div class="sub-card" style="background:rgba(0,47,167,.16)">
+        <div class="nb-corner">02</div>
+        <div class="ttl">政策支持</div>
+        <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh">合规 · 升学政策</div>
+        <div class="desc" style="margin-top:auto">AI 教育产品合规路径指引；强基计划、科技特长生等政策接入渠道</div>
+      </div>
+      <div class="sub-card accent">
+        <div class="nb-corner" style="color:rgba(255,255,255,.7)">03</div>
+        <div class="ttl" style="color:var(--accent-on)">教育渠道对接</div>
+        <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:1vh">凤凰花 · 南沙中小学</div>
+        <div style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;color:rgba(255,255,255,.88);margin-top:auto">凤凰花家长社群、南沙本地中小学合作意向接触——精准触达种子用户</div>
+      </div>
+      <div style="grid-column:1/-1;display:flex;justify-content:center;align-items:stretch;gap:1.4vw;min-height:0">
+        <div class="sub-card" style="background:rgba(0,47,167,.23);flex:0 0 calc((100% - 2.8vw) / 3);max-width:calc((100% - 2.8vw) / 3)">
+          <div class="nb-corner">04</div>
+          <div class="ttl">高校资源连接</div>
+          <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh">港科大（广州）· 中大南沙</div>
+          <div class="desc" style="margin-top:auto">高校合作探索，借助学术背书提升产品在升学场景的公信力</div>
+        </div>
+        <div class="sub-card" style="background:rgba(0,47,167,.32);flex:0 0 calc((100% - 2.8vw) / 3);max-width:calc((100% - 2.8vw) / 3)">
+          <div class="nb-corner">05</div>
+          <div class="ttl">创新生态接入</div>
+          <div style="font-family:var(--mono);font-size:max(13px,.82vw);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh">竞赛 · 研学</div>
+          <div class="desc" style="margin-top:auto">南沙青少年 AI 创新竞赛、研学项目等资源网络，帮助产品快速触达目标用户群体</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 14 / 14 · Split Statement · Closing ===== -->
+<section class="slide split" data-animate="split-statement">
+  <div class="canvas-card">
+    <div class="split-half">
+      <div class="half b-accent" style="padding:5.6vh 3.6vw 4.4vh;justify-content:space-between;position:relative;overflow:hidden">
+        <canvas class="ascii-bg" aria-hidden="true"></canvas>
+        <div class="chrome-min" style="margin-bottom:0;position:relative;z-index:1">
+          <div class="l">13 / 13</div>
+          <div class="r">CLOSING</div>
+        </div>
+        <div data-anim="manifesto" style="display:flex;flex-direction:column;gap:2vh;position:relative;z-index:1">
+          <div class="t-meta" style="color:rgba(255,255,255,.78);letter-spacing:.22em;margin-bottom:1.6vh">MANIFESTO</div>
+          <h2 style="font-family:var(--sans),var(--sans-zh);font-size:min(7vw,12vh);line-height:.96;letter-spacing:-.025em;font-weight:200;color:#fff">为每一个<br/>学习目标<br/>赋予可执行的<br/><span style="font-style:italic;font-weight:300">项目形态</span></h2>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(14px,1vw);line-height:1.6;color:rgba(255,255,255,.82);font-weight:400;max-width:36ch;margin-top:1.4vh">AI让PBL第一次在家庭场景真正可操作。这个时代，孩子比任何时候都更需要一个项目经理。</div>
+        </div>
+        <div data-anim="signature" style="display:flex;justify-content:space-between;align-items:end;border-top:1px solid rgba(255,255,255,.22);padding-top:2vh;position:relative;z-index:1">
+          <div class="t-meta" style="color:rgba(255,255,255,.62)">AI × PBL · 南沙</div>
+          <div class="t-meta" style="color:rgba(255,255,255,.62)">26.05.20</div>
+        </div>
+      </div>
+      <div class="half" style="padding:5.6vh 3.6vw 4.4vh;justify-content:space-between">
+        <div class="chrome-min">
+          <div class="l">CORE CLAIMS</div>
+          <div class="r">03 POINTS</div>
+        </div>
+        <div data-anim="rules" style="display:flex;flex-direction:column;gap:0">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2vw;align-items:start;padding:2.6vh 0;border-top:1px solid var(--border-subtle)">
+            <div style="font-family:var(--sans);font-weight:200;font-size:min(4.4vw,7.8vh);line-height:.9;color:var(--text-primary)">01</div>
+            <div>
+              <h3 style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.8vw);line-height:1.2;letter-spacing:-.015em;color:var(--text-primary);margin-bottom:1vh">MVP已运行，不是PPT产品</h3>
+              <p style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.6;color:var(--text-secondary);font-weight:400">小学奥数项目已完整闭环可运行，项目制系统蓝图完备，正在Phase 1/2/3执行。</p>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2vw;align-items:start;padding:2.6vh 0;border-top:1px solid var(--border-subtle)">
+            <div style="font-family:var(--sans);font-weight:200;font-size:min(4.4vw,7.8vh);line-height:.9;color:var(--text-primary)">02</div>
+            <div>
+              <h3 style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.8vw);line-height:1.2;letter-spacing:-.015em;color:var(--text-primary);margin-bottom:1vh">创始人就是用户，场景真实</h3>
+              <p style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.6;color:var(--text-secondary);font-weight:400">孩子正在备考华杯，三个场景（奥数/游泳/雅思）已在家庭内部验证闭环。</p>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2vw;align-items:start;padding:2.6vh 0;border-top:1px solid var(--border-subtle);border-bottom:2px solid var(--accent)">
+            <div style="font-family:var(--sans);font-weight:200;font-size:min(4.4vw,7.8vh);line-height:.9;color:var(--accent)">03</div>
+            <div>
+              <h3 style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.8vw);line-height:1.2;letter-spacing:-.015em;color:var(--accent);margin-bottom:1vh">南沙是最自然的第一步</h3>
+              <p style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.6;color:var(--text-secondary);font-weight:400">家庭在南沙，凤凰花是最精准的B2B渠道，高校生态提供研发背书。彼此成就。</p>
+            </div>
+          </div>
+        </div>
+        <div data-anim="foot" class="t-meta" style="color:var(--text-helper);text-align:right">→ 完 · END OF DECK</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+const deck=document.getElementById('deck');
+function isSlideVisible(s){return getComputedStyle(s).display!=='none'}
+const slides=[...deck.querySelectorAll('.slide')].filter(isSlideVisible);
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+deck.style.width=(total*100)+'vw';
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex=idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const isDark=el.classList.contains('dark')||el.classList.contains('accent');
+  document.body.classList.toggle('dark-bg',isDark);
+  if(window.__playSlide)setTimeout(()=>window.__playSlide(idx),450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(250,250,248,.96);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;overflow:hidden;border:2px solid '+(i===idx?'var(--accent)':'rgba(0,0,0,.12)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(0,0,0,.4)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'var(--accent)':'rgba(0,0,0,.12)';
+    const wrap=document.createElement('div');
+    const isDark=s.classList.contains('dark')||s.classList.contains('accent');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(isDark?'var(--ink)':'var(--paper)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key&&e.key.toLowerCase()==='b'&&!e.metaKey&&!e.ctrlKey&&!e.altKey){e.preventDefault();window.__setLowPowerMode(!window.__lowPowerMode);return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){go(idx+1);return;}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){go(idx+(wheelAcc>0?1:-1));wheelAcc=0;}
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  const dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1));
+},{passive:true});
+const initialSlide=new URLSearchParams(location.search).get('slide');
+go(initialSlide?Number(initialSlide)-1:0);
+</script>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>if(window.lucide)lucide.createIcons();</script>
+
+<script type="module">
+let motion;
+try{motion=await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');}
+catch(e){console.warn('[motion] CDN failed, disabling animations');document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});}
+
+if(motion){
+  const{animate}=motion;
+  document.body.classList.add('motion-ready');
+  const EASE_PROD=[.2,0,.38,.9];
+  const EASE_ENTRY_EXP=[0,0,.3,1];
+  const deckEl=document.getElementById('deck');
+  const slides=[...deckEl.querySelectorAll('.slide')].filter(s=>getComputedStyle(s).display!=='none');
+  const fade=(el,opts={})=>animate(el,{opacity:[0,1],y:[opts.y??12,0]},{duration:opts.duration??.6,delay:opts.delay??0,easing:opts.easing??EASE_ENTRY_EXP});
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='';el.style.transform='';});
+  }
+  function rHero(slide,all){
+    const chrome=slide.querySelector('.chrome-min');
+    if(chrome)animate(chrome,{opacity:[0,1]},{duration:.24,easing:EASE_PROD});
+    all.forEach((el,i)=>fade(el,{delay:.15+i*.1}));
+  }
+  function rStatement(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.5,y:6});
+    const blocks=all.filter(el=>el!==head);
+    blocks.forEach((el,i)=>animate(el,{opacity:[0,1],y:[20,0]},{duration:.55,delay:.25+i*.18,easing:EASE_ENTRY_EXP}));
+  }
+  function rWhyNow(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.55,y:10});
+    const grid=slide.querySelector('[data-anim="up"]');
+    if(!grid)return;
+    animate(grid,{opacity:[0,1]},{duration:.3,delay:.35,easing:EASE_PROD});
+    const cols=[...grid.children];
+    cols.forEach((col,i)=>{
+      const base=.5+i*.16;
+      const body=col.querySelector(':scope>div:not(:last-child)');
+      const big=col.querySelector(':scope>div:last-child');
+      if(body)animate(body,{opacity:[0,1],y:[14,0]},{duration:.55,delay:base,easing:EASE_ENTRY_EXP});
+      if(big)animate(big,{opacity:[0,1],scale:[.7,1]},{duration:.7,delay:base+.35,easing:EASE_ENTRY_EXP});
+    });
+  }
+  function rDuoMirror(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.6,y:10});
+    const cols=[...slide.querySelectorAll('.duo-compare .col')];
+    const vrule=slide.querySelector('.duo-compare .vrule');
+    if(cols[0])animate(cols[0],{opacity:[0,1],x:[-24,0]},{duration:.65,delay:.4,easing:EASE_ENTRY_EXP});
+    if(vrule){vrule.style.transformOrigin='center';animate(vrule,{opacity:[0,1],scaleY:[0,1]},{duration:.55,delay:.55,easing:EASE_ENTRY_EXP});}
+    if(cols[1])animate(cols[1],{opacity:[0,1],x:[24,0]},{duration:.65,delay:.7,easing:EASE_ENTRY_EXP});
+    const foot=slide.querySelector('.t-meta');
+    if(foot)animate(foot,{opacity:[0,1]},{duration:.3,delay:1.3,easing:EASE_PROD});
+  }
+  function rLoopForm(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.55,y:10});
+    const grid=slide.querySelector('[data-anim="up"]');
+    if(grid)animate(grid,{opacity:[0,1]},{duration:.3,delay:.35,easing:EASE_PROD});
+    const steps=grid?[...grid.querySelectorAll(':scope>div:first-child>div')]:[];
+    steps.forEach((step,i)=>animate(step,{opacity:[0,1],x:[-18,0]},{duration:.5,delay:.5+i*.14,easing:EASE_ENTRY_EXP}));
+    const svg=grid?.querySelector('svg');
+    if(svg){
+      const ring=svg.querySelector('circle:first-of-type');
+      if(ring)animate(ring,{opacity:[0,.25]},{duration:.5,delay:.6,easing:EASE_PROD});
+      const nodeCircles=[...svg.querySelectorAll('circle')].slice(1);
+      nodeCircles.forEach((c,i)=>{
+        c.style.transformOrigin=`${c.getAttribute('cx')}px ${c.getAttribute('cy')}px`;
+        animate(c,{opacity:[0,1],scale:[.4,1]},{duration:.45,delay:.7+i*.16,easing:EASE_ENTRY_EXP});
+      });
+    }
+  }
+  function rThreeForces(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.5,y:8});
+    const grid=slide.querySelector('[data-anim="up"]');
+    if(grid)animate(grid,{opacity:[0,1]},{duration:.3,delay:.3,easing:EASE_PROD});
+    const heroBlock=grid?.querySelector(':scope>div:first-child');
+    if(heroBlock)animate(heroBlock,{opacity:[0,1],x:[-26,0]},{duration:.6,delay:.4,easing:EASE_ENTRY_EXP});
+    const cards=grid?[...grid.querySelectorAll(':scope>div:nth-child(2)>.card-fill')]:[];
+    cards.forEach((card,i)=>{
+      const base=.6+i*.18;
+      animate(card,{opacity:[0,1],x:[28,0]},{duration:.6,delay:base,easing:EASE_ENTRY_EXP});
+    });
+  }
+  function rFourCards(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head){
+      const topRule=head.querySelector(':scope>div:first-child');
+      if(topRule){topRule.style.transformOrigin='left center';animate(topRule,{opacity:[0,1],scaleX:[0,1]},{duration:.5,delay:.1,easing:EASE_ENTRY_EXP});}
+      fade(head,{duration:.55,y:10,delay:.25});
+      const title=head.querySelector(':scope>h2,:scope>.h-md');
+      if(title)animate(title,{opacity:[0,1],y:[14,0]},{duration:.55,delay:.4,easing:EASE_ENTRY_EXP});
+    }
+    const grid=slide.querySelector('[data-anim="up"]');
+    if(!grid)return;
+    animate(grid,{opacity:[0,1]},{duration:.3,delay:.55,easing:EASE_PROD});
+    const cards=[...grid.querySelectorAll(':scope > .sub-card, :scope > div .sub-card')];
+    cards.forEach((card,i)=>animate(card,{opacity:[0,1],y:[18,0]},{duration:.55,delay:.7+i*.1,easing:EASE_ENTRY_EXP}));
+  }
+  function rStackedLedger(slide,all){
+    const ledger=slide.querySelector('[data-anim="ledger"]');
+    if(!ledger)return;
+    animate(ledger,{opacity:[0,1]},{duration:.3,delay:.1,easing:EASE_PROD});
+    const rows=[...ledger.querySelectorAll('.ledger-row')];
+    rows.forEach((row,i)=>{
+      const base=.25+i*.18;
+      const num=row.querySelector('.ledger-num');
+      const label=row.querySelector('.ledger-label');
+      const icon=row.querySelector('.ledger-icon');
+      if(num)animate(num,{opacity:[0,1],y:[20,0]},{duration:.7,delay:base,easing:EASE_ENTRY_EXP});
+      if(label)animate(label,{opacity:[0,1],x:[-12,0]},{duration:.55,delay:base+.12,easing:EASE_ENTRY_EXP});
+      if(icon)animate(icon,{opacity:[0,1]},{duration:.4,delay:base+.22,easing:EASE_PROD});
+    });
+  }
+  function rFieldNotes(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.55,y:10});
+    const grid=slide.querySelector('[data-anim="up"]');
+    if(!grid)return;
+    animate(grid,{opacity:[0,1]},{duration:.3,delay:.35,easing:EASE_PROD});
+    const order=[0,3,1,4,2,5];
+    const cards=[...grid.children];
+    order.forEach((idx,i)=>{
+      const card=cards[idx];
+      if(!card)return;
+      animate(card,{opacity:[0,1],y:[18,0],rotate:[(idx%2?-.6:.6),0]},{duration:.55,delay:.5+i*.11,easing:EASE_ENTRY_EXP});
+    });
+  }
+  function rTimelineWalk(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.55,y:10});
+    const tl=slide.querySelector('.timeline-h');
+    if(tl)animate(tl,{opacity:[0,1]},{duration:.4,delay:.35,easing:EASE_PROD});
+    const nodes=[...slide.querySelectorAll('.timeline-h .th-node')];
+    nodes.forEach((node,i)=>{
+      const base=.55+i*.18;
+      const dot=node.querySelector('.dot');
+      const label=node.querySelector('.label');
+      if(dot){dot.style.transformOrigin='center';animate(dot,{opacity:[0,1],scale:[.2,1]},{duration:.45,delay:base,easing:EASE_ENTRY_EXP});}
+      if(label){
+        const fromY=node.classList.contains('up')?8:-8;
+        animate(label,{opacity:[0,1],transform:[`translate(-50%,${fromY}px)`,'translate(-50%,0px)']},{duration:.5,delay:base+.12,easing:EASE_ENTRY_EXP});
+      }
+    });
+    const foot=slide.querySelector('.t-meta');
+    if(foot)animate(foot,{opacity:[0,1]},{duration:.3,delay:1.7,easing:EASE_PROD});
+  }
+  function rManifesto(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head){
+      const cat=head.querySelector('.t-cat');
+      const title=head.querySelector('div:nth-child(2)');
+      if(cat)animate(cat,{opacity:[0,1],x:[-10,0]},{duration:.4,delay:.1,easing:EASE_PROD});
+      if(title)animate(title,{opacity:[0,1],y:[26,0]},{duration:.85,delay:.3,easing:EASE_ENTRY_EXP});
+    }
+    const foot=[...slide.querySelectorAll('[data-anim="up"]')];
+    foot.forEach((el,i)=>animate(el,{opacity:[0,1],y:[40,0]},{duration:.75,delay:.85+i*.12,easing:EASE_ENTRY_EXP}));
+  }
+  function rSplitStatement(slide,all){
+    const halves=[...slide.querySelectorAll('.half')];
+    if(halves[0])animate(halves[0],{opacity:[0,1]},{duration:.4,easing:EASE_PROD});
+    if(halves[1])animate(halves[1],{opacity:[0,1]},{duration:.4,delay:.3,easing:EASE_PROD});
+    const manifesto=slide.querySelector('[data-anim="manifesto"]');
+    if(manifesto)animate(manifesto,{opacity:[0,1],y:[22,0]},{duration:.7,delay:.45,easing:EASE_ENTRY_EXP});
+    const signature=slide.querySelector('[data-anim="signature"]');
+    if(signature)animate(signature,{opacity:[0,1],y:[12,0]},{duration:.5,delay:.95,easing:EASE_ENTRY_EXP});
+    const items=[...slide.querySelectorAll('[data-anim="rules"] > div')];
+    items.forEach((li,i)=>animate(li,{opacity:[0,1],x:[20,0]},{duration:.45,delay:.75+i*.12,easing:EASE_ENTRY_EXP}));
+    const foot=slide.querySelector('[data-anim="foot"]');
+    if(foot)animate(foot,{opacity:[0,1]},{duration:.35,delay:1.35,easing:EASE_PROD});
+  }
+  function rGridReveal(slide,all){
+    const head=slide.querySelector('[data-anim="line"]');
+    if(head)fade(head,{duration:.6,y:10});
+    const cards=[...slide.querySelectorAll('.sub-card')];
+    cards.forEach((card,i)=>animate(card,{opacity:[0,1],y:[20,0],scale:[.96,1]},{duration:.5,delay:.3+i*.09,easing:EASE_ENTRY_EXP}));
+  }
+  const RECIPES={
+    'hero':rHero,'statement':rStatement,'why-now':rWhyNow,'duo-mirror':rDuoMirror,
+    'loop-form':rLoopForm,'three-forces':rThreeForces,'four-cards':rFourCards,
+    'stacked-ledger':rStackedLedger,'field-notes':rFieldNotes,'timeline-walk':rTimelineWalk,
+    'manifesto':rManifesto,'split-statement':rSplitStatement,'grid-reveal':rGridReveal,
+  };
+  function revealStatic(slide){
+    resetAnims(slide);
+    slide.querySelectorAll('[data-anim],.ledger-row,.sub-card,.col,.vrule').forEach(el=>{el.style.opacity='1';el.style.transform='none';});
+  }
+  function settleSlide(slide){
+    resetAnims(slide);
+    slide.querySelectorAll('[data-anim],.sub-card,.ledger-row').forEach(el=>{el.style.opacity='1';el.style.transform='none';});
+  }
+  function playSlide(i){
+    const slide=slides[i];
+    if(!slide)return;
+    slides.forEach((s,j)=>{if(j!==i)settleSlide(s);});
+    if(window.__lowPowerMode){revealStatic(slide);return;}
+    resetAnims(slide);
+    slide.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none';});
+    const all=[...slide.querySelectorAll('[data-anim]')];
+    const recipe=slide.dataset.animate;
+    const fn=RECIPES[recipe];
+    if(fn){fn(slide,all);return;}
+    if(all.length)animate(all,{opacity:[0,1],y:[12,0]},{duration:.6,delay:stagger=>stagger*.08,easing:EASE_ENTRY_EXP});
+  }
+  window.__playSlide=playSlide;
+  window.__pipeAdvance=()=>false;
+  playSlide(window.__currentSlideIndex||0);
+}
+</script>
+
+<script>
+(function(){
+  const canvases=[...document.querySelectorAll('canvas.ascii-bg')];
+  if(!canvases.length)return;
+  const PALETTE='   ...:::---+++***◦◦••▢▣';
+  const CELL=16,FONT_SIZE=13;
+  function setup(c){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const rect=c.getBoundingClientRect();
+    if(rect.width<4||rect.height<4)return false;
+    c.width=Math.round(rect.width*dpr);c.height=Math.round(rect.height*dpr);
+    c.__dpr=dpr;c.__w=rect.width;c.__h=rect.height;
+    const ctx=c.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const mono=(getComputedStyle(document.documentElement).getPropertyValue('--mono')||'JetBrains Mono,monospace').trim();
+    ctx.font=`500 ${FONT_SIZE}px ${mono}`;ctx.textBaseline='top';c.__ctx=ctx;return true;
+  }
+  function draw(c,t){
+    if(!c.__ctx)return;
+    const ctx=c.__ctx,w=c.__w,h=c.__h;
+    ctx.clearRect(0,0,w,h);
+    const cols=Math.ceil(w/CELL),rows=Math.ceil(h/CELL);
+    for(let r=0;r<rows;r++){
+      for(let cc=0;cc<cols;cc++){
+        const n=(Math.sin(cc*.18+t)+Math.sin(r*.24-t*.7)+Math.sin((cc+r)*.12+t*.45)+Math.sin(Math.hypot(cc-cols*.5,r-rows*.5)*.16-t*.55))/4;
+        const v=(n+1)/2;
+        if(v<.22)continue;
+        const idx=Math.min(PALETTE.length-1,Math.floor(v*PALETTE.length));
+        const ch=PALETTE[idx];
+        if(ch===' ')continue;
+        const alpha=.08+(v-.22)*.55;
+        ctx.fillStyle=`rgba(255,255,255,${alpha.toFixed(3)})`;
+        ctx.fillText(ch,cc*CELL,r*CELL);
+      }
+    }
+  }
+  function resizeAll(){canvases.forEach(setup);}
+  let pending=null;
+  window.addEventListener('resize',()=>{if(window.__lowPowerMode)return;if(pending)cancelAnimationFrame(pending);pending=requestAnimationFrame(resizeAll);},{passive:true});
+  let t0=performance.now(),frame=0,asciiRAF=0,running=false;
+  function tick(now){
+    if(!running||window.__lowPowerMode){running=false;asciiRAF=0;return;}
+    const t=(now-t0)/1000*.55;frame++;
+    canvases.forEach(c=>{
+      const slide=c.closest('.slide');
+      const rect=slide?slide.getBoundingClientRect():null;
+      const onscreen=rect&&rect.right>0&&rect.left<window.innerWidth;
+      if(!onscreen&&(frame&3)!==0)return;
+      draw(c,t);
+    });
+    asciiRAF=requestAnimationFrame(tick);
+  }
+  function start(){
+    if(running||window.__lowPowerMode)return;
+    resizeAll();t0=performance.now();frame=0;running=true;asciiRAF=requestAnimationFrame(tick);
+  }
+  function stop(){
+    running=false;
+    if(asciiRAF)cancelAnimationFrame(asciiRAF);
+    if(pending)cancelAnimationFrame(pending);
+    asciiRAF=0;pending=null;
+    canvases.forEach(c=>{if(c.__ctx)c.__ctx.clearRect(0,0,c.__w||0,c.__h||0);});
+  }
+  addEventListener('swiss-low-power-change',e=>{e.detail.on?stop():start();});
+  start();
+})();
+</script>
+</body>
+</html>

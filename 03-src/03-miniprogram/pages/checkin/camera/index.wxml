@@ -1,0 +1,96 @@
+<view class="camera-page">
+
+  <!-- 顶部安全区 -->
+  <view style="height:{{statusBarHeight}}px" class="status-bar"></view>
+
+  <!-- 顶部导航栏 -->
+  <view class="top-bar">
+    <view class="top-btn" bindtap="onClose">
+      <text class="top-btn-icon">✕</text>
+    </view>
+    <text class="top-title">{{chapterName || '拍照上传'}}</text>
+    <view class="top-btn top-btn-help" bindtap="onHelp">
+      <text class="top-btn-help-text">帮助</text>
+    </view>
+  </view>
+
+  <!-- 模式切换 Tab -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{mode === 'full' ? 'tab-active' : ''}}"
+      bindtap="onModeSwitch"
+      data-mode="full"
+    >整张卷子</view>
+    <view
+      class="tab-item {{mode === 'single' ? 'tab-active' : ''}}"
+      bindtap="onModeSwitch"
+      data-mode="single"
+    >单题拍摄</view>
+  </view>
+
+  <!-- 取景框 / 预览区 -->
+  <view class="viewfinder">
+
+    <!-- 已拍照：显示预览 -->
+    <image wx:if="{{imageUrl}}" src="{{imageUrl}}" class="preview-img" mode="aspectFill" />
+
+    <!-- 未拍照：取景框提示 -->
+    <view wx:else class="finder-overlay">
+      <!-- 四角标记 -->
+      <view class="corner corner-tl"></view>
+      <view class="corner corner-tr"></view>
+      <view class="corner corner-bl"></view>
+      <view class="corner corner-br"></view>
+
+      <!-- 中间提示文字（随模式切换） -->
+      <view class="finder-hint">
+        <block wx:if="{{mode === 'full'}}">
+          <text class="hint-line">将试卷放入框内</text>
+          <text class="hint-line">自动识别题目边缘</text>
+        </block>
+        <block wx:else>
+          <text class="hint-line">框住单道题目</text>
+          <text class="hint-line">自动裁切识别</text>
+        </block>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+
+    <!-- 相册选择 -->
+    <view class="album-btn" bindtap="onChooseFromAlbum">
+      <text class="album-icon">⊞</text>
+      <text class="album-label">相册选择</text>
+    </view>
+
+    <!-- 拍摄 / 重拍 / 确认 -->
+    <view wx:if="{{!imageUrl}}" class="capture-btn" bindtap="onCapture">
+      <view class="capture-inner"></view>
+    </view>
+    <view wx:elif="{{imageUrl}}" class="capture-area">
+      <view class="retake-btn" bindtap="onRetake">重拍</view>
+      <view class="confirm-btn {{uploading ? 'uploading' : ''}}" bindtap="onUpload">
+        <text wx:if="{{!uploading}}">✓</text>
+        <text wx:else>…</text>
+      </view>
+    </view>
+
+    <!-- 右侧占位（保持中间对称） -->
+    <view class="bottom-spacer"></view>
+
+  </view>
+
+  <!-- 上传进度浮层 -->
+  <view wx:if="{{uploading}}" class="upload-mask">
+    <view class="upload-progress-box">
+      <text class="upload-progress-label">上传中 {{uploadProgress}}%</text>
+      <view class="upload-bar-track">
+        <view class="upload-bar-fill" style="width:{{uploadProgress}}%"></view>
+      </view>
+    </view>
+  </view>
+
+</view>

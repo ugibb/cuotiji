@@ -1,0 +1,402 @@
+/* ── 每日复习页 ── */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F5F6FA;
+}
+
+/* ── 导航栏（紫色渐变，与首页一致） ── */
+.nav-wrap {
+  background: linear-gradient(135deg, #5B5FC7 0%, #4338CA 100%);
+  flex-shrink: 0;
+}
+
+.nav-bar {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+}
+
+.nav-back {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav-back-icon {
+  font-size: 52rpx;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
+  margin-top: -4rpx;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-counter {
+  width: 80rpx;
+  text-align: right;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+/* 进度条 */
+.prog-track {
+  height: 4rpx;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.prog-fill {
+  height: 100%;
+  background: #fff;
+  transition: width 0.4s ease;
+}
+
+/* ── 加载 ── */
+.loading-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+}
+
+.spinner {
+  width: 64rpx;
+  height: 64rpx;
+  border: 6rpx solid rgba(91, 95, 199, 0.15);
+  border-top-color: #5B5FC7;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 26rpx;
+  color: #9CA3AF;
+}
+
+/* ── 完成屏 ── */
+.done-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64rpx 48rpx 0;
+}
+
+.done-medal {
+  width: 180rpx;
+  height: 180rpx;
+  background: #EEF0FF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+.done-medal-emoji {
+  font-size: 72rpx;
+  line-height: 1;
+}
+
+.done-count {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #5B5FC7;
+  line-height: 1;
+  letter-spacing: -2rpx;
+}
+
+.done-count-sub {
+  font-size: 24rpx;
+  color: #9B9FE4;
+  margin-bottom: 32rpx;
+  margin-top: 6rpx;
+}
+
+.done-title {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 12rpx;
+}
+
+.done-sub {
+  font-size: 26rpx;
+  color: #9CA3AF;
+  text-align: center;
+  line-height: 1.7;
+  margin-bottom: 56rpx;
+}
+
+/* 打卡按钮 — 对齐首页 btn-action-primary 风格 */
+.checkin-btn {
+  width: 100%;
+  height: 100rpx;
+  background: linear-gradient(135deg, #5B5FC7, #4338CA);
+  border-radius: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkin-btn-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2rpx;
+}
+
+.checked-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  background: #EEF0FF;
+  border-radius: 32rpx;
+  padding: 32rpx 60rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.checked-badge-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #5B5FC7;
+}
+
+.streak-text {
+  font-size: 26rpx;
+  color: #9B9FE4;
+}
+
+/* ── 复习区 ── */
+.review-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ── 翻转卡片 ── */
+.card-scene {
+  flex: 1;
+  perspective: 2000rpx;
+  padding: 24rpx 24rpx 16rpx;
+  min-height: 0;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card--flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 32rpx;
+  overflow: hidden;
+}
+
+/* 正面 */
+.front {
+  background: #fff;
+  box-shadow: 0 4rpx 32rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 36rpx;
+}
+
+.front-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28rpx;
+  flex-shrink: 0;
+}
+
+.front-label {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.kp-chip {
+  background: #EEF0FF;
+  border-radius: 100rpx;
+  padding: 6rpx 18rpx;
+  max-width: 300rpx;
+}
+
+.kp-chip-text {
+  font-size: 22rpx;
+  color: #5B5FC7;
+  font-weight: 600;
+}
+
+.q-text {
+  flex: 1;
+  font-size: 32rpx;
+  color: #111827;
+  line-height: 1.8;
+}
+
+.front-footer {
+  flex-shrink: 0;
+  border-top: 1rpx solid #F3F4F6;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.front-footer-text {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+/* 背面 */
+.back {
+  background: #1a1a2e;
+  transform: rotateY(180deg);
+}
+
+.back-scroll {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 36rpx;
+}
+
+.answer-block {
+  background: rgba(91, 95, 199, 0.18);
+  border-left: 5rpx solid #7B7FE7;
+  border-radius: 0 16rpx 16rpx 0;
+  padding: 20rpx 24rpx;
+  margin-bottom: 28rpx;
+}
+
+.answer-label {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.4);
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.answer-val {
+  font-size: 44rpx;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -1rpx;
+}
+
+.back-divider {
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 24rpx;
+}
+
+.analysis-item {
+  margin-bottom: 24rpx;
+}
+
+.analysis-tag {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.analysis-body {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.7;
+}
+
+/* ── 底部操作浮层 ── */
+.bottom-bar {
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1rpx solid #F0F1F5;
+  padding: 20rpx 32rpx 0;
+}
+
+.action-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn-practice {
+  flex: 1;
+  background: #F5F6FA;
+  border: 1.5rpx solid #E5E7EB;
+  border-radius: 100rpx;
+  height: 96rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+}
+
+.btn-mastered {
+  flex: 1;
+  background: linear-gradient(135deg, #5B5FC7, #4338CA);
+  border-radius: 100rpx;
+  height: 96rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+}
+
+.btn-disabled { opacity: 0.4; }
+
+.btn-icon {
+  font-size: 28rpx;
+  color: #6B7280;
+}
+
+.btn-icon-w { color: rgba(255, 255, 255, 0.85); }
+
+.btn-label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #374151;
+}
+
+.btn-label-w { color: #fff; }
+
+.hint-row {
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}

@@ -1,0 +1,768 @@
+// ============================================================================
+// Prisma Schema · cuoti-ai
+// Provider : MySQL 5.7  (pbl @ 123.207.64.65:3306)
+// 域前缀   : usr_ | knl_ | onb_ | pla_ | stu_ | pre_
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ── 枚举 ──────────────────────────────────────────────────────────────────────
+
+enum AssignmentStatus {
+  ocr_pending
+  ocr_done
+  grading
+  graded
+  reviewed
+}
+
+enum ProblemResult {
+  correct
+  wrong
+  unknown
+}
+
+enum ReviewStatusEnum {
+  pending
+  done
+}
+
+enum DialogueRole {
+  ai
+  student
+}
+
+enum AiContextType {
+  assessment_report
+  milestone_retro
+  problem_chat
+  plan_confirm
+}
+
+enum PrepReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+enum PrepQuestionType {
+  fill
+  choice
+  open
+}
+
+// ============================================================================
+// [usr_] 身份与学生
+// ============================================================================
+
+model Usr_User {
+  id          BigInt   @id @default(autoincrement())
+  openid      String   @unique @db.VarChar(64)
+  nickname    String?  @db.VarChar(32)
+  parentPhone String?  @map("parent_phone") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  students Usr_Student[]
+
+  @@map("usr_users")
+}
+
+model Usr_Student {
+  id                 BigInt   @id @default(autoincrement())
+  userId             BigInt   @map("user_id")
+  name               String   @db.VarChar(32)
+  grade              Int      @db.SmallInt
+  avatar             String?  @db.VarChar(512)
+  isDefault          Boolean  @default(false) @map("is_default")
+  onboardingAnswers  Json?    @map("onboarding_answers")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user            Usr_User               @relation(fields: [userId], references: [id])
+  learningProjects Pla_LearningProject[]
+  skillMastery    Onb_SkillMastery[]
+  topicScores     Onb_TopicScore[]
+  trainingPlans   Stu_TrainingPlan[]
+  assignments     Stu_Assignment[]
+  aiDialogues     Stu_AiDialogue[]
+  dailyCheckIns   Stu_DailyCheckIn[]
+
+  @@index([userId])
+  @@map("usr_students")
+}
+
+// ============================================================================
+// [knl_] 知识体系与题库
+// ============================================================================
+
+model Knl_System {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(64)
+  description String? @db.Text
+  isActive    Boolean @default(true) @map("is_active")
+
+  modules Knl_Module[]
+
+  @@map("knl_systems")
+}
+
+model Knl_Module {
+  id             Int     @id @default(autoincrement())
+  systemId       Int     @map("system_id")
+  name           String  @db.VarChar(64)
+  description    String? @db.Text
+  examWeight     Decimal @default(0) @map("exam_weight") @db.Decimal(4, 2)
+  olympiadWeight Decimal @default(0) @map("olympiad_weight") @db.Decimal(4, 2)
+  sortOrder      Int     @default(0) @map("sort_order")
+
+  system Knl_System  @relation(fields: [systemId], references: [id])
+  topics Knl_Topic[]
+
+  @@index([systemId])
+  @@map("knl_modules")
+}
+
+model Knl_Topic {
+  id          BigInt  @id @default(autoincrement())
+  moduleId    Int     @map("module_id")
+  name        String  @db.VarChar(128)
+  description String? @db.Text
+  gradeStart  Int?    @map("grade_start") @db.SmallInt
+  gradeEnd    Int?    @map("grade_end") @db.SmallInt
+  difficulty  Int     @default(1) @db.SmallInt
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  module      Knl_Module         @relation(fields: [moduleId], references: [id])
+  skills      Knl_Skill[]
+  chapters    Knl_Chapter[]
+  topicScores Onb_TopicScore[]
+
+  @@index([moduleId])
+  @@map("knl_topics")
+}
+
+model Knl_Skill {
+  id            BigInt  @id @default(autoincrement())
+  topicId       BigInt  @map("topic_id")
+  name          String  @db.VarChar(128)
+  gradeStart    Int?    @map("grade_start") @db.SmallInt
+  gradeEnd      Int?    @map("grade_end") @db.SmallInt
+  difficulty    Int     @default(1) @db.SmallInt
+  prerequisites Json?
+  errorTypes    Json?   @map("error_types")
+  sortOrder     Int     @default(0) @map("sort_order")
+
+  topic           Knl_Topic                  @relation(fields: [topicId], references: [id])
+  questionSkillMap Knl_QuestionSkillMap[]
+  planItems       Stu_TrainingPlanItem[]
+  skillMastery    Onb_SkillMastery[]
+  wrongAnswerMap  Stu_WrongAnswerSkillMap[]
+  assessmentResults Onb_AssessmentResult[]
+
+  @@index([topicId])
+  @@map("knl_skills")
+}
+
+model Knl_Chapter {
+  id        Int     @id @default(autoincrement())
+  code      String  @unique @db.VarChar(32)
+  name      String  @db.VarChar(64)
+  subtitle  String? @db.VarChar(128)
+  grade     Int     @default(0) @db.SmallInt
+  sortOrder Int     @default(0) @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+  topicId   BigInt? @map("topic_id")
+
+  topic         Knl_Topic?       @relation(fields: [topicId], references: [id])
+  trainingPlans Stu_TrainingPlan[]
+  assignments   Stu_Assignment[]
+
+  @@map("knl_chapters")
+}
+
+model Knl_Question {
+  id               BigInt   @id @default(autoincrement())
+  sourceMaterial   String?  @map("source_material") @db.VarChar(128)
+  sourceQuestionNo String?  @map("source_question_no") @db.VarChar(32)
+  grade            Int?     @db.SmallInt
+  difficulty       Int      @default(1) @db.SmallInt
+  stemLatex        String   @map("stem_latex") @db.Text
+  options          Json?
+  answerLatex      String?  @map("answer_latex") @db.Text
+  solutionLatex    String?  @map("solution_latex") @db.Text
+  trapDesc         String?  @map("trap_desc") @db.Text
+  errorHints       String?  @map("error_hints") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  skillMap          Knl_QuestionSkillMap[]
+  solutions         Knl_QuestionSolution[]
+  poolMap           Onb_PoolQuestionMap[]
+  assessmentResults Onb_AssessmentResult[]
+  planItems         Stu_TrainingPlanItem[]
+
+  @@map("knl_questions")
+}
+
+model Knl_QuestionSkillMap {
+  questionId BigInt  @map("question_id")
+  skillId    BigInt  @map("skill_id")
+  isPrimary  Boolean @default(false) @map("is_primary")
+  confidence Decimal @default(1.0) @db.Decimal(4, 2)
+
+  question Knl_Question @relation(fields: [questionId], references: [id])
+  skill    Knl_Skill    @relation(fields: [skillId], references: [id])
+
+  @@id([questionId, skillId])
+  @@index([skillId])
+  @@map("knl_question_skill_map")
+}
+
+model Knl_QuestionSolution {
+  id            BigInt   @id @default(autoincrement())
+  questionId    BigInt   @map("question_id")
+  methodSeq     Int      @default(1) @map("method_seq") @db.SmallInt
+  title         String?  @db.VarChar(128)
+  summary       String?  @db.Text
+  solutionLatex String?  @map("solution_latex") @db.Text
+  isPrimary     Boolean  @default(false) @map("is_primary")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  question Knl_Question @relation(fields: [questionId], references: [id])
+
+  @@unique([questionId, methodSeq])
+  @@map("knl_question_solutions")
+}
+
+// ============================================================================
+// [pla_] 项目与计划  ← 先于 onb_ 定义（onb_ability_assessments 引用它）
+// ============================================================================
+
+model Pla_Type {
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(64)
+  subject     String? @db.VarChar(64)
+  gradeRange  String? @map("grade_range") @db.VarChar(32)
+  description String? @db.Text
+  isActive    Boolean @default(true) @map("is_active")
+
+  projects Pla_LearningProject[]
+
+  @@map("pla_types")
+}
+
+model Pla_LearningProject {
+  id         BigInt   @id @default(autoincrement())
+  studentId  BigInt   @map("student_id")
+  typeId     Int?     @map("type_id")
+  targetDate DateTime? @map("target_date") @db.Date
+  goalLevel  String?  @map("goal_level") @db.VarChar(32)
+  status     String   @default("assessing") @db.VarChar(32)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  student       Usr_Student              @relation(fields: [studentId], references: [id])
+  type          Pla_Type?                @relation(fields: [typeId], references: [id])
+  assessment    Onb_AbilityAssessment?
+  sprintPlan    Pla_SprintPlan?
+  projectRetro  Pla_ProjectRetro?
+  aiDialogues   Stu_AiDialogue[]
+
+  @@index([studentId])
+  @@map("pla_learning_projects")
+}
+
+model Pla_SprintPlan {
+  id              BigInt    @id @default(autoincrement())
+  projectId       BigInt    @unique @map("project_id")
+  generatedAt     DateTime  @default(now()) @map("generated_at")
+  confirmedAt     DateTime? @map("confirmed_at")
+  totalDays       Int?      @map("total_days")
+  planData        Json?     @map("plan_data")
+  competitionName String?   @map("competition_name") @db.VarChar(128)
+  goalType        String?   @map("goal_type") @db.VarChar(32)
+  targetScore     Decimal?  @map("target_score") @db.Decimal(5, 2)
+  overallLevel    String?   @map("overall_level") @db.VarChar(16)
+  dailyMinutes    Int?      @map("daily_minutes") @db.SmallInt
+
+  project       Pla_LearningProject @relation(fields: [projectId], references: [id])
+  milestones    Pla_Milestone[]
+  trainingPlans Stu_TrainingPlan[]
+
+  @@map("pla_sprint_plans")
+}
+
+model Pla_Milestone {
+  id            BigInt    @id @default(autoincrement())
+  sprintPlanId  BigInt    @map("sprint_plan_id")
+  seq           Int       @db.SmallInt
+  name          String    @db.VarChar(64)
+  focusTopicIds Json?     @map("focus_topic_ids")
+  focusSkillIds Json?     @map("focus_skill_ids")
+  startDate     DateTime? @map("start_date") @db.Date
+  endDate       DateTime? @map("end_date") @db.Date
+  durationDays  Int?      @map("duration_days") @db.SmallInt
+  scoreBefore   Decimal?  @map("score_before") @db.Decimal(5, 2)
+  scoreTarget   Decimal?  @map("score_target") @db.Decimal(5, 2)
+  scoreAfter    Decimal?  @map("score_after") @db.Decimal(5, 2)
+  status        String    @default("locked") @db.VarChar(16)
+  completedAt   DateTime? @map("completed_at")
+
+  sprintPlan    Pla_SprintPlan     @relation(fields: [sprintPlanId], references: [id])
+  retro         Pla_MilestoneRetro?
+  trainingPlans Stu_TrainingPlan[]
+
+  @@unique([sprintPlanId, seq])
+  @@index([sprintPlanId])
+  @@map("pla_milestones")
+}
+
+model Pla_MilestoneRetro {
+  id                 BigInt    @id @default(autoincrement())
+  milestoneId        BigInt    @unique @map("milestone_id")
+  checkinDays        Int?      @map("checkin_days") @db.SmallInt
+  taskCompletionRate Decimal?  @map("task_completion_rate") @db.Decimal(5, 2)
+  scoreBefore        Decimal?  @map("score_before") @db.Decimal(5, 2)
+  scoreAfter         Decimal?  @map("score_after") @db.Decimal(5, 2)
+  q1MemorableTopic   String?   @map("q1_memorable_topic") @db.Text
+  q2MasteryRating    Int?      @map("q2_mastery_rating") @db.SmallInt
+  q3NextFeeling      String?   @map("q3_next_feeling") @db.Text
+  achievementSent    Boolean   @default(false) @map("achievement_sent")
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  milestone Pla_Milestone @relation(fields: [milestoneId], references: [id])
+
+  @@map("pla_milestone_retros")
+}
+
+model Pla_ProjectRetro {
+  id              BigInt   @id @default(autoincrement())
+  projectId       BigInt   @unique @map("project_id")
+  studentReport   Json?    @map("student_report")
+  platformMetrics Json?    @map("platform_metrics")
+  generatedAt     DateTime @default(now()) @map("generated_at")
+
+  project Pla_LearningProject @relation(fields: [projectId], references: [id])
+
+  @@map("pla_project_retros")
+}
+
+// ============================================================================
+// [onb_] 评测 + 能力画像
+// ============================================================================
+
+model Onb_QuestionPool {
+  id             Int      @id @default(autoincrement())
+  grade          Int      @db.SmallInt
+  difficultyBand String   @map("difficulty_band") @db.VarChar(8)
+  poolName       String   @map("pool_name") @db.VarChar(64)
+  version        String   @default("v1") @db.VarChar(16)
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  poolQuestionMap Onb_PoolQuestionMap[]
+
+  @@map("onb_question_pools")
+}
+
+model Onb_PoolQuestionMap {
+  poolId     Int    @map("pool_id")
+  questionId BigInt @map("question_id")
+  orderNum   Int    @default(0) @map("order_num") @db.SmallInt
+
+  pool     Onb_QuestionPool @relation(fields: [poolId], references: [id])
+  question Knl_Question     @relation(fields: [questionId], references: [id])
+
+  @@id([poolId, questionId])
+  @@map("onb_pool_question_map")
+}
+
+model Onb_AbilityAssessment {
+  id           BigInt   @id @default(autoincrement())
+  projectId    BigInt   @unique @map("project_id")
+  intakeData   Json?    @map("intake_data")
+  abilityLevel String?  @map("ability_level") @db.VarChar(16)
+  weakPoints   Json?    @map("weak_points")
+  reportData   Json?    @map("report_data")
+  calibrated   Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  project  Pla_LearningProject      @relation(fields: [projectId], references: [id])
+  sessions Onb_AssessmentSession[]
+
+  @@map("onb_ability_assessments")
+}
+
+model Onb_AssessmentSession {
+  id           BigInt    @id @default(autoincrement())
+  assessmentId BigInt    @map("assessment_id")
+  questions    Json?
+  answers      Json?
+  aiGrading    Json?     @map("ai_grading")
+  completedAt  DateTime? @map("completed_at")
+
+  assessment Onb_AbilityAssessment  @relation(fields: [assessmentId], references: [id])
+  results    Onb_AssessmentResult[]
+
+  @@index([assessmentId])
+  @@map("onb_assessment_sessions")
+}
+
+model Onb_AssessmentResult {
+  id                     BigInt   @id @default(autoincrement())
+  sessionId              BigInt   @map("session_id")
+  questionId             BigInt   @map("question_id")
+  skillId                BigInt?  @map("skill_id")
+  studentAnswer          String?  @map("student_answer") @db.VarChar(256)
+  correctAnswer          String?  @map("correct_answer") @db.VarChar(256)
+  isCorrect              Boolean? @map("is_correct")
+  topicScoreContribution Decimal? @map("topic_score_contribution") @db.Decimal(6, 2)
+
+  session  Onb_AssessmentSession @relation(fields: [sessionId], references: [id])
+  question Knl_Question          @relation(fields: [questionId], references: [id])
+  skill    Knl_Skill?            @relation(fields: [skillId], references: [id])
+
+  @@index([sessionId])
+  @@index([questionId])
+  @@map("onb_assessment_results")
+}
+
+model Onb_SkillMastery {
+  studentId    BigInt   @map("student_id")
+  skillId      BigInt   @map("skill_id")
+  masteryLevel String?  @map("mastery_level") @db.VarChar(16)
+  initialScore Decimal? @map("initial_score") @db.Decimal(5, 2)
+  targetScore  Decimal? @map("target_score") @db.Decimal(5, 2)
+  currentScore Decimal? @map("current_score") @db.Decimal(5, 2)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  student Usr_Student @relation(fields: [studentId], references: [id])
+  skill   Knl_Skill   @relation(fields: [skillId], references: [id])
+
+  @@id([studentId, skillId])
+  @@map("onb_skill_mastery")
+}
+
+model Onb_TopicScore {
+  studentId BigInt   @map("student_id")
+  topicId   BigInt   @map("topic_id")
+  score     Decimal? @db.Decimal(5, 2)
+  trend     Int      @default(0) @db.SmallInt
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  student Usr_Student @relation(fields: [studentId], references: [id])
+  topic   Knl_Topic   @relation(fields: [topicId], references: [id])
+
+  @@id([studentId, topicId])
+  @@map("onb_topic_scores")
+}
+
+// ============================================================================
+// [stu_] 学生执行与错题闭环
+// ============================================================================
+
+model Stu_TrainingPlan {
+  id           BigInt    @id @default(autoincrement())
+  studentId    BigInt    @map("student_id")
+  sprintPlanId BigInt?   @map("sprint_plan_id")
+  milestoneId  BigInt?   @map("milestone_id")
+  chapterId    Int?      @map("chapter_id")
+  planDate     DateTime  @map("plan_date") @db.Date
+  topic        String?   @db.VarChar(128)
+  keyPoints    Json?     @map("key_points")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  student     Usr_Student            @relation(fields: [studentId], references: [id])
+  sprintPlan  Pla_SprintPlan?        @relation(fields: [sprintPlanId], references: [id])
+  milestone   Pla_Milestone?         @relation(fields: [milestoneId], references: [id])
+  chapter     Knl_Chapter?           @relation(fields: [chapterId], references: [id])
+  planItems   Stu_TrainingPlanItem[]
+
+  @@unique([studentId, sprintPlanId, planDate])
+  @@index([studentId])
+  @@map("stu_training_plans")
+}
+
+model Stu_TrainingPlanItem {
+  id          BigInt    @id @default(autoincrement())
+  planId      BigInt    @map("plan_id")
+  skillId     BigInt?   @map("skill_id")
+  questionId  BigInt?   @map("question_id")
+  itemType    String    @default("new_practice") @map("item_type") @db.VarChar(32)
+  orderNum    Int       @default(0) @map("order_num") @db.SmallInt
+  completed   Boolean   @default(false)
+  completedAt DateTime? @map("completed_at")
+
+  plan     Stu_TrainingPlan @relation(fields: [planId], references: [id])
+  skill    Knl_Skill?       @relation(fields: [skillId], references: [id])
+  question Knl_Question?    @relation(fields: [questionId], references: [id])
+
+  @@index([planId])
+  @@map("stu_training_plan_items")
+}
+
+model Stu_Assignment {
+  id             BigInt           @id @default(autoincrement())
+  studentId      BigInt           @map("student_id")
+  chapterId      Int?             @map("chapter_id")
+  planDate       DateTime?        @map("plan_date") @db.Date
+  imageUrl       String           @map("image_url") @db.VarChar(512)
+  imageUrlThumb  String?          @map("image_url_thumb") @db.VarChar(512)
+  status         AssignmentStatus @default(ocr_pending)
+  totalCount     Int              @default(0) @map("total_count")
+  correctCount   Int              @default(0) @map("correct_count")
+  wrongCount     Int              @default(0) @map("wrong_count")
+  unknownCount   Int              @default(0) @map("unknown_count")
+  moodText       String?          @map("mood_text") @db.Text
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  student       Usr_Student          @relation(fields: [studentId], references: [id])
+  chapter       Knl_Chapter?         @relation(fields: [chapterId], references: [id])
+  problems      Stu_Problem[]
+  reviewSession Stu_ReviewSession?
+
+  @@index([studentId, planDate])
+  @@map("stu_assignments")
+}
+
+model Stu_Problem {
+  id             BigInt           @id @default(autoincrement())
+  assignmentId   BigInt           @map("assignment_id")
+  seq            Int
+  ocrText        String?          @map("ocr_text") @db.Text
+  studentAnswer  String?          @map("student_answer") @db.VarChar(256)
+  correctAnswer  String?          @map("correct_answer") @db.VarChar(256)
+  result         ProblemResult
+  knowledgePoint String?          @map("knowledge_point") @db.VarChar(128)
+  trapDesc       String?          @map("trap_desc") @db.Text
+  solutionText   String?          @map("solution_text") @db.Text
+  rootCause      String?          @map("root_cause") @db.Text
+  reviewStatus   ReviewStatusEnum @default(pending) @map("review_status")
+  reviewStage    Int              @default(0) @map("review_stage") @db.SmallInt
+  nextReviewAt   DateTime?        @map("next_review_at")
+  masteredAt     DateTime?        @map("mastered_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  assignment     Stu_Assignment           @relation(fields: [assignmentId], references: [id])
+  dialogues      Stu_Dialogue[]
+  wrongAnswerMap Stu_WrongAnswerSkillMap[]
+
+  @@index([assignmentId])
+  @@index([nextReviewAt])
+  @@map("stu_problems")
+}
+
+model Stu_Dialogue {
+  id        BigInt       @id @default(autoincrement())
+  problemId BigInt       @map("problem_id")
+  role      DialogueRole
+  content   String       @db.Text
+  audioUrl  String?      @map("audio_url") @db.VarChar(512)
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  problem Stu_Problem @relation(fields: [problemId], references: [id])
+
+  @@index([problemId])
+  @@map("stu_dialogues")
+}
+
+model Stu_AiDialogue {
+  id          BigInt        @id @default(autoincrement())
+  studentId   BigInt        @map("student_id")
+  projectId   BigInt?       @map("project_id")
+  contextType AiContextType @map("context_type")
+  contextId   BigInt?       @map("context_id")
+  role        DialogueRole
+  content     String        @db.Text
+  audioUrl    String?       @map("audio_url") @db.VarChar(512)
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  student Usr_Student          @relation(fields: [studentId], references: [id])
+  project Pla_LearningProject? @relation(fields: [projectId], references: [id])
+
+  @@index([studentId])
+  @@index([contextType, contextId])
+  @@map("stu_ai_dialogues")
+}
+
+model Stu_ReviewSession {
+  id             BigInt    @id @default(autoincrement())
+  assignmentId   BigInt    @unique @map("assignment_id")
+  startedAt      DateTime? @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  summaryText    String?   @map("summary_text") @db.Text
+  notifiedParent Boolean   @default(false) @map("notified_parent")
+  notifiedAt     DateTime? @map("notified_at")
+
+  assignment Stu_Assignment @relation(fields: [assignmentId], references: [id])
+
+  @@map("stu_review_sessions")
+}
+
+model Stu_WrongAnswerSkillMap {
+  problemId     BigInt   @map("problem_id")
+  skillId       BigInt   @map("skill_id")
+  rootCauseType String?  @map("root_cause_type") @db.VarChar(64)
+  diagnosedAt   DateTime @default(now()) @map("diagnosed_at")
+
+  problem Stu_Problem @relation(fields: [problemId], references: [id])
+  skill   Knl_Skill   @relation(fields: [skillId], references: [id])
+
+  @@id([problemId, skillId])
+  @@map("stu_wrong_answer_skill_map")
+}
+
+model Stu_DailyCheckIn {
+  id        BigInt   @id @default(autoincrement())
+  studentId BigInt   @map("student_id")
+  checkDate DateTime @map("check_date") @db.Date
+  streak    Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  student Usr_Student @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, checkDate])
+  @@index([studentId])
+  @@map("stu_daily_check_ins")
+}
+
+// ============================================================================
+// [pre_] 预处理（版权隔离，同库不同前缀）
+// ============================================================================
+
+model Pre_SourceLesson {
+  id          BigInt   @id @default(autoincrement())
+  materialSet String   @map("material_set") @db.VarChar(64)
+  grade       Int?     @db.SmallInt
+  level       String?  @db.VarChar(32)
+  semester    String?  @db.VarChar(16)
+  lessonNum   Int?     @map("lesson_num")
+  lessonName  String   @map("lesson_name") @db.VarChar(256)
+  filePath    String?  @map("file_path") @db.VarChar(512)
+  fileType    String?  @map("file_type") @db.VarChar(16)
+  isScanned   Boolean  @default(false) @map("is_scanned")
+  stage       String   @default("raw") @db.VarChar(32)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  lectureMethods Pre_LectureMethod[]
+  lectureKps     Pre_LectureKp[]
+  questions      Pre_Question[]
+
+  @@index([materialSet, grade])
+  @@map("pre_source_lessons")
+}
+
+model Pre_MaterialTopic {
+  id          BigInt    @id @default(autoincrement())
+  materialSet String    @map("material_set") @db.VarChar(64)
+  grade       Int?      @db.SmallInt
+  level       String?   @db.VarChar(32)
+  topicName   String    @map("topic_name") @db.VarChar(256)
+  description String?   @db.Text
+  stdSkillIds Json?     @map("std_skill_ids")
+  mappedAt    DateTime? @map("mapped_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  questions Pre_Question[]
+
+  @@map("pre_material_topics")
+}
+
+model Pre_LectureMethod {
+  id        BigInt   @id @default(autoincrement())
+  lessonId  BigInt   @map("lesson_id")
+  seq       Int      @db.SmallInt
+  title     String?  @db.VarChar(128)
+  summary   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lesson    Pre_SourceLesson @relation(fields: [lessonId], references: [id])
+  questions Pre_Question[]
+
+  @@unique([lessonId, seq])
+  @@map("pre_lecture_methods")
+}
+
+model Pre_LectureKp {
+  id           BigInt   @id @default(autoincrement())
+  lessonId     BigInt   @map("lesson_id")
+  seq          Int      @db.SmallInt
+  title        String?  @db.VarChar(128)
+  contentLatex String?  @map("content_latex") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  lesson      Pre_SourceLesson      @relation(fields: [lessonId], references: [id])
+  questionMap Pre_QuestionKpMap[]
+
+  @@unique([lessonId, seq])
+  @@map("pre_lecture_kp")
+}
+
+model Pre_Question {
+  id               BigInt           @id @default(autoincrement())
+  lessonId         BigInt?          @map("lesson_id")
+  materialTopicId  BigInt?          @map("material_topic_id")
+  methodId         BigInt?          @map("method_id")
+  questionType     PrepQuestionType @default(open) @map("question_type")
+  materialSet      String?          @map("material_set") @db.VarChar(64)
+  grade            Int?             @db.SmallInt
+  level            String?          @db.VarChar(32)
+  difficulty       Int              @default(1) @db.SmallInt
+  stemRaw          String?          @map("stem_raw") @db.Text
+  answerRaw        String?          @map("answer_raw") @db.Text
+  solutionRaw      String?          @map("solution_raw") @db.Text
+  stemLatex        String?          @map("stem_latex") @db.Text
+  answerLatex      String?          @map("answer_latex") @db.Text
+  solutionLatex    String?          @map("solution_latex") @db.Text
+  options          Json?
+  skillIdsAi       Json?            @map("skill_ids_ai")
+  skillConfidence  Decimal?         @map("skill_confidence") @db.Decimal(4, 2)
+  reviewStatus     PrepReviewStatus @default(pending) @map("review_status")
+  reviewerNote     String?          @map("reviewer_note") @db.Text
+  reviewedAt       DateTime?        @map("reviewed_at")
+  syncedToStd      Boolean          @default(false) @map("synced_to_std")
+  syncedAt         DateTime?        @map("synced_at")
+  stdQuestionId    BigInt?          @map("std_question_id")
+  createdAt        DateTime         @default(now()) @map("created_at")
+
+  lesson        Pre_SourceLesson?   @relation(fields: [lessonId], references: [id])
+  materialTopic Pre_MaterialTopic?  @relation(fields: [materialTopicId], references: [id])
+  method        Pre_LectureMethod?  @relation(fields: [methodId], references: [id])
+  kpMap         Pre_QuestionKpMap[]
+
+  @@index([reviewStatus])
+  @@index([lessonId])
+  @@index([syncedToStd])
+  @@map("pre_questions")
+}
+
+model Pre_QuestionKpMap {
+  questionId BigInt @map("question_id")
+  kpId       BigInt @map("kp_id")
+
+  question Pre_Question  @relation(fields: [questionId], references: [id])
+  kp       Pre_LectureKp @relation(fields: [kpId], references: [id])
+
+  @@id([questionId, kpId])
+  @@map("pre_question_kp_map")
+}
+
+model Pre_SkillGap {
+  id             BigInt   @id @default(autoincrement())
+  materialSet    String?  @map("material_set") @db.VarChar(64)
+  description    String   @db.Text
+  questionCount  Int      @default(0) @map("question_count")
+  suggestedSkill String?  @map("suggested_skill") @db.VarChar(128)
+  resolution     String?  @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("pre_skill_gaps")
+}

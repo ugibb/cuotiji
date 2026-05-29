@@ -17,17 +17,19 @@ function todayDateStr(): string {
   return `${now.getFullYear()}-${zeroPad(now.getMonth() + 1)}-${zeroPad(now.getDate())}`
 }
 
-function calcDaysLeft(): number {
-  const exam = new Date('2026-11-20')
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  return Math.max(0, Math.ceil((exam.getTime() - now.getTime()) / 86400000))
-}
 
 const STATUS_CIRCLE: Record<string, string> = {
   done: 'c-done',
   not_uploaded: 'c-miss',
   uploaded_pending: 'c-pending',
+  planned: 'c-future',
+}
+
+const STATUS_UL: Record<string, string> = {
+  done: 'ul-green',
+  not_uploaded: 'ul-red',
+  uploaded_pending: 'ul-orange',
+  planned: 'ul-gray',
 }
 
 const STATUS_NUM: Record<string, string> = {
@@ -65,6 +67,13 @@ function buildCalendarDays(year: number, month: number, plans: TrainingPlan[]): 
     const hasPlan = status !== 'no_plan'
     const circleClass = [STATUS_CIRCLE[status] || '', isToday ? 'c-today' : ''].join(' ').trim()
     const numClass = [STATUS_NUM[status] || '', isToday ? 'n-today' : ''].join(' ').trim()
+    let underlineClass = ''
+    if (STATUS_UL[status]) {
+      underlineClass = STATUS_UL[status]
+    } else if (status === 'no_plan' && isPast) {
+      underlineClass = 'ul-dim'
+    }
+
     days.push({
       date: dateStr,
       status,
@@ -75,6 +84,7 @@ function buildCalendarDays(year: number, month: number, plans: TrainingPlan[]): 
       hasPlan,
       circleClass,
       numClass,
+      underlineClass,
     })
   }
 
@@ -96,6 +106,7 @@ interface HomePageData {
   m1Pct: number
   todayPlan: TrainingPlan | null
   todayStr: string
+  todayKey: string
   recentPractices: RecentPractice[]
   year: number
   month: number
@@ -119,6 +130,7 @@ Page<HomePageData, Record<string, unknown>>({
     m1Pct: 0,
     todayPlan: null,
     todayStr: '',
+    todayKey: '',
     recentPractices: [],
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
@@ -140,8 +152,9 @@ Page<HomePageData, Record<string, unknown>>({
     this.setData({
       statusBarHeight,
       navAreaHeight,
-      daysLeft: calcDaysLeft(),
+      daysLeft: 0,
       selectedDate: tStr,
+      todayKey: tStr,
       selectedDayLabel: formatDayLabel(now),
     })
   },
@@ -182,11 +195,11 @@ Page<HomePageData, Record<string, unknown>>({
 
       this.setData({
         hasPlan: true,
-        plan: { daysLeft: calcDaysLeft() },
+        plan: { daysLeft: activePlan.daysLeft },
         m1Day,
         m1Pct,
         todayStr: todayLabel,
-        daysLeft: calcDaysLeft(),
+        daysLeft: activePlan.daysLeft,
       })
 
       await Promise.all([
@@ -279,26 +292,39 @@ Page<HomePageData, Record<string, unknown>>({
     })
   },
 
-  onTodayAction() {
-    wx.navigateTo({ url: `/pages/camera/index?date=${todayDateStr()}` })
-  },
-
   onGoProject() {
     wx.navigateTo({ url: '/pages/project/index' })
   },
 
+  onGoWeaknessMap() {
+    wx.navigateTo({ url: '/pages/project/analysis/index' })
+  },
+
+  onGoDailyReview() {
+    wx.navigateTo({ url: '/pages/project/review/index' })
+  },
+
   onStartSetup() {
-    wx.navigateTo({ url: '/pages/intake/index' })
+    wx.navigateTo({ url: '/pages/onboarding/goals/index' })
   },
 
   onDayActionUpload() {
     const date = this.data.selectedDate || todayDateStr()
-    wx.navigateTo({ url: `/pages/camera/index?date=${date}` })
+    const chapterId = this.data.selectedDayPlan?.chapterId || 0
+    const chapterName = encodeURIComponent(this.data.selectedDayPlan?.chapter?.name || '')
+    wx.navigateTo({ url: `/pages/checkin/camera/index?date=${date}&chapterId=${chapterId}&chapterName=${chapterName}` })
   },
 
   onDayActionReview() {
     const { selectedDate } = this.data
     if (!selectedDate) return
-    wx.navigateTo({ url: `/pages/problem-list/index?date=${selectedDate}` })
+    wx.navigateTo({ url: `/pages/checkin/problem-list/index?date=${selectedDate}` })
   },
+
+  onDayActionView() {
+    const { selectedDate } = this.data
+    if (!selectedDate) return
+    wx.navigateTo({ url: `/pages/checkin/problem-list/index?date=${selectedDate}` })
+  },
+
 })

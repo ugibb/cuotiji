@@ -1,0 +1,78 @@
+<view class="summary-page">
+
+  <!-- 顶部安全区 -->
+  <view style="height:{{statusBarHeight}}px" class="safe-top"></view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="page-loading">
+    <view class="page-spinner"></view>
+  </view>
+
+  <!-- 主体 -->
+  <block wx:if="{{!loading && assignment}}">
+
+    <!-- ── Hero：深紫渐变 ── -->
+    <view class="hero">
+      <text class="hero-emoji">🎉</text>
+
+      <!-- 大分数：答对 / 总数 -->
+      <view class="score-row">
+        <text class="score-correct">{{assignment.correctCount}}</text>
+        <text class="score-slash"> / </text>
+        <text class="score-total">{{assignment.totalCount}}</text>
+      </view>
+
+      <!-- 章节 · 题数 -->
+      <text class="hero-chapter">{{chapterName ? chapterName + ' · ' : ''}}{{assignment.totalCount}}道题</text>
+
+      <!-- AI 评语 -->
+      <text wx:if="{{assignment.moodText}}" class="hero-comment">{{assignment.moodText}}</text>
+    </view>
+
+    <!-- ── 白色内容区 ── -->
+    <view class="body-section">
+
+      <!-- 三列统计卡（上移压住 hero 底部） -->
+      <view class="stat-card">
+        <view class="stat-col">
+          <text class="stat-num num-correct">{{assignment.correctCount}}</text>
+          <text class="stat-label">答对</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-col">
+          <text class="stat-num num-wrong">{{assignment.wrongCount}}</text>
+          <text class="stat-label">做错</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-col">
+          <text class="stat-num num-unknown">{{assignment.unknownCount}}</text>
+          <text class="stat-label">不会</text>
+        </view>
+      </view>
+
+      <!-- 知识点标签 -->
+      <view wx:if="{{knowledgeTags.length > 0}}" class="kp-section">
+        <text class="kp-title">本次涉及知识点</text>
+        <view class="kp-tags">
+          <view
+            wx:for="{{knowledgeTags}}"
+            wx:key="label"
+            class="kp-tag kp-{{item.status}}"
+          >
+            <text class="kp-text">{{item.label}} {{item.suffix}}</text>
+          </view>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- ── 底部按钮区 ── -->
+    <view class="btn-section">
+      <view class="btn-primary" bindtap="onViewProblems">开始逐题复盘 →</view>
+      <view class="btn-ghost" bindtap="onGoHome">稍后复盘</view>
+      <view style="height:{{safeAreaBottom}}px"></view>
+    </view>
+
+  </block>
+
+</view>
