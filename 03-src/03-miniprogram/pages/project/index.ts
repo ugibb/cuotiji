@@ -42,7 +42,7 @@ Page<ProjectPageData, Record<string, unknown>>({
         const elapsed = Math.max(0, Math.ceil((now.getTime() - startDate.getTime()) / 86400000))
         const m1Completed = Math.min(21, elapsed + 1)
         const m1Pct = Math.round((m1Completed / 21) * 100)
-        const totalDays = 67
+        const totalDays = 671
         const progressPct = Math.round((elapsed / totalDays) * 100)
         const streakDays = (streakRes.success && streakRes.data?.streak) ? streakRes.data.streak : 0
 

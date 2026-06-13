@@ -93,7 +93,7 @@ export const chaptersApi = {
 }
 
 export const assignmentsApi = {
-  create(data: { chapterId: number; planDate: string; imageUrl: string; studentId: number }) {
+  create(data: { chapterId: number; planDate: string; imageUrl: string; studentId: number; questionText?: string }) {
     return api.post<{ assignmentId: number; status: string }>('/assignments/upload', data as unknown as Record<string, unknown>)
   },
 
@@ -106,6 +106,17 @@ export const assignmentsApi = {
       '/assignments',
       { studentId }
     )
+  },
+
+  byDate(studentId: number, date: string) {
+    return api.get<{
+      date: string
+      totalCount: number
+      correctCount: number
+      wrongCount: number
+      unknownCount: number
+      problems: import('../types/index').Problem[]
+    }>('/assignments', { studentId, date })
   }
 }
 
@@ -191,8 +202,14 @@ export const trainingPlansApi = {
       { studentId, year, month }
     )
   },
-  generate(data: { studentId: number; examDate?: string; competitionName?: string }) {
-    return api.post<{ sprintPlanId: number; milestones: unknown[] }>(
+  preview(data: { examDate?: string; dailyMinutes?: number }) {
+    return api.post<{ totalDays: number; dailyMinutes: number; milestoneCount: number; milestones: unknown[] }>(
+      '/training-plans/preview',
+      data as unknown as Record<string, unknown>
+    )
+  },
+  generate(data: { studentId: number; examDate?: string; competitionName?: string; dailyMinutes?: number }) {
+    return api.post<{ sprintPlanId: number; totalDays: number; dailyMinutes: number; milestoneCount: number; milestones: unknown[] }>(
       '/training-plans/generate',
       data as unknown as Record<string, unknown>
     )

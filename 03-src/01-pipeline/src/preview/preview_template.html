@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OCR 验证编辑器</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath:[['$','$']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    packages:{'[+]':['ams']}
+  },
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre']},
+  startup:{typeset:false}
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#0f172a;color:#e2e8f0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Header ──────────────────────────────────────────────── */
+header{background:#1e293b;border-bottom:1px solid #334155;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+header h1{font-size:15px;font-weight:700;color:#38bdf8;white-space:nowrap}
+.badge{background:#38bdf8;color:#0f172a;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;white-space:nowrap}
+.hint{font-size:11px;color:#64748b;margin-left:auto;white-space:nowrap}
+.sync-btn{padding:4px 12px;border-radius:6px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
+.sync-btn.on{color:#38bdf8;border-color:#38bdf8;background:#38bdf818}
+.json-view-btn{padding:3px 10px;margin:0 10px 0 2px;border-radius:5px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:11px;font-family:inherit;white-space:nowrap;transition:all .15s;display:none}
+.json-view-btn:hover{color:#e2e8f0;border-color:#475569}
+.json-view-btn.active{color:#38bdf8;border-color:#38bdf8;background:#38bdf812}
+
+/* ── Workspace (three columns) ───────────────────────────── */
+.workspace{display:flex;flex:1;overflow:hidden}
+.divider{width:5px;background:#334155;cursor:col-resize;flex-shrink:0;transition:background .15s;position:relative;z-index:10}
+.divider:hover,.divider.dragging{background:#38bdf8}
+
+/* ── Nav Sidebar ─────────────────────────────────────────── */
+.nav-sidebar{width:200px;min-width:120px;display:flex;flex-direction:column;background:#131c2b;flex-shrink:0}
+.pane-bar{background:#1e293b;padding:8px 16px;font-size:12px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;color:#94a3b8}
+.pane-bar strong{color:#e2e8f0}
+/* 树形导航 */
+.nav-tree{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0}
+.nav-tree::-webkit-scrollbar{width:4px}
+.nav-tree::-webkit-scrollbar-track{background:transparent}
+.nav-tree::-webkit-scrollbar-thumb{background:#334155;border-radius:2px}
+.tree-lesson{user-select:none}
+.tree-lesson-hd{display:flex;align-items:center;gap:6px;width:100%;padding:7px 12px;background:transparent;border:none;color:#94a3b8;cursor:pointer;font-size:12px;font-family:inherit;text-align:left;transition:color .15s,background .15s}
+.tree-lesson-hd:hover{background:#1e293b;color:#e2e8f0}
+.tree-lesson-hd.has-active{color:#38bdf8}
+.tree-arrow{font-size:9px;flex-shrink:0;transition:transform .2s;display:inline-block}
+.tree-arrow.open{transform:rotate(90deg)}
+.tree-lesson-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.tree-lesson-count{font-size:10px;color:#475569;flex-shrink:0}
+.tree-pages{display:none;padding:2px 0 4px 28px}
+.tree-pages.open{display:block}
+.tree-page-btn{display:block;width:100%;padding:5px 10px;background:transparent;border:none;border-radius:4px;color:#64748b;cursor:pointer;font-size:12px;font-family:"JetBrains Mono","Fira Code",monospace;text-align:left;transition:all .12s;white-space:nowrap}
+.tree-page-btn:hover{background:#1e293b;color:#cbd5e1}
+.tree-page-btn.active{background:#38bdf8;color:#0f172a;font-weight:700}
+/* 合并模式平铺导航 */
+.tree-flat-btn{display:block;width:100%;padding:10px 16px;background:transparent;border:none;border-radius:6px;color:#94a3b8;cursor:pointer;font-size:13px;font-family:inherit;text-align:left;font-weight:600;transition:all .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-flat-btn:hover{background:#1e293b;color:#e2e8f0}
+.tree-flat-btn.active{background:#38bdf8;color:#0f172a}
+.tree-flat-btn.sub{padding:5px 10px;font-size:12px;font-weight:500;border-radius:4px}
+
+/* ── Original Image Pane ─────────────────────────────────── */
+.image-pane{width:220px;min-width:100px;display:flex;flex-direction:column;flex-shrink:0;background:#0a1120}
+#imageViewer{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px;display:flex;flex-direction:column;align-items:center;gap:0}
+#imageViewer::-webkit-scrollbar{width:4px}
+#imageViewer::-webkit-scrollbar-track{background:transparent}
+#imageViewer::-webkit-scrollbar-thumb{background:#334155;border-radius:2px}
+#origImg{width:100%;border-radius:4px;border:1px solid #1e3a5f;display:none}
+#imgEmpty{padding:32px 8px;text-align:center;color:#475569;font-size:11px}
+
+/* ── Editor Pane ─────────────────────────────────────────── */
+.editor-pane{width:380px;display:flex;flex-direction:column;min-width:200px;flex-shrink:0}
+#editor{width:100%;height:100%;background:#0d1117;color:#c9d1d9;border:none;outline:none;resize:none;font-family:"JetBrains Mono","Fira Code","Courier New",monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;white-space:pre;overflow-x:auto;tab-size:4}
+
+/* ── Preview Pane ────────────────────────────────────────── */
+.preview-pane{flex:1;display:flex;flex-direction:column;min-width:200px}
+.preview-pane .pane-bar{background:#f1f5f9;border-bottom:1px solid #e2e8f0}
+.preview-pane .pane-bar strong{color:#1e293b}
+.preview-pane .pane-bar span{color:#64748b}
+#preview{flex:1;overflow-y:auto;padding:32px 44px;background:#fff;font-size:14px;line-height:1.85;color:#334155}
+#preview h2{font-size:17px;font-weight:700;color:#0f3460;margin:28px 0 10px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+#preview h2:first-child{margin-top:0}
+#preview h3{font-size:15px;font-weight:600;color:#1e3a5f;margin:20px 0 8px}
+#preview p{margin:5px 0;white-space:pre-wrap}
+#preview img{max-width:100%;border-radius:6px;border:1px solid #e2e8f0;margin:12px 0;display:block;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.math-block{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:14px 20px;margin:12px 0;overflow-x:auto;text-align:center}
+.spacer{height:6px}
+.src-line{scroll-margin-top:16px}
+.src-line.active-line{outline:1px dashed #bae6fd;outline-offset:2px;border-radius:4px}
+
+/* ── Panel Toggles ──────────────────────────────────────── */
+.panel-toggles{display:flex;gap:3px}
+.ptoggle{padding:3px 9px;border-radius:5px;border:1px solid #334155;background:transparent;color:#64748b;cursor:pointer;font-size:11px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.ptoggle:hover{color:#e2e8f0;border-color:#475569}
+.ptoggle.active{color:#38bdf8;border-color:#38bdf8;background:#38bdf812}
+#autoSaveStatus{font-size:11px;color:#475569;white-space:nowrap;min-width:80px}
+
+/* ── Save Button ─────────────────────────────────────────── */
+.save-btn{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:7px;border:1.5px solid #4ade80;background:transparent;color:#4ade80;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;white-space:nowrap}
+.save-btn:hover{background:#4ade8018}
+.save-btn.saving{border-color:#38bdf8;color:#38bdf8;pointer-events:none}
+.save-btn.saved{border-color:#a3e635;color:#a3e635;pointer-events:none}
+.save-btn svg{width:13px;height:13px;flex-shrink:0}
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer{background:#1e293b;border-top:1px solid #334155;padding:7px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;font-size:12px;flex-wrap:wrap}
+.stat{color:#94a3b8}.stat b{color:#38bdf8}
+.score-group{display:flex;gap:6px}
+.sbtn{padding:4px 12px;border:1px solid;border-radius:6px;background:transparent;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600}
+.g{color:#4ade80;border-color:#4ade80}
+.y{color:#fbbf24;border-color:#fbbf24}
+.r{color:#f87171;border-color:#f87171}
+#score-out{color:#38bdf8;font-weight:600;min-width:200px}
+#rstatus{margin-left:auto;color:#64748b}
+
+.empty{padding:40px;text-align:center;color:#64748b}
+
+/* ── Merge 多图模式 ──────────────────────────────────────── */
+.img-wrap{position:relative;width:100%;margin-bottom:8px;cursor:pointer;border-radius:6px;border:2px solid transparent;transition:border-color .2s,box-shadow .2s;overflow:hidden;flex-shrink:0}
+.img-wrap:hover{border-color:#38bdf840}
+.img-wrap.img-on{border-color:#38bdf8;box-shadow:0 0 0 3px #38bdf820,0 0 16px #38bdf820;animation:imgGlow .5s ease}
+@keyframes imgGlow{0%{box-shadow:0 0 0 7px #38bdf855,0 0 24px #38bdf845}100%{box-shadow:0 0 0 3px #38bdf820,0 0 16px #38bdf820}}
+.img-badge{position:absolute;top:5px;left:5px;background:#0f172acc;color:#38bdf8;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;pointer-events:none;z-index:2;opacity:0;transition:opacity .15s;border:1px solid #38bdf840;backdrop-filter:blur(4px)}
+.img-wrap:hover .img-badge,.img-wrap.img-on .img-badge{opacity:1}
+.m-img{width:100%;display:block}
+/* 胶片点导航 */
+.p-dot{width:7px;height:7px;border-radius:50%;background:#334155;cursor:pointer;flex-shrink:0;transition:background .15s,transform .15s}
+.p-dot:hover{background:#64748b;transform:scale(1.3)}
+.p-dot.p-on{background:#38bdf8;transform:scale(1.2)}
+/* Editor 跳转闪光 */
+@keyframes eFlash{0%,100%{background:#0d1117}55%{background:#38bdf80e}}
+.e-flash{animation:eFlash .4s ease}
+
+/* ── JSON 树形视图 ──────────────────────────────────────────── */
+#preview.json-mode{padding:0;background:#0d1117}
+.json-tree{font-family:"JetBrains Mono","Fira Code","Courier New",monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow:auto;min-height:100%;color:#c9d1d9}
+.j-node{padding-left:0}
+.j-hdr{cursor:pointer;display:flex;align-items:baseline;gap:2px;padding:1px 4px 1px 2px;border-radius:3px;user-select:none;white-space:nowrap}
+.j-hdr:hover{background:#ffffff0d}
+.j-arrow{width:14px;flex-shrink:0;color:#3fb950;font-size:10px;text-align:center}
+.j-open>.j-hdr>.j-arrow::before{content:"▾"}
+.j-closed>.j-hdr>.j-arrow::before{content:"▸"}
+.j-body{padding-left:18px;border-left:1px solid #21262d}
+.j-tail{padding-left:2px}
+.j-closed>.j-body{display:none}
+.j-closed>.j-tail{display:none}
+.j-open>.j-hdr>.j-sum{display:none}
+.j-open>.j-hdr>.j-close-br{display:none}
+.j-leaf{padding:1px 4px 1px 16px;white-space:pre-wrap;word-break:break-all}
+.j-br{color:#e8bf6a;font-weight:600}
+.j-sep{color:#7d8590;margin:0 1px}
+.j-key{color:#79c0ff}
+.j-sum{color:#6e7681;font-size:11px;font-style:italic;margin-left:4px}
+.jv-str{color:#a5d6ff}
+.jv-num{color:#f2cc60}
+.jv-bool{color:#ff7b72}
+.jv-null{color:#6e7681;font-style:italic}
+
+/* ── JSON 可编辑树（编辑栏）──────────────────────────────────── */
+#jsonEditor{flex:1;overflow-y:auto;overflow-x:hidden;background:#0d1117;color:#c9d1d9;display:none}
+#jsonEditor::-webkit-scrollbar{width:4px}
+#jsonEditor::-webkit-scrollbar-thumb{background:#334155;border-radius:2px}
+.j-editable{border-bottom:1px dashed #334155;outline:none;cursor:text;min-width:6px;display:inline;white-space:pre-wrap;word-break:break-all;padding:0 2px;border-radius:2px;caret-color:#38bdf8;transition:background .12s,border-color .12s}
+.j-editable:hover:not(:focus){border-color:#475569;background:#ffffff0a}
+.j-editable:focus{border-color:#38bdf8;background:#38bdf808;border-bottom-style:solid}
+.j-quote{color:#e8bf6a;opacity:0.45;user-select:none;pointer-events:none}
+.json-tree-edit .j-leaf{white-space:normal}
+
+/* ── 合并 MD 小预览（原图栏）────────────────────────────────── */
+.merge-mini{padding:12px 10px;font-size:11px;line-height:1.6;color:#cbd5e1}
+.merge-mini h2{font-size:12px;font-weight:700;color:#38bdf8;margin:14px 0 5px;padding-bottom:3px;border-bottom:1px solid #1e3a5f}
+.merge-mini h2:first-child{margin-top:0}
+.merge-mini h3{font-size:11px;font-weight:600;color:#7dd3fc;margin:8px 0 3px}
+.merge-mini p{margin:2px 0;white-space:pre-wrap}
+.merge-mini img{max-width:100%;border-radius:3px;border:1px solid #1e3a5f;margin:5px 0;display:block}
+.merge-mini .math-block{background:#070d1a;border:1px solid #1e3a5f;border-radius:5px;padding:6px 8px;margin:5px 0;overflow-x:auto;text-align:center}
+.merge-mini .spacer{height:3px}
+
+/* ── 结构化课程视图（预览栏）────────────────────────────────── */
+.jl-view{max-width:760px}
+.jl-section{margin-bottom:30px}
+.jl-sec-title{font-size:15px;font-weight:700;color:#0f3460;display:flex;align-items:center;gap:8px;margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+.jl-sec-icon{font-size:16px}
+.jl-goals{padding-left:24px;color:#334155;font-size:14px;line-height:1.9;margin:0}
+.jl-goals li{margin:4px 0}
+.jl-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.jl-kp-card{border-left:3px solid #3b82f6}
+.jl-method-card{border-left:3px solid #10b981}
+.jl-ex-card{border-left:3px solid #f59e0b}
+.jl-card-hd{font-size:13px;font-weight:600;color:#1e293b;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.jl-seq{background:#334155;color:#f1f5f9;font-size:10px;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.jl-kp-tag{background:#eff6ff;color:#2563eb;font-size:10px;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.jl-method-ref{background:#ecfdf5;color:#059669;font-size:11px;padding:2px 8px;border-radius:4px;flex-shrink:0}
+.jl-content{font-size:13.5px;color:#374151;line-height:1.85}
+.jl-ex-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.jl-type{font-size:11px;font-weight:700;padding:2px 9px;border-radius:4px;flex-shrink:0}
+.jl-type-example{background:#dbeafe;color:#1d4ed8}
+.jl-type-practice{background:#dcfce7;color:#15803d}
+.jl-type-hard_practice{background:#ffedd5;color:#c2410c}
+.jl-type-challenge{background:#fae8ff;color:#7e22ce}
+.jl-qtype{font-size:11px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:4px}
+.jl-stem{font-size:13.5px;color:#1e293b;line-height:1.85;margin:4px 0 6px}
+.jl-answer{font-size:13px;color:#15803d;background:#f0fdf4;border-radius:6px;padding:5px 12px;margin:4px 0 8px;display:flex;align-items:baseline;gap:4px;flex-wrap:wrap}
+.jl-ans-label{font-weight:600;flex-shrink:0}
+.jl-ans-empty .jl-placeholder{color:#94a3b8;font-style:italic}
+.jl-fig{margin:10px 0;position:relative;display:inline-block;max-width:100%}
+.jl-img{max-width:100%;border-radius:6px;border:1px solid #e2e8f0;display:block}
+.jl-figcap{font-size:11px;color:#94a3b8;margin-top:4px;padding:6px 10px;background:#f1f5f9;border-radius:4px}
+.jl-replace-btn{position:absolute;top:6px;right:6px;padding:3px 9px;font-size:11px;font-weight:600;background:#1e293bcc;color:#e2e8f0;border:1px solid #475569;border-radius:5px;cursor:pointer;opacity:0;transition:opacity .15s;white-space:nowrap;backdrop-filter:blur(4px)}
+.jl-fig:hover .jl-replace-btn{opacity:1}
+/* ── 图片替换浮层 ──────────────────────────────────────────── */
+.jl-img-overlay{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#0006}
+.jl-img-panel{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;width:320px;box-shadow:0 20px 60px #0008}
+.jl-img-panel h3{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px}
+.jl-img-panel .jl-ip-hint{font-size:11px;color:#64748b;margin-bottom:16px;word-break:break-all}
+.jl-drop-zone{border:2px dashed #334155;border-radius:8px;padding:24px 16px;text-align:center;color:#64748b;font-size:12px;cursor:pointer;transition:border-color .15s,background .15s;margin-bottom:12px}
+.jl-drop-zone.drag-over{border-color:#38bdf8;background:#38bdf810;color:#38bdf8}
+.jl-drop-zone .jl-dz-icon{font-size:28px;margin-bottom:8px}
+.jl-ip-actions{display:flex;gap:8px}
+.jl-ip-actions button{flex:1;padding:7px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;border:none}
+.jl-ip-select{background:#38bdf8;color:#0f172a}
+.jl-ip-cancel{background:#334155;color:#94a3b8}
+.jl-ip-status{font-size:11px;margin-top:10px;text-align:center;min-height:16px}
+.jl-solution{margin-top:12px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.jl-solution summary{cursor:pointer;padding:8px 14px;background:#f8fafc;font-size:12px;font-weight:600;color:#64748b;user-select:none;list-style:none;display:flex;align-items:center;gap:6px}
+.jl-solution summary::-webkit-details-marker{display:none}
+.jl-solution summary::before{content:"▸";font-size:10px;color:#94a3b8;transition:transform .15s;display:inline-block}
+.jl-solution[open] summary::before{transform:rotate(90deg)}
+.jl-sol-section{padding:10px 14px;border-top:1px solid #f1f5f9}
+.jl-sol-label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.jl-sol-content{font-size:13px;color:#374151;line-height:1.85}
+
+/* ── 习题按方法分组 ─────────────────────────────────────────── */
+.jl-m-group{margin-bottom:22px}
+.jl-m-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#f1f5f9;border-radius:8px;margin-bottom:10px;border-left:3px solid #10b981}
+.jl-m-title{font-size:13px;font-weight:600;color:#1e293b;flex:1;min-width:0}
+.jl-t-group{margin-bottom:12px;padding-left:2px}
+.jl-t-label{font-size:11px;font-weight:700;padding:3px 11px;border-radius:10px;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;letter-spacing:.3px;user-select:none}
+.jl-tl-example{background:#dbeafe;color:#1d4ed8}
+.jl-tl-practice{background:#dcfce7;color:#15803d}
+.jl-tl-hard_practice{background:#ffedd5;color:#c2410c}
+.jl-t-group[data-type="example"]      .jl-ex-card{border-left-color:#3b82f6}
+.jl-t-group[data-type="practice"]     .jl-ex-card{border-left-color:#10b981}
+.jl-t-group[data-type="hard_practice"] .jl-ex-card{border-left-color:#f59e0b}
+.jl-challenge-group{background:#fdf4ff;border-radius:12px;padding:16px 18px;border:1px solid #e9d5ff;margin-bottom:20px}
+.jl-challenge-hd{border-left-color:#7c3aed !important;background:#faf5ff !important}
+.jl-challenge-hd .jl-m-title{color:#6d28d9}
+.jl-challenge-group .jl-ex-card{border-left-color:#7c3aed;background:#fefcff}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>OCR 验证编辑器</h1>
+  <span class="badge">PIPELINE</span>
+  <button class="sync-btn on" id="syncBtn" onclick="toggleSync()" title="左侧滚动时右侧跟随（按行锚点）">🔗 联动</button>
+  <div class="panel-toggles">
+    <button class="ptoggle active" id="tog-nav"     onclick="togglePanel('nav')"     title="显示/隐藏 导航">导航</button>
+    <button class="ptoggle active" id="tog-img"     onclick="togglePanel('img')"     title="显示/隐藏 原图">原图</button>
+    <button class="ptoggle active" id="tog-editor"  onclick="togglePanel('editor')"  title="显示/隐藏 编辑器">编辑器</button>
+    <button class="ptoggle active" id="tog-preview" onclick="togglePanel('preview')" title="显示/隐藏 渲染">渲染</button>
+  </div>
+  <span id="autoSaveStatus"></span>
+  <span class="hint" title="Alt+↑↓ 切换页面 · ⌘S 保存">Alt+↑↓ 翻页 · __GENERATED_AT__</span>
+</header>
+
+<div class="workspace" id="workspace">
+
+  <!-- 左侧导航栏 -->
+  <div class="nav-sidebar" id="navSidebar">
+    <div class="pane-bar">
+      <strong>导航</strong><span id="navCount"></span>
+      <span style="display:flex;gap:3px;margin-left:auto">
+        <button class="ptoggle" id="mode-ocr" onclick="switchMode('ocr')" title="02-ocr 逐页">逐页</button>
+        <button class="ptoggle" id="mode-merge" onclick="switchMode('merge')" title="03-merge 全讲">合并</button>
+        <button class="ptoggle active" id="mode-json" onclick="switchMode('json')" title="04-json 结构">JSON</button>
+      </span>
+    </div>
+    <div class="nav-tree" id="navTree"></div>
+  </div>
+
+  <div class="divider" id="divider1" title="拖拽调整宽度"></div>
+
+  <!-- 原图 -->
+  <div class="image-pane" id="imagePane">
+    <div class="pane-bar" style="position:relative;overflow:hidden">
+      <strong>原图</strong><span id="imgPageLabel" style="color:#64748b;font-size:11px"></span>
+      <div id="imgPBar" style="position:absolute;bottom:0;left:0;height:2px;background:#38bdf8;width:0;transition:width .3s ease;border-radius:0 1px 1px 0"></div>
+    </div>
+    <div id="pDotsBar" style="display:none;flex-wrap:wrap;gap:3px;padding:5px 8px;background:#0a1120;border-bottom:1px solid #1e293b;flex-shrink:0"></div>
+    <div id="imageViewer">
+      <img id="origImg" alt="原图">
+      <div id="imgEmpty">选择页面后显示原图<br>（需 serve 模式）</div>
+    </div>
+  </div>
+
+  <div class="divider" id="divider2" title="拖拽调整宽度"></div>
+
+  <!-- 编辑器 -->
+  <div class="editor-pane" id="editorPane">
+    <div class="pane-bar">
+      <button class="json-view-btn" id="jsonViewToggle" onclick="_toggleJsonView()" title="切换 树形 / 纯文本">树形</button>
+      <strong id="fileTitle">OCR Markdown</strong>
+      <span id="charCount" style="margin-left:auto;margin-right:8px">0 字符</span>
+      <button class="save-btn" id="saveBtn" onclick="saveFile()" title="保存到原始 .md 文件 (⌘S)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 1H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4l-3-3z"/>
+          <path d="M11 1v4H5V1M5 9h6M5 12h4"/>
+        </svg>
+        <span id="saveTxt">保存</span>
+      </button>
+    </div>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <div id="jsonEditor"></div>
+  </div>
+
+  <div class="divider" id="divider3" title="拖拽调整宽度"></div>
+
+  <!-- 预览 -->
+  <div class="preview-pane" id="previewPane">
+    <div class="pane-bar">
+      <strong>渲染效果</strong>
+      <span id="rstatus">等待渲染…</span>
+    </div>
+    <div id="preview"></div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="stat">公式块 <b id="sm">0</b></div>
+  <div class="stat">图片 <b id="si">0</b></div>
+  <div class="stat">标题 <b id="sh">0</b></div>
+  <div class="stat">共 <b id="totalPages">0</b> 页</div>
+  <div class="score-group">
+    <span style="color:#64748b">评分：</span>
+    <button class="sbtn g" onclick="rate('公式准确，结构完整 ✅')">准确</button>
+    <button class="sbtn y" onclick="rate('部分偏差，可接受 ⚠️')">偏差</button>
+    <button class="sbtn r" onclick="rate('错误较多，不可用 ❌')">较差</button>
+  </div>
+  <span id="score-out">— 点击评分 —</span>
+</footer>
+
+<script>
+const FILES_OCR   = __FILES_OCR_JSON__;
+const FILES_MERGE = __FILES_MERGE_JSON__;
+const FILES_JSON  = __FILES_JSON_JSON__;
+const LESSONS = {};
+const USE_LIVE = location.protocol.startsWith('http');
+
+// 预分配 _idx（各数据集独立编号）
+[FILES_OCR, FILES_MERGE, FILES_JSON].forEach(list => list.forEach((f, i) => { f._idx = i; }));
+
+let FILES = FILES_JSON;    // 默认 JSON 模式
+let curLesson = '';
+let cur = 0;
+
+function _rebuildLessons() {
+  Object.keys(LESSONS).forEach(k => delete LESSONS[k]);
+  FILES.forEach(f => {
+    if (!LESSONS[f.lesson]) LESSONS[f.lesson] = [];
+    LESSONS[f.lesson].push(f);
+  });
+}
+_rebuildLessons();
+
+async function fetchContent(f) {
+  const res = await fetch('/' + f.path + '?t=' + Date.now(), {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error('读取失败: ' + f.path);
+  return await res.text();
+}
+
+async function loadFileContent(f) {
+  if (USE_LIVE) return fetchContent(f);
+  return f.content || '';
+}
+
+function buildNavTree(activeIdx) {
+  const tree = document.getElementById('navTree');
+  tree.innerHTML = '';
+  const lessonKeys = Object.keys(LESSONS).sort();
+  document.getElementById('navCount').textContent = lessonKeys.length + ' 讲';
+
+  if (FILES === FILES_MERGE || FILES === FILES_JSON) {
+    // 合并/JSON 模式：一级「X级」分组 + 二级讲次按钮
+    const byLevel = new Map(); // levelNum(int) → lessonKey[]
+    lessonKeys.forEach(lesson => {
+      const m = lesson.match(/^L(\d+)/);
+      const lvl = m ? parseInt(m[1]) : 0;
+      if (!byLevel.has(lvl)) byLevel.set(lvl, []);
+      byLevel.get(lvl).push(lesson);
+    });
+
+    [...byLevel.keys()].sort((a, b) => a - b).forEach(lvl => {
+      const lessons = byLevel.get(lvl);
+      const hasActive = lessons.some(lk => LESSONS[lk][0]._idx === activeIdx);
+
+      const wrap = document.createElement('div');
+      wrap.className = 'tree-lesson';
+
+      const hd = document.createElement('button');
+      hd.className = 'tree-lesson-hd' + (hasActive ? ' has-active' : '');
+      hd.innerHTML =
+        '<span class="tree-arrow' + (hasActive ? ' open' : '') + '">▶</span>' +
+        '<span class="tree-lesson-name">' + lvl + '级</span>' +
+        '<span class="tree-lesson-count">' + lessons.length + '讲</span>';
+
+      const pagesDiv = document.createElement('div');
+      pagesDiv.className = 'tree-pages' + (hasActive ? ' open' : '');
+
+      lessons.forEach(lesson => {
+        const f = LESSONS[lesson][0];
+        const btn = document.createElement('button');
+        btn.className = 'tree-flat-btn sub' + (f._idx === activeIdx ? ' active' : '');
+        btn.textContent = lesson;
+        btn.dataset.idx = f._idx;
+        btn.onclick = () => switchFile(f._idx);
+        pagesDiv.appendChild(btn);
+      });
+
+      hd.onclick = () => {
+        const isOpen = pagesDiv.classList.toggle('open');
+        hd.querySelector('.tree-arrow').classList.toggle('open', isOpen);
+      };
+
+      wrap.appendChild(hd);
+      wrap.appendChild(pagesDiv);
+      tree.appendChild(wrap);
+    });
+    return;
+  }
+
+  // 逐页模式：两级树形导航
+  lessonKeys.forEach(lesson => {
+    const pages = LESSONS[lesson];
+    const hasActive = pages.some(f => f._idx === activeIdx);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'tree-lesson';
+
+    const hd = document.createElement('button');
+    hd.className = 'tree-lesson-hd' + (hasActive ? ' has-active' : '');
+    hd.innerHTML =
+      '<span class="tree-arrow' + (hasActive ? ' open' : '') + '">▶</span>' +
+      '<span class="tree-lesson-name">' + lesson + '</span>' +
+      '<span class="tree-lesson-count">' + pages.length + 'p</span>';
+
+    const pagesDiv = document.createElement('div');
+    pagesDiv.className = 'tree-pages' + (hasActive ? ' open' : '');
+
+    pages.forEach(f => {
+      const btn = document.createElement('button');
+      btn.className = 'tree-page-btn' + (f._idx === activeIdx ? ' active' : '');
+      btn.textContent = f.page.replace('page_', 'p');
+      btn.dataset.idx = f._idx;
+      btn.onclick = () => switchFile(f._idx);
+      pagesDiv.appendChild(btn);
+    });
+
+    hd.onclick = () => {
+      const arrow = hd.querySelector('.tree-arrow');
+      const isOpen = pagesDiv.classList.toggle('open');
+      arrow.classList.toggle('open', isOpen);
+    };
+
+    wrap.appendChild(hd);
+    wrap.appendChild(pagesDiv);
+    tree.appendChild(wrap);
+  });
+}
+
+async function initUI() {
+  _setJsonEditorMode(FILES === FILES_JSON);
+  document.getElementById('totalPages').textContent = FILES.length;
+  if (!FILES.length) {
+    document.getElementById('workspace').innerHTML =
+      '<div class="empty">未找到 OCR 文件，请先运行 step2 后执行 ./preview.sh 重新生成</div>';
+    return;
+  }
+  const firstLesson = Object.keys(LESSONS).sort()[0];
+  curLesson = firstLesson;
+  const firstFile = LESSONS[firstLesson][0];
+  buildNavTree(firstFile._idx);
+  await switchFile(firstFile._idx);
+}
+
+async function switchFile(idx) {
+  cur = idx;
+  const f = FILES[idx];
+  document.getElementById('fileTitle').textContent =
+    FILES === FILES_JSON ? f.lesson + ' · JSON 编辑' : f.path;
+  // 更新导航高亮（合并/JSON 用 flat-btn，逐页用 page-btn）
+  if (FILES === FILES_MERGE || FILES === FILES_JSON) {
+    document.querySelectorAll('.tree-flat-btn').forEach(b => {
+      const isActive = parseInt(b.dataset.idx) === idx;
+      b.classList.toggle('active', isActive);
+      if (isActive) b.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+    // 同步级别分组展开与 has-active 状态
+    document.querySelectorAll('.tree-lesson').forEach(wrap => {
+      const hasActive = !!wrap.querySelector('.tree-flat-btn.active');
+      const hd = wrap.querySelector('.tree-lesson-hd');
+      const pages = wrap.querySelector('.tree-pages');
+      const arrow = wrap.querySelector('.tree-arrow');
+      hd.classList.toggle('has-active', hasActive);
+      if (hasActive) { pages.classList.add('open'); arrow.classList.add('open'); }
+    });
+  } else {
+    document.querySelectorAll('.tree-page-btn').forEach(b => {
+      const isActive = parseInt(b.dataset.idx) === idx;
+      b.classList.toggle('active', isActive);
+      if (isActive) b.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+    document.querySelectorAll('.tree-lesson').forEach(wrap => {
+      const nameEl = wrap.querySelector('.tree-lesson-name');
+      if (!nameEl) return;
+      if (nameEl.textContent === f.lesson) {
+        wrap.querySelector('.tree-pages').classList.add('open');
+        wrap.querySelector('.tree-arrow').classList.add('open');
+        wrap.querySelector('.tree-lesson-hd').classList.add('has-active');
+      }
+    });
+  }
+  updateOrigImage(f);
+  rstatus.textContent = USE_LIVE ? '从磁盘加载…' : '加载中…';
+  try {
+    const content = await loadFileContent(f);
+    f.content = content;
+    editor.value = content;
+    if (f.path.startsWith('03-merge/')) { _parseMap(content); _loadMergeImgs(f.lesson); }
+    if (f.path.startsWith('04-json/')) { _loadJsonPageImgs(f.lesson); }
+  } catch (e) {
+    if (USE_LIVE) {
+      editor.value = '';
+      rstatus.textContent = '⚠ 磁盘加载失败，请重启 ./preview.sh serve';
+      console.error('loadFileContent failed:', e);
+      return;
+    }
+    editor.value = f.content || '';
+    rstatus.textContent = '⚠ 加载失败，使用缓存';
+    if (f.path.startsWith('03-merge/')) { _parseMap(editor.value); _loadMergeImgs(f.lesson); }
+    if (f.path.startsWith('04-json/')) { _loadJsonPageImgs(f.lesson); }
+  }
+  _autoSaveBase = editor.value;
+  editor.scrollTop = 0;
+  preview.scrollTop = 0;
+  go();
+}
+
+function closeBrace(s, start) {
+  let d = 0;
+  for (let i = start; i < s.length; i++) {
+    if (s[i]==='{') d++;
+    else if (s[i]==='}') { d--; if(d===0) return i; }
+  }
+  return s.length-1;
+}
+
+function braceContent(line, afterIdx) {
+  const b = line.indexOf('{', afterIdx);
+  if (b===-1) return '';
+  return line.slice(b+1, closeBrace(line, b));
+}
+
+function wrapLine(ln, html) {
+  return `<div class="src-line" data-ln="${ln}">${html}</div>`;
+}
+
+function convert(raw) {
+  const lines = raw.split('\n');
+  const out = [];
+  let inMath = false, mathBuf = [], mathStart = 0;
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const t = line.trim();
+    const ln = i;
+
+    if (t === '$$') {
+      if (!inMath) { inMath = true; mathBuf = []; mathStart = ln; }
+      else {
+        inMath = false;
+        out.push(wrapLine(mathStart,
+          '<div class="math-block">$$\n' + mathBuf.join('\n') + '\n$$</div>'));
+        mathBuf = [];
+      }
+      i++; continue;
+    }
+    if (inMath) { mathBuf.push(line); i++; continue; }
+
+    const bm = t.match(/^\\begin\{(\w+)\}/);
+    if (bm) {
+      const env = bm[1], block = [line], start = ln; i++;
+      while (i < lines.length) {
+        block.push(lines[i]);
+        if (lines[i].includes('\\end{' + env + '}')) { i++; break; }
+        i++;
+      }
+      out.push(wrapLine(start,
+        '<div class="math-block">$$\n' + block.join('\n') + '\n$$</div>'));
+      continue;
+    }
+
+    if (t.match(/^\\section\*\{/)) {
+      let c = braceContent(t, t.indexOf('*') + 1);
+      c = c.replace(/\\section\*\{([^}]*)\}/g, ' · $1').replace(/\\\\/g, ' ').trim();
+      if (c) out.push(wrapLine(ln, '<h2>' + c + '</h2>'));
+      i++; continue;
+    }
+
+    if (t.match(/^\\subsection\*\{/)) {
+      let c = braceContent(t, t.indexOf('*') + 1).replace(/\\\\/g, ' ').trim();
+      if (c) out.push(wrapLine(ln, '<h3>' + c + '</h3>'));
+      i++; continue;
+    }
+
+    if (t.match(/^\\(frac|sqrt|sum|int|prod|lim|binom|left|cdots|ldots|cdot|times|leq|geq|neq|infty|Delta|Sigma|alpha|beta|theta|lambda|pi|sigma|tau|mu|varphi)/) && !t.includes('img')) {
+      out.push(wrapLine(ln, '<div class="math-block">$$\n' + t + '\n$$</div>'));
+      i++; continue;
+    }
+
+    // 图片引用已改为 output 根相对路径（02-ocr/latex_imgs/{lesson}/...），无需前缀
+    const baseDir = '';
+    let p = line.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+      const resolved = /^https?:\/\/|^\//.test(src) ? src : (baseDir ? baseDir + '/' + src : src);
+      return `<img src="${resolved}" alt="${alt}" loading="lazy">`;
+    });
+    if (!t) { out.push(wrapLine(ln, '<div class="spacer"></div>')); i++; continue; }
+    out.push(wrapLine(ln, '<p>' + p + '</p>'));
+    i++;
+  }
+  return out.join('\n');
+}
+
+const editor = document.getElementById('editor');
+const preview = document.getElementById('preview');
+const rstatus = document.getElementById('rstatus');
+let timer = null;
+
+// ── 联动滚动 ────────────────────────────────────────────────
+let syncEnabled = true;
+let syncLock = false;
+let lineAnchors = [];
+let anchorLine = 0;
+
+function getLineHeight() {
+  return parseFloat(getComputedStyle(editor).lineHeight) || 21.875;
+}
+
+function getLineAtScroll(scrollTop) {
+  return Math.max(0, Math.floor(scrollTop / getLineHeight()));
+}
+
+function rebuildAnchors() {
+  lineAnchors = [];
+  preview.querySelectorAll('.src-line[data-ln]').forEach(el => {
+    lineAnchors[parseInt(el.dataset.ln, 10)] = el;
+  });
+}
+
+function findAnchor(line) {
+  if (lineAnchors[line]) return lineAnchors[line];
+  for (let i = line; i >= 0; i--) if (lineAnchors[i]) return lineAnchors[i];
+  return lineAnchors.find(Boolean) || null;
+}
+
+function highlightLine(line) {
+  preview.querySelectorAll('.src-line.active-line').forEach(el => el.classList.remove('active-line'));
+  const el = lineAnchors[line];
+  if (el) el.classList.add('active-line');
+}
+
+function syncPreviewToEditor() {
+  if (!syncEnabled || syncLock) return;
+  syncLock = true;
+  const line = getLineAtScroll(editor.scrollTop);
+  anchorLine = line;
+  const el = findAnchor(line);
+  if (el) {
+    preview.scrollTop = Math.max(0, el.offsetTop - 16);
+    highlightLine(parseInt(el.dataset.ln, 10));
+  }
+  requestAnimationFrame(() => { syncLock = false; });
+}
+
+function toggleSync() {
+  syncEnabled = !syncEnabled;
+  const btn = document.getElementById('syncBtn');
+  btn.classList.toggle('on', syncEnabled);
+  btn.textContent = syncEnabled ? '🔗 联动' : '🔗 联动 off';
+  if (syncEnabled) syncPreviewToEditor();
+}
+
+editor.addEventListener('scroll', () => { syncPreviewToEditor(); syncImageToEditor(); }, { passive: true });
+
+function go() {
+  clearTimeout(timer);
+  anchorLine = getLineAtScroll(editor.scrollTop);
+  rstatus.textContent='转换中…';
+  document.getElementById('charCount').textContent=editor.value.length.toLocaleString()+' 字符';
+  timer = setTimeout(render, 450);
+  _tickCountdown();
+}
+
+async function render() {
+  if (FILES === FILES_JSON) { renderJsonPreview(); return; }
+  const savedScroll = editor.scrollTop;
+  preview.classList.remove('json-mode');
+  preview.innerHTML = convert(editor.value);
+  document.getElementById('sm').textContent = preview.querySelectorAll('.math-block').length;
+  document.getElementById('si').textContent = preview.querySelectorAll('img').length;
+  document.getElementById('sh').textContent = preview.querySelectorAll('h2,h3').length;
+  rstatus.textContent='MathJax 渲染中…';
+  if (window.MathJax && MathJax.typesetPromise) {
+    try {
+      await MathJax.typesetPromise([preview]);
+      rstatus.textContent='✓ 渲染完成';
+    } catch(e) {
+      rstatus.textContent='⚠ 部分公式出错';
+    }
+  } else {
+    setTimeout(render, 900);
+    return;
+  }
+  rebuildAnchors();
+  editor.scrollTop = savedScroll;
+  syncPreviewToEditor();
+}
+
+function rate(msg) {
+  document.getElementById('score-out').textContent='['+FILES[cur].label+'] '+msg;
+}
+
+async function saveFile(silent = false) {
+  const btn  = document.getElementById('saveBtn');
+  const txt  = document.getElementById('saveTxt');
+  const content = editor.value;
+  const path = FILES[cur].path;
+
+  if (!silent) { btn.classList.add('saving'); txt.textContent = '保存中…'; }
+
+  try {
+    const res  = await fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path, content })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || '服务器错误');
+
+    FILES[cur].content = content;
+    _autoSaveBase = content;
+    _autoSaveCountdown = 30;
+    if (!silent) {
+      btn.classList.remove('saving');
+      btn.classList.add('saved');
+      txt.textContent = '已保存 ✓';
+      setTimeout(() => { btn.classList.remove('saved'); txt.textContent = '保存'; }, 2000);
+    }
+    return true;
+  } catch(e) {
+    if (!silent) {
+      btn.classList.remove('saving');
+      txt.textContent = '需启动 preview.sh serve';
+      setTimeout(() => { txt.textContent = '保存'; }, 3000);
+    }
+    return false;
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+    e.preventDefault();
+    saveFile();
+    return;
+  }
+  // Alt+↑/↓：在导航列表中切换上/下一页
+  if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    e.preventDefault();
+    const next = e.key === 'ArrowDown' ? cur + 1 : cur - 1;
+    if (next >= 0 && next < FILES.length) switchFile(next);
+  }
+});
+
+// ── 原图加载 ────────────────────────────────────────────────
+function updateOrigImage(f) {
+  const label = document.getElementById('imgPageLabel');
+  const dots  = document.getElementById('pDotsBar');
+  const pbar  = document.getElementById('imgPBar');
+
+  if (f.path.startsWith('04-json/')) {
+    mergePageMap = []; _aidx = -1;
+    dots.style.display = 'none'; pbar.style.width = '0';
+    label.textContent = f.lesson;
+    document.getElementById('imageViewer').innerHTML =
+      '<div style="padding:32px 8px;text-align:center;color:#475569;font-size:11px">加载原图中…</div>';
+    return;
+  }
+
+  if (f.path.startsWith('02-ocr/')) {
+    // 逐页模式：恢复单图结构（从合并模式切回时重建 DOM）
+    const viewer = document.getElementById('imageViewer');
+    if (!document.getElementById('origImg')) {
+      viewer.innerHTML =
+        '<img id="origImg" alt="原图" style="display:none">' +
+        '<div id="imgEmpty" style="padding:32px 8px;text-align:center;color:#475569;font-size:11px">选择页面后显示原图<br>（需 serve 模式）</div>';
+    }
+    const img   = document.getElementById('origImg');
+    const empty = document.getElementById('imgEmpty');
+    mergePageMap = []; _aidx = -1;
+    dots.style.display = 'none'; pbar.style.width = '0';
+    const parts  = f.path.split('/');
+    const lesson = parts[1];
+    const page   = parts[2].replace('.md', '');
+    label.textContent = page;
+    const src = `01-pages/${lesson}/${page}.png`;
+    img.src = USE_LIVE ? src + '?t=' + Date.now() : src;
+    img.style.display = 'block';
+    empty.style.display = 'none';
+    img.onerror = () => {
+      img.style.display = 'none';
+      empty.style.display = '';
+      empty.textContent = `原图未找到：${src}`;
+    };
+  } else {
+    // 合并模式：内容加载完成后由 _loadMergeImgs 填充
+    mergePageMap = []; _aidx = -1;
+    dots.style.display = 'none'; pbar.style.width = '0';
+    label.textContent = f.lesson;
+    document.getElementById('imageViewer').innerHTML =
+      '<div style="padding:32px 8px;text-align:center;color:#475569;font-size:11px">加载原图中…</div>';
+  }
+}
+
+// ── Merge 多图 ───────────────────────────────────────────────
+let mergePageMap = [], _aidx = -1;
+
+function _parseMap(content) {
+  mergePageMap = [];
+  content.split('\n').forEach((ln, i) => {
+    const m = ln.match(/^\[第(\d+)页\]/);
+    if (m) mergePageMap.push({ line: i, page: +m[1] });
+  });
+}
+
+// JSON 模式原图：从对应合并文件解析页码，复用 _loadMergeImgs 渲染多图
+function _loadJsonPageImgs(lesson) {
+  const mf = FILES_MERGE.find(m => m.lesson === lesson);
+  if (!mf) {
+    const viewer = document.getElementById('imageViewer');
+    viewer.innerHTML = '<div style="padding:32px 8px;text-align:center;color:#475569;font-size:11px">未找到对应合并文件</div>';
+    return;
+  }
+  _parseMap(mf.content || '');
+  _loadMergeImgs(lesson);
+}
+
+function _loadMergeImgs(lesson) {
+  const viewer = document.getElementById('imageViewer');
+  const dots   = document.getElementById('pDotsBar');
+  const pbar   = document.getElementById('imgPBar');
+  viewer.innerHTML = ''; dots.innerHTML = '';
+  _aidx = -1; pbar.style.width = '0';
+
+  if (!mergePageMap.length) {
+    dots.style.display = 'none';
+    viewer.innerHTML = '<div style="padding:32px 8px;text-align:center;color:#475569;font-size:11px">合并文件，无页码标记</div>';
+    return;
+  }
+  dots.style.display = 'flex';
+  document.getElementById('imgPageLabel').textContent = `0 / ${mergePageMap.length} 页`;
+
+  mergePageMap.forEach(({ line, page }, idx) => {
+    const wrap  = document.createElement('div');
+    wrap.className = 'img-wrap';
+    const badge = document.createElement('div');
+    badge.className = 'img-badge';
+    badge.textContent = `第${page}页`;
+    const img   = document.createElement('img');
+    img.className = 'm-img';
+    const padded = String(page).padStart(2, '0');
+    const src = `01-pages/${lesson}/page_${padded}.png`;
+    img.src = USE_LIVE ? src + '?t=' + Date.now() : src;
+    img.alt = `第${page}页`; img.loading = 'lazy';
+    img.onerror = () => { wrap.style.display = 'none'; };
+    wrap.appendChild(badge); wrap.appendChild(img);
+    wrap.onclick = () => _jumpMergePage(idx);
+    viewer.appendChild(wrap);
+
+    const dot = document.createElement('div');
+    dot.className = 'p-dot'; dot.title = `第${page}页`;
+    dot.onclick = e => { e.stopPropagation(); _jumpMergePage(idx); };
+    dots.appendChild(dot);
+  });
+}
+
+function _jumpMergePage(idx) {
+  if (idx < 0 || idx >= mergePageMap.length) return;
+  const { line } = mergePageMap[idx];
+  editor.scrollTop = line * getLineHeight();
+  const anchor = findAnchor(line);
+  if (anchor) preview.scrollTop = Math.max(0, anchor.offsetTop - 16);
+  editor.classList.remove('e-flash');
+  void editor.offsetWidth;
+  editor.classList.add('e-flash');
+  editor.addEventListener('animationend', () => editor.classList.remove('e-flash'), { once: true });
+  _setAimg(idx, false);
+}
+
+function _setAimg(idx, scroll = true) {
+  if (_aidx === idx) return;
+  _aidx = idx;
+  const viewer = document.getElementById('imageViewer');
+  const dots   = document.getElementById('pDotsBar');
+  const pbar   = document.getElementById('imgPBar');
+  viewer.querySelectorAll('.img-wrap').forEach((w, i) => w.classList.toggle('img-on', i === idx));
+  dots.querySelectorAll('.p-dot').forEach((d, i) => d.classList.toggle('p-on', i === idx));
+  const pct = mergePageMap.length > 1 ? idx / (mergePageMap.length - 1) * 100 : 100;
+  pbar.style.width = pct + '%';
+  document.getElementById('imgPageLabel').textContent =
+    `第${mergePageMap[idx].page}页 · ${idx + 1}/${mergePageMap.length}`;
+  if (scroll) {
+    const wraps = viewer.querySelectorAll('.img-wrap');
+    if (wraps[idx]) wraps[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function syncImageToEditor() {
+  if (!mergePageMap.length) return;
+  const line = getLineAtScroll(editor.scrollTop);
+  let ai = 0;
+  for (let i = 0; i < mergePageMap.length; i++) {
+    if (mergePageMap[i].line <= line) ai = i; else break;
+  }
+  _setAimg(ai, true);
+}
+
+// ── 可拖拽分割线（通用）─────────────────────────────────────
+function makeDraggable(dividerId, getTarget, getWidth, setWidth) {
+  const divider = document.getElementById(dividerId);
+  let dragging = false, startX = 0, startW = 0;
+
+  divider.addEventListener('mousedown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startW = getWidth();
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    editor.style.pointerEvents = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const workspace = document.getElementById('workspace');
+    const totalW = workspace.getBoundingClientRect().width;
+    const newW = Math.min(Math.max(startW + (e.clientX - startX), 100), totalW - 400);
+    setWidth(newW);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    divider.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    editor.style.pointerEvents = '';
+  });
+}
+
+// 分割线1：导航栏宽度
+makeDraggable(
+  'divider1',
+  () => document.getElementById('navSidebar'),
+  () => document.getElementById('navSidebar').getBoundingClientRect().width,
+  w => { document.getElementById('navSidebar').style.width = w + 'px'; }
+);
+
+// 分割线2：原图面板宽度
+makeDraggable(
+  'divider2',
+  () => document.getElementById('imagePane'),
+  () => document.getElementById('imagePane').getBoundingClientRect().width,
+  w => {
+    const ip = document.getElementById('imagePane');
+    ip.style.width = w + 'px';
+    ip.style.flex = 'none';
+  }
+);
+
+// 分割线3：编辑器宽度
+makeDraggable(
+  'divider3',
+  () => document.getElementById('editorPane'),
+  () => document.getElementById('editorPane').getBoundingClientRect().width,
+  w => {
+    const ep = document.getElementById('editorPane');
+    ep.style.width = w + 'px';
+    ep.style.flex = 'none';
+  }
+);
+
+// ── 数据源切换（逐页 / 合并）────────────────────────────────
+function switchMode(mode) {
+  FILES = mode === 'ocr' ? FILES_OCR : mode === 'merge' ? FILES_MERGE : FILES_JSON;
+  _setJsonEditorMode(mode === 'json');
+  _rebuildLessons();
+  document.getElementById('mode-ocr').classList.toggle('active', mode === 'ocr');
+  document.getElementById('mode-merge').classList.toggle('active', mode === 'merge');
+  document.getElementById('mode-json').classList.toggle('active', mode === 'json');
+  document.getElementById('totalPages').textContent = FILES.length;
+  cur = 0;
+  _autoSaveBase = '';
+  if (!FILES.length) {
+    document.getElementById('navTree').innerHTML = '<div class="empty">无文件</div>';
+    return;
+  }
+  buildNavTree(FILES[0]._idx);
+  switchFile(FILES[0]._idx);
+}
+
+// ── 面板显示/隐藏 ────────────────────────────────────────────
+const _PANEL_MAP = {
+  nav:     { pane: 'navSidebar',  divider: 'divider1' },
+  img:     { pane: 'imagePane',   divider: 'divider2' },
+  editor:  { pane: 'editorPane',  divider: 'divider3' },
+  preview: { pane: 'previewPane', divider: null },
+};
+
+function togglePanel(key) {
+  const { pane, divider } = _PANEL_MAP[key];
+  const paneEl   = document.getElementById(pane);
+  const divEl    = divider ? document.getElementById(divider) : null;
+  const btn      = document.getElementById('tog-' + key);
+  const isHidden = paneEl.style.display === 'none';
+  paneEl.style.display = isHidden ? '' : 'none';
+  if (divEl) divEl.style.display = isHidden ? '' : 'none';
+  btn.classList.toggle('active', isHidden);
+}
+
+// ── 自动保存（30s，仅 serve 模式，有变化才存）────────────────
+let _autoSaveBase = '';
+let _autoSaveCountdown = 30;
+let _autoSaveStatusLocked = false;
+
+function _setAutoSaveStatus(msg, color) {
+  const el = document.getElementById('autoSaveStatus');
+  el.textContent = msg;
+  el.style.color = color;
+}
+
+function _tickCountdown() {
+  if (_autoSaveStatusLocked) return;
+  const dirty = editor.value && editor.value !== _autoSaveBase;
+  _setAutoSaveStatus(`${_autoSaveCountdown}s`, dirty ? '#fbbf24' : '#475569');
+}
+
+function startAutoSave() {
+  if (!USE_LIVE) return;
+  _autoSaveCountdown = 30;
+  _tickCountdown();
+  setInterval(async () => {
+    _autoSaveCountdown--;
+    if (_autoSaveCountdown > 0) { _tickCountdown(); return; }
+    _autoSaveCountdown = 30;
+    const current = editor.value;
+    if (current && current !== _autoSaveBase) {
+      _autoSaveStatusLocked = true;
+      _setAutoSaveStatus('保存中…', '#94a3b8');
+      const ok = await saveFile(true);
+      if (ok) {
+        const btn = document.getElementById('saveBtn');
+        const txt = document.getElementById('saveTxt');
+        btn.classList.add('saved'); txt.textContent = '已保存 ✓';
+        setTimeout(() => { btn.classList.remove('saved'); txt.textContent = '保存'; }, 2000);
+      }
+      _setAutoSaveStatus(ok ? '自动保存 ✓' : '保存失败', ok ? '#4ade80' : '#f87171');
+      setTimeout(() => { _autoSaveStatusLocked = false; _tickCountdown(); }, 2000);
+    } else {
+      _tickCountdown();
+    }
+  }, 1000);
+}
+
+// ── JSON 编辑器状态 ──────────────────────────────────────────
+let _jsonData = null;
+let _jsonViewMode = 'tree'; // 'tree' | 'text'
+
+function _setJsonEditorMode(on) {
+  const jedit    = document.getElementById('jsonEditor');
+  const toggleBtn = document.getElementById('jsonViewToggle');
+  const imgLabel = document.querySelector('#imagePane .pane-bar strong');
+  if (on) {
+    // 进入 JSON 模式：按当前子视图显示
+    _applyJsonView();
+    if (toggleBtn) toggleBtn.style.display = 'inline-block';
+    if (imgLabel) imgLabel.textContent = '原图';
+  } else {
+    // 离开 JSON 模式：恢复 textarea，隐藏树和切换按钮
+    editor.style.display = '';
+    jedit.style.display = 'none';
+    if (toggleBtn) toggleBtn.style.display = 'none';
+    if (imgLabel) imgLabel.textContent = '原图';
+    _jsonData = null;
+    _jsonViewMode = 'tree'; // 下次进入 JSON 默认树形
+  }
+}
+
+// 根据 _jsonViewMode 切换显隐
+function _applyJsonView() {
+  const jedit    = document.getElementById('jsonEditor');
+  const toggleBtn = document.getElementById('jsonViewToggle');
+  if (_jsonViewMode === 'tree') {
+    editor.style.display = 'none';
+    jedit.style.display = 'block';
+    if (toggleBtn) { toggleBtn.textContent = '纯文本'; toggleBtn.classList.remove('active'); }
+  } else {
+    jedit.style.display = 'none';
+    editor.style.display = '';
+    if (toggleBtn) { toggleBtn.textContent = '树形'; toggleBtn.classList.add('active'); }
+  }
+}
+
+// 点击切换按钮
+function _toggleJsonView() {
+  if (FILES !== FILES_JSON) return;
+  if (_jsonViewMode === 'tree') {
+    // 树形 → 纯文本：editor.value 已是最新（_jFieldSave 每次编辑都同步）
+    _jsonViewMode = 'text';
+    _applyJsonView();
+    editor.focus();
+  } else {
+    // 纯文本 → 树形：解析 editor.value，重建树
+    _jsonViewMode = 'tree';
+    _applyJsonView();
+    try {
+      _jsonData = JSON.parse(editor.value);
+      document.getElementById('jsonEditor').innerHTML = renderEditableJsonTree(_jsonData);
+    } catch(e) {
+      // 解析失败时保留旧树，不中断
+    }
+  }
+}
+
+// path 写入辅助（支持 "a.b[0].c" 格式）
+function _jSetPath(obj, path, val) {
+  if (!path) return;
+  const parts = [];
+  const re = /([^.[]+)|\[(\d+)\]/g;
+  let m;
+  while ((m = re.exec(path)) !== null) parts.push(m[2] !== undefined ? +m[2] : m[1]);
+  if (!parts.length) return;
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
+  cur[parts[parts.length - 1]] = val;
+}
+
+// 字段失焦后保存
+function _jFieldSave(span) {
+  if (!_jsonData) return;
+  const path  = span.dataset.jpath;
+  const dtype = span.dataset.jtype;
+  let newVal  = span.textContent;
+  if (dtype === 'number') {
+    const n = parseFloat(newVal);
+    newVal = isNaN(n) ? 0 : n;
+  }
+  _jSetPath(_jsonData, path, newVal);
+  editor.value = JSON.stringify(_jsonData, null, 2);
+  FILES[cur].content = editor.value;
+  document.getElementById('charCount').textContent = editor.value.length.toLocaleString() + ' 字符';
+  // 只更新预览栏树，不重建编辑树（避免打断光标）
+  _renderPreviewFromJsonData();
+}
+
+// 键盘：数字字段回车确认，Esc 退出
+function _jFieldKey(e) {
+  if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); return; }
+  if (e.key === 'Enter' && e.target.dataset.jtype === 'number') {
+    e.preventDefault(); e.target.blur();
+  }
+}
+
+// 仅刷新预览栏（不重建 #jsonEditor，保持编辑焦点）
+async function _renderPreviewFromJsonData() {
+  if (!_jsonData) return;
+  const lesson = FILES[cur] ? FILES[cur].lesson : '';
+  preview.classList.remove('json-mode');
+  preview.innerHTML = renderLessonView(_jsonData, lesson);
+  rstatus.textContent = 'MathJax 渲染中…';
+  if (window.MathJax && MathJax.typesetPromise) {
+    try {
+      await MathJax.typesetPromise([preview]);
+      rstatus.textContent = '✓ 渲染完成';
+    } catch(e) {
+      rstatus.textContent = '⚠ 部分公式出错';
+    }
+  } else {
+    rstatus.textContent = '✓ 完成';
+  }
+}
+
+// ── JSON 树形渲染 ────────────────────────────────────────────
+function _jEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _jPrimHtml(v) {
+  if (v === null)             return '<span class="jv-null">null</span>';
+  if (typeof v === 'boolean') return `<span class="jv-bool">${v}</span>`;
+  if (typeof v === 'number')  return `<span class="jv-num">${v}</span>`;
+  return `<span class="jv-str">"${_jEsc(String(v))}"</span>`;
+}
+
+function _jNodeHtml(key, val, depth) {
+  const keyHtml = key !== null
+    ? `<span class="j-key">${typeof key==='number' ? key : '"'+_jEsc(key)+'"'}</span><span class="j-sep">: </span>`
+    : '';
+  const isArr = Array.isArray(val);
+  const isObj = !isArr && val !== null && typeof val === 'object';
+
+  if (!isObj && !isArr) {
+    return `<div class="j-leaf">${keyHtml}${_jPrimHtml(val)}</div>`;
+  }
+
+  const entries = isArr ? val.map((v, i) => [i, v]) : Object.entries(val);
+  const [ob, cb] = isArr ? ['[', ']'] : ['{', '}'];
+  const open = depth < 2;
+  const sum  = `${entries.length} ${isArr ? 'items' : 'keys'}`;
+  const cls  = open ? 'j-node j-open' : 'j-node j-closed';
+
+  const childrenHtml = entries.map(([k, v]) => _jNodeHtml(k, v, depth + 1)).join('');
+
+  return `<div class="${cls}">` +
+    `<div class="j-hdr" onclick="this.closest('.j-node').classList.toggle('j-open');this.closest('.j-node').classList.toggle('j-closed')">` +
+    `<span class="j-arrow"></span>${keyHtml}<span class="j-br">${ob}</span>` +
+    `<span class="j-sum">${sum}</span><span class="j-br j-close-br">${cb}</span></div>` +
+    `<div class="j-body">${childrenHtml}</div>` +
+    `<div class="j-tail"><span class="j-br">${cb}</span></div>` +
+    `</div>`;
+}
+
+function renderJsonTree(data) {
+  return '<div class="json-tree">' + _jNodeHtml(null, data, 0) + '</div>';
+}
+
+// ── JSON 可编辑树（编辑栏）──────────────────────────────────
+function _jEditNodeHtml(key, val, depth, path) {
+  const keyHtml = key !== null
+    ? `<span class="j-key">${typeof key==='number' ? key : '"'+_jEsc(key)+'"'}</span><span class="j-sep">: </span>`
+    : '';
+  const isArr = Array.isArray(val);
+  const isObj = !isArr && val !== null && typeof val === 'object';
+
+  if (!isObj && !isArr) {
+    let valHtml;
+    if (val === null) {
+      valHtml = '<span class="jv-null">null</span>';
+    } else if (typeof val === 'boolean') {
+      valHtml = `<span class="jv-bool">${val}</span>`;
+    } else if (typeof val === 'number') {
+      valHtml = `<span class="jv-num j-editable" contenteditable="true" spellcheck="false" `+
+        `data-jpath="${path}" data-jtype="number" `+
+        `onblur="_jFieldSave(this)" onkeydown="_jFieldKey(event)">${val}</span>`;
+    } else {
+      const escaped = _jEsc(String(val));
+      valHtml = `<span class="j-quote">"</span>`+
+        `<span class="jv-str j-editable" contenteditable="true" spellcheck="false" `+
+        `data-jpath="${path}" data-jtype="string" `+
+        `onblur="_jFieldSave(this)" onkeydown="_jFieldKey(event)">${escaped}</span>`+
+        `<span class="j-quote">"</span>`;
+    }
+    return `<div class="j-leaf">${keyHtml}${valHtml}</div>`;
+  }
+
+  const entries = isArr ? val.map((v, i) => [i, v]) : Object.entries(val);
+  const [ob, cb] = isArr ? ['[', ']'] : ['{', '}'];
+  const open = depth < 2;
+  const sum = `${entries.length} ${isArr ? 'items' : 'keys'}`;
+  const cls = open ? 'j-node j-open' : 'j-node j-closed';
+
+  const childrenHtml = entries.map(([k, v]) => {
+    const cp = path
+      ? (typeof k === 'number' ? `${path}[${k}]` : `${path}.${k}`)
+      : (typeof k === 'number' ? `[${k}]` : String(k));
+    return _jEditNodeHtml(k, v, depth + 1, cp);
+  }).join('');
+
+  return `<div class="${cls}">` +
+    `<div class="j-hdr" onclick="this.closest('.j-node').classList.toggle('j-open');this.closest('.j-node').classList.toggle('j-closed')">` +
+    `<span class="j-arrow"></span>${keyHtml}<span class="j-br">${ob}</span>` +
+    `<span class="j-sum">${sum}</span><span class="j-br j-close-br">${cb}</span></div>` +
+    `<div class="j-body">${childrenHtml}</div>` +
+    `<div class="j-tail"><span class="j-br">${cb}</span></div>` +
+    `</div>`;
+}
+
+function renderEditableJsonTree(data) {
+  return '<div class="json-tree json-tree-edit">' + _jEditNodeHtml(null, data, 0, '') + '</div>';
+}
+
+// ── 课程结构化视图辅助 ───────────────────────────────────────
+// 渲染含 LaTeX 的文本：转义 HTML，保留 $...$ 和 $$...$$ 供 MathJax 处理，\n → <br>
+function _jlTex(s) {
+  if (!s) return '';
+  const str = String(s);
+  // 兜底：若无 $ 分隔符但含 LaTeX 命令（\frac、\cdots 等），整体作为 display math
+  if (!str.includes('$') && /\\[a-zA-Z]/.test(str)) {
+    const esc = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '$$' + esc + '$$';
+  }
+  const parts = str.split(/(\$\$[\s\S]*?\$\$|\$[^\n$]*\$)/);
+  return parts.map((p, i) => {
+    const esc = p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return i % 2 === 1 ? esc : esc.replace(/\n|\\n/g, '<br>');
+  }).join('');
+}
+
+// 渲染图片（失败时显示描述文字）
+function _jlImg(img, lesson) {
+  if (!img || !img.placeholder) return '';
+  const src = `02-ocr/latex_imgs/${lesson}/${img.placeholder}.png`;
+  const alt = _jEsc(img.desc || img.placeholder);
+  const replaceBtn = USE_LIVE
+    ? `<button class="jl-replace-btn" onclick="_openImgReplace(this,event,'${src}')">替换</button>`
+    : '';
+  return `<figure class="jl-fig">` +
+    replaceBtn +
+    `<img class="jl-img" src="${USE_LIVE ? src + '?t=' + Date.now() : src}" alt="${alt}" loading="lazy" ` +
+    `onerror="this.nextElementSibling.style.display='block';this.style.display='none'">` +
+    `<figcaption class="jl-figcap" style="display:none">📷 ${alt}</figcaption>` +
+    `</figure>`;
+}
+
+// ── 图片替换浮层 ──────────────────────────────────────────────
+let _imgReplaceCtx = null; // { fig, imgEl, path }
+
+function _openImgReplace(btn, ev, path) {
+  ev.stopPropagation();
+  const fig = btn.closest('figure');
+  const imgEl = fig.querySelector('img.jl-img');
+  _imgReplaceCtx = { fig, imgEl, path };
+
+  const overlay = document.createElement('div');
+  overlay.className = 'jl-img-overlay';
+  overlay.id = 'imgReplaceOverlay';
+  overlay.innerHTML = `
+    <div class="jl-img-panel">
+      <h3>替换图片</h3>
+      <div class="jl-ip-hint">${path}</div>
+      <div class="jl-drop-zone" id="imgDropZone">
+        <div class="jl-dz-icon">📂</div>
+        <div>拖拽图片到此处</div>
+        <div style="margin-top:4px;font-size:11px">或按 Ctrl+V 粘贴截图</div>
+      </div>
+      <div class="jl-ip-actions">
+        <button class="jl-ip-select" onclick="document.getElementById('imgFileInput').click()">选择文件</button>
+        <button class="jl-ip-cancel" onclick="_closeImgReplace()">取消</button>
+      </div>
+      <input type="file" id="imgFileInput" accept="image/*" style="display:none">
+      <div class="jl-ip-status" id="imgReplaceStatus"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // 点击遮罩关闭
+  overlay.addEventListener('click', e => { if (e.target === overlay) _closeImgReplace(); });
+
+  // ESC 关闭
+  overlay._escHandler = e => { if (e.key === 'Escape') _closeImgReplace(); };
+  document.addEventListener('keydown', overlay._escHandler);
+
+  // 文件选择
+  document.getElementById('imgFileInput').addEventListener('change', e => {
+    if (e.target.files[0]) _doReplaceImage(e.target.files[0]);
+  });
+
+  // 拖拽
+  const dz = document.getElementById('imgDropZone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) _doReplaceImage(file);
+  });
+  dz.addEventListener('click', () => document.getElementById('imgFileInput').click());
+
+  // 粘贴
+  overlay._pasteHandler = e => {
+    const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+    if (item) { e.preventDefault(); _doReplaceImage(item.getAsFile()); }
+  };
+  document.addEventListener('paste', overlay._pasteHandler);
+}
+
+function _closeImgReplace() {
+  const overlay = document.getElementById('imgReplaceOverlay');
+  if (!overlay) return;
+  document.removeEventListener('keydown', overlay._escHandler);
+  document.removeEventListener('paste', overlay._pasteHandler);
+  overlay.remove();
+  _imgReplaceCtx = null;
+}
+
+function _doReplaceImage(file) {
+  const status = document.getElementById('imgReplaceStatus');
+  if (!file || !_imgReplaceCtx) return;
+  status.textContent = '上传中…';
+  status.style.color = '#94a3b8';
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const base64 = reader.result.split(',')[1];
+    try {
+      const res = await fetch('/api/replace-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: _imgReplaceCtx.path, data: base64 }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        const imgEl = _imgReplaceCtx.imgEl;
+        // 刷新图片（防缓存）
+        const base = imgEl.src.split('?')[0];
+        imgEl.src = base + '?t=' + Date.now();
+        imgEl.style.display = 'block';
+        const cap = imgEl.nextElementSibling;
+        if (cap) cap.style.display = 'none';
+        status.textContent = '✓ 替换成功';
+        status.style.color = '#22c55e';
+        setTimeout(_closeImgReplace, 800);
+      } else {
+        status.textContent = '✗ ' + (json.error || '替换失败');
+        status.style.color = '#f87171';
+      }
+    } catch (e) {
+      status.textContent = '✗ 网络错误';
+      status.style.color = '#f87171';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// 四板块课程视图主渲染函数
+function renderLessonView(data, lesson) {
+  if (!data || typeof data !== 'object') return '<div class="empty">数据格式错误</div>';
+  const h = [];
+  const e = _jEsc;
+  const t = _jlTex;
+
+  // ── 1. 学习目标 ────────────────────────────────────────────
+  const goals = data.knowledge_guide_list || [];
+  if (goals.length) {
+    h.push('<section class="jl-section">');
+    h.push('<h2 class="jl-sec-title"><span class="jl-sec-icon">📚</span>学习目标</h2>');
+    h.push('<ol class="jl-goals">');
+    goals.forEach(g => h.push(`<li>${e(g.title || '')}</li>`));
+    h.push('</ol></section>');
+  }
+
+  // ── 2. 知识点 ──────────────────────────────────────────────
+  const kps = data.kp_list || [];
+  if (kps.length) {
+    h.push('<section class="jl-section">');
+    h.push('<h2 class="jl-sec-title"><span class="jl-sec-icon">💡</span>知识点</h2>');
+    kps.forEach(kp => {
+      h.push('<div class="jl-card jl-kp-card">');
+      h.push(`<div class="jl-card-hd"><span class="jl-seq">知识点 ${kp.seq}</span>${e(kp.title || '')}</div>`);
+      if (kp.content_latex) h.push(`<div class="jl-content">${t(kp.content_latex)}</div>`);
+      (kp.images || []).forEach(img => h.push(_jlImg(img, lesson)));
+      h.push('</div>');
+    });
+    h.push('</section>');
+  }
+
+  // ── 3. 方法 ────────────────────────────────────────────────
+  const methods = data.methods || [];
+  if (methods.length) {
+    h.push('<section class="jl-section">');
+    h.push('<h2 class="jl-sec-title"><span class="jl-sec-icon">🔑</span>方法</h2>');
+    methods.forEach(m => {
+      h.push('<div class="jl-card jl-method-card">');
+      const kpTag = m.kp_seq ? `<span class="jl-kp-tag">知识点 ${m.kp_seq}</span>` : '';
+      h.push(`<div class="jl-card-hd"><span class="jl-seq">方法 ${m.seq}</span>${e(m.title || '')}${kpTag}</div>`);
+      if (m.content_latex) h.push(`<div class="jl-content">${t(m.content_latex)}</div>`);
+      h.push('</div>');
+    });
+    h.push('</section>');
+  }
+
+  // ── 4. 习题（按方法分组） ──────────────────────────────────
+  const exercises = data.exercises || [];
+  if (exercises.length) {
+    const TYPE_LABELS = { example: '典题精讲', practice: '举一反三', hard_practice: '挑战自我' };
+    const TYPE_ORDER  = ['example', 'practice', 'hard_practice'];
+
+    // 建立方法索引，并分桶
+    const methodIndex = new Map(); // method.seq → { method, exs[] }
+    (data.methods || []).forEach(m => methodIndex.set(m.seq, { method: m, exs: [] }));
+    const challenges = []; // method_seq 为 null / 未匹配 → 巅峰
+    exercises.forEach(ex => {
+      if (ex.method_seq != null && methodIndex.has(ex.method_seq)) {
+        methodIndex.get(ex.method_seq).exs.push(ex);
+      } else {
+        challenges.push(ex);
+      }
+    });
+
+    // 单题卡片渲染（闭包访问外层 e, t, lesson）
+    function _exCard(ex) {
+      const lines = [];
+      lines.push('<div class="jl-card jl-ex-card">');
+      lines.push('<div class="jl-ex-hd">' +
+        `<span class="jl-seq">第 ${ex.seq} 题</span>` +
+        `<span class="jl-qtype">${e(ex.question_type || '')}</span>` +
+        '</div>');
+      (ex.stem_parts || []).forEach(p => {
+        lines.push(`<div class="jl-stem">${t(p.stem_latex || '')}</div>`);
+        (p.images || []).forEach(img => lines.push(_jlImg(img, lesson)));
+        const ans = p.answer_latex;
+        if (ans !== null && ans !== undefined && ans !== '') {
+          lines.push(`<div class="jl-answer"><span class="jl-ans-label">答：</span>${t(String(ans))}</div>`);
+        } else {
+          lines.push('<div class="jl-answer jl-ans-empty"><span class="jl-ans-label">答：</span><span class="jl-placeholder">待填写</span></div>');
+        }
+      });
+      const sol = ex.solution;
+      if (sol && (sol.thinking_latex || sol.solution_latex || (sol.images || []).length)) {
+        lines.push('<details class="jl-solution" open><summary>查看解析</summary>');
+        if (sol.thinking_latex) lines.push('<div class="jl-sol-section"><div class="jl-sol-label">解题思路</div>' + `<div class="jl-sol-content">${t(sol.thinking_latex)}</div></div>`);
+        if (sol.solution_latex) lines.push('<div class="jl-sol-section"><div class="jl-sol-label">解答过程</div>' + `<div class="jl-sol-content">${t(sol.solution_latex)}</div></div>`);
+        const solImgs = (sol.images || []).map(img => _jlImg(img, lesson)).join('');
+        if (solImgs) lines.push(`<div class="jl-sol-section">${solImgs}</div>`);
+        lines.push('</details>');
+      }
+      lines.push('</div>');
+      return lines.join('');
+    }
+
+    h.push('<section class="jl-section">');
+    h.push('<h2 class="jl-sec-title"><span class="jl-sec-icon">📝</span>习题</h2>');
+
+    // 按方法顺序输出分组
+    methodIndex.forEach(({ method, exs }) => {
+      if (!exs.length) return;
+      h.push('<div class="jl-m-group">');
+      h.push('<div class="jl-m-hd">' +
+        `<span class="jl-seq">方法 ${method.seq}</span>` +
+        `<span class="jl-m-title">${e(method.title || '')}</span>` +
+        '</div>');
+      // 按题型进一步细分
+      const byType = new Map();
+      exs.forEach(ex => { if (!byType.has(ex.type)) byType.set(ex.type, []); byType.get(ex.type).push(ex); });
+      TYPE_ORDER.forEach(typ => {
+        const group = byType.get(typ);
+        if (!group || !group.length) return;
+        h.push(`<div class="jl-t-group" data-type="${typ}">`);
+        h.push(`<div class="jl-t-label jl-tl-${typ}">${TYPE_LABELS[typ]}</div>`);
+        group.forEach(ex => h.push(_exCard(ex)));
+        h.push('</div>');
+      });
+      h.push('</div>'); // jl-m-group
+    });
+
+    // 巅峰（无方法归属）
+    if (challenges.length) {
+      h.push('<div class="jl-challenge-group">');
+      h.push('<div class="jl-m-hd jl-challenge-hd"><span class="jl-m-title">👑 巅峰</span></div>');
+      challenges.forEach(ex => h.push(_exCard(ex)));
+      h.push('</div>');
+    }
+
+    h.push('</section>');
+  }
+
+  return `<div class="jl-view">${h.join('')}</div>`;
+}
+
+function renderJsonPreview() {
+  rstatus.textContent = '解析中…';
+  const raw = editor.value.trim();
+  const jedit = document.getElementById('jsonEditor');
+  if (!raw) {
+    preview.classList.remove('json-mode');
+    preview.innerHTML = '<div class="empty">空文件</div>';
+    jedit.innerHTML = '';
+    rstatus.textContent = '—';
+    return;
+  }
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch(e) {
+    preview.classList.add('json-mode');
+    preview.innerHTML = `<div style="color:#f87171;padding:20px 24px;font-family:monospace;white-space:pre-wrap;font-size:12px">⚠ JSON 解析错误\n${_jEsc(e.message)}</div>`;
+    rstatus.textContent = '✗ 语法错误';
+    return;
+  }
+  _jsonData = data;
+  // 编辑栏：始终更新树（无论当前子视图，保持数据就绪；切换时即刻可用）
+  jedit.innerHTML = renderEditableJsonTree(data);
+  // 确保视图显隐状态与 _jsonViewMode 一致
+  _applyJsonView();
+  // 预览栏：结构化课程视图 + MathJax
+  _renderPreviewFromJsonData();
+  const topKeys = Array.isArray(data) ? data.length : (data && typeof data === 'object' ? Object.keys(data).length : 0);
+  document.getElementById('sm').textContent = '—';
+  document.getElementById('si').textContent = '—';
+  document.getElementById('sh').textContent = topKeys;
+}
+
+initUI();
+startAutoSave();
+editor.addEventListener('input', go);
+</script>
+</body>
+</html>

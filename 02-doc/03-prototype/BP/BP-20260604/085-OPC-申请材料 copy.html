@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPC 社区入驻申请材料</title>
+  <style>
+    :root {
+      --color-bg: #f9f7f4;
+      --color-surface: #ffffff;
+      --color-surface-2: #f2efe9;
+      --color-accent: #2d5be3;
+      --color-accent-light: #e8eefb;
+      --color-text: #1a1a1a;
+      --color-text-muted: #666;
+      --color-border: #e0dbd3;
+      --color-tag-bg: #eef2fd;
+      --color-tag-text: #2d5be3;
+      --font-sans: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: "Songti SC", "Noto Serif SC", "SimSun", Georgia, serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.8;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 3rem 2.5rem 2.5rem;
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      margin-bottom: 1.5rem;
+    }
+
+    .header-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+
+    .header h1 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--color-text);
+      margin-bottom: 0.75rem;
+    }
+
+    .header-subtitle {
+      font-size: 1rem;
+      color: var(--color-text-muted);
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .meta-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+    }
+
+    .meta-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    /* ── Section ── */
+    .section {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem 2rem;
+      background: var(--color-surface-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .section-icon {
+      font-size: 1.1rem;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    .section-body {
+      padding: 2rem;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Typography ── */
+    .lead {
+      font-size: 1.05rem;
+      color: var(--color-text);
+      line-height: 1.9;
+    }
+
+    p { margin-bottom: 1rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── Highlight card ── */
+    .highlight {
+      background: var(--color-accent-light);
+      border-left: 3px solid var(--color-accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+      font-size: 0.95rem;
+      color: var(--color-text);
+    }
+
+    .highlight strong {
+      color: var(--color-accent);
+    }
+
+    /* ── Step list ── */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--color-accent);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.1rem;
+    }
+
+    .step-content strong {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-content p {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    /* ── Timeline ── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1.25rem 0;
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      padding-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .tl-item:last-child { padding-bottom: 0; }
+
+    .tl-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 0.6rem;
+      top: 1.5rem;
+      bottom: 0;
+      width: 1px;
+      background: var(--color-border);
+    }
+
+    .tl-dot {
+      flex-shrink: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      background: var(--color-accent-light);
+      border: 2px solid var(--color-accent);
+      margin-top: 0.2rem;
+    }
+
+    .tl-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 0.3rem;
+    }
+
+    .tl-text {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      line-height: 1.7;
+    }
+
+    /* ── Prototype cards ── */
+    .proto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .proto-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+    }
+
+    .proto-card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .proto-card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .proto-card-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── Tag list ── */
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .tag {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--color-tag-text);
+      background: var(--color-tag-bg);
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 1.5rem 0;
+    }
+
+    /* ── Quote ── */
+    blockquote {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      border-left: 3px solid var(--color-border);
+      padding: 0.75rem 1.25rem;
+      margin: 1.25rem 0;
+      font-style: italic;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      padding: 1.5rem 0 2rem;
+    }
+
+    @media (max-width: 540px) {
+      .header { padding: 2rem 1.25rem; }
+      .header h1 { font-size: 1.5rem; }
+      .section-body { padding: 1.25rem; }
+      .proto-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">OPC 社区入驻申请</div>
+    <h1>AI 驱动的 PBL 学习平台</h1>
+    <p class="header-subtitle">用 AI 替代传统 PBL 中对高水平教师的依赖，让每个人都能获得目标驱动、有实时反馈的主动学习体验</p>
+    <div class="header-meta">
+      <div class="meta-item">
+        <span class="meta-label">阶段</span>
+        <span class="meta-value">原型验证期</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">方向</span>
+        <span class="meta-value">EdTech · AI</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">团队规模</span>
+        <span class="meta-value">2 人</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">日期</span>
+        <span class="meta-value">2026-06-04</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 项目信息 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🚀</span>
+      <span class="section-title">项目信息 · Project Overview</span>
+    </div>
+    <div class="section-body">
+
+      <!-- 核心产品 -->
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">核心产品 / 解决方案</h3>
+
+      <blockquote>
+        「当学习扎根于真实经验且由学生的兴趣驱动时，知识才能从抽象的符号转化为控制环境的工具。」<br>
+        — 约翰·杜威（John Dewey）
+      </blockquote>
+
+      <p>项目制学习（PBL）是杜威教育理想最成熟的实践形式，但它长期被困在精英教育圈里——因为它对教师的要求极高，需要教练型、引导型的高水平老师，普及成本极大。</p>
+
+      <div class="highlight">
+        <strong>AI 的到来，正在打破这个瓶颈。</strong><br>
+        AI 扮演的正是杜威所说的「教练与促进者」角色——过去这个角色只有少数精英学校才负担得起，现在我们让它规模化。
+      </div>
+
+      <p>我们的平台做三件事：</p>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>目标锚定</strong>
+            <p>让学生（或由家长引导）设定真实目标——如考入某所心仪的学校——AI 反推学习路径，清掉规划负担</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>每日执行</strong>
+            <p>AI 拆解成「跳一跳能够得着」的每日任务，只需打卡完成，无需学生自己制定计划</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>实时反馈</strong>
+            <p>每天可见的学习进度，让成就感持续驱动动力，对抗学习过程中的枯燥感</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 当前阶段 -->
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">当前阶段</h3>
+
+      <p>已完成两个方向的早期工具原型，均来自创始人自身真实场景：</p>
+
+      <div class="proto-grid">
+        <div class="proto-card">
+          <div class="proto-card-icon">📝</div>
+          <div class="proto-card-title">雅思备考工具</div>
+          <div class="proto-card-desc">目标分数 → 个性化学习计划 → 每日任务打卡 → 进度可视化</div>
+        </div>
+        <div class="proto-card">
+          <div class="proto-card-icon">🧮</div>
+          <div class="proto-card-title">小学奥数错题系统</div>
+          <div class="proto-card-desc">备考训练计划 + 错题归因分析 + 针对性练习推荐，帮助孩子精准补弱</div>
+        </div>
+      </div>
+
+      <p style="font-size:0.9rem; color: var(--color-text-muted);">同步经营两个内容账号（雅思备考 / 小学奥数方向），以内容积累首批种子用户，以真实反馈驱动产品迭代。</p>
+
+      <div class="divider"></div>
+
+      <!-- 盈利模式 -->
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">盈利模式</h3>
+
+      <p>面向家长端的 <strong>B2C 订阅制</strong>（早期假设）。中国家长对教育付费意愿强，且已习惯订阅类教育产品；我们的切入点是「学习执行陪伴」，而非内容本身，差异化足够支撑独立定价。</p>
+
+      <div class="divider"></div>
+
+      <!-- 发展目标 -->
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">发展目标</h3>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div>
+            <div class="tl-label">近期</div>
+            <div class="tl-text">跑通雅思 + 小学奥数两个垂直场景，验证「AI 学习执行系统」的产品模型</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div>
+            <div class="tl-label">中期</div>
+            <div class="tl-text">将方法论横向复制至更多学科 / 考试场景，形成可规模化的 PBL 执行平台</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div>
+            <div class="tl-label">长期</div>
+            <div class="tl-text">从应试教育延伸至兴趣驱动的非应试学习领域，成为「每个人的 AI 学习教练」</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <!-- 个人背景 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">👤</span>
+      <span class="section-title">团队介绍 · Team Background</span>
+    </div>
+    <div class="section-body">
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'bg-short')">简洁版</button>
+        <button class="tab-btn" onclick="switchTab(event, 'bg-long')">详细版</button>
+      </div>
+
+      <div id="bg-short" class="tab-panel active">
+        <p class="lead">互联网产品经理出身，十余年 B2B 产品经验；技术联创拥有十余年系统架构背景。</p>
+        <div class="divider"></div>
+        <p>我们不是教育行业出身，而是被自己的痛点逼出来的创业者——</p>
+        <div class="tag-list">
+          <span class="tag">正在备考雅思的成年学习者</span>
+          <span class="tag">两个孩子在学奥数的父亲</span>
+          <span class="tag">每天目睹「家长焦虑 + 孩子被动」</span>
+        </div>
+        <p style="margin-top:1rem; color: var(--color-text-muted); font-size:0.9rem;">发现现有学习工具全都差一口气，决定自己来做。</p>
+      </div>
+
+      <div id="bg-long" class="tab-panel">
+        <p>我是一名拥有十余年经验的互联网产品经理，长期深耕 B2B 领域，擅长产品规划、用户需求拆解与快速迭代。我的技术联创拥有十余年系统架构经验，具备从 0 到 1 搭建高可用产品的完整能力。</p>
+
+        <div class="highlight">
+          促使我们进入这个领域的，不是行业研究报告，而是两个<strong>真实的生活场景</strong>。
+        </div>
+
+        <p>我自己在雅思备考中发现，市面上学习资料极度过剩，但真正帮你「管住自己、按时推进」的系统几乎不存在——光是整理资料就已经耗尽了所有学习激情。</p>
+
+        <p>与此同时，看着两个孩子每天在家长半推半就下学习奥数，我意识到中国基础教育中「学习自驱力缺失」是一个被严重低估的系统性问题。</p>
+
+        <div class="divider"></div>
+
+        <p style="font-weight:600;">我们是典型的「用户变创始人」——</p>
+        <div class="tag-list">
+          <span class="tag">对问题有第一手感知</span>
+          <span class="tag">产品打磨经验 10 年+</span>
+          <span class="tag">技术落地完整判断力</span>
+          <span class="tag">outsider 视角不受行业路径依赖束缚</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  
+  <div class="footer">
+    整理于 2026-06-04 · AI 驱动的 PBL 学习平台 · OPC 社区入驻申请
+  </div>
+
+</div>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.section-body');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+</script>
+</body>
+</html>

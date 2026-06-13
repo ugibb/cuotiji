@@ -538,6 +538,7 @@ model Stu_Problem {
   assignmentId   BigInt           @map("assignment_id")
   seq            Int
   ocrText        String?          @map("ocr_text") @db.Text
+  rawOcrText     String?          @map("raw_ocr_text") @db.Text
   studentAnswer  String?          @map("student_answer") @db.VarChar(256)
   correctAnswer  String?          @map("correct_answer") @db.VarChar(256)
   result         ProblemResult
@@ -566,11 +567,14 @@ model Stu_Dialogue {
   role      DialogueRole
   content   String       @db.Text
   audioUrl  String?      @map("audio_url") @db.VarChar(512)
+  imageUrl  String?      @map("image_url") @db.VarChar(512)
+  stageCode String?      @map("stage_code") @db.VarChar(32)
   createdAt DateTime     @default(now()) @map("created_at")
 
   problem Stu_Problem @relation(fields: [problemId], references: [id])
 
   @@index([problemId])
+  @@index([problemId, stageCode])
   @@map("stu_dialogues")
 }
 

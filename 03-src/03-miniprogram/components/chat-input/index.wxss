@@ -1,0 +1,515 @@
+/* ════════════════════════════════════════
+   chat-input 组件
+   ════════════════════════════════════════ */
+
+/* ── 根容器（fixed 贴底，脱离 flex 流，始终可见） ─ */
+.chat-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: #fff;
+}
+
+/* ── 输入栏 ─────────────────────────── */
+.bar {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 16rpx;
+  background: #fff;
+  border-top: 1rpx solid #F0F1F5;
+  gap: 4rpx;
+  min-height: 104rpx;
+  box-sizing: border-box;
+}
+
+.bar-btn {
+  flex-shrink: 0;
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bar-btn--send {
+  width: 64rpx;
+  height: 64rpx;
+}
+
+.bar--no-border {
+  border-top: none;
+}
+
+.bar-mid {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 文字输入框 */
+.bar-input {
+  width: 100%;
+  min-height: 72rpx;
+  max-height: 220rpx;
+  background: #F5F6FA;
+  border-radius: 20rpx;
+  padding: 14rpx 28rpx;
+  font-size: 30rpx;
+  line-height: 1.5;
+  color: #1a1a1a;
+  box-sizing: border-box;
+}
+
+.bar-ph {
+  color: #B8BCC8;
+  font-size: 30rpx;
+}
+
+/* 语音模式下「按住说话」按钮 */
+.bar-voice-btn {
+  width: 100%;
+  height: 72rpx;
+  background: #F5F6FA;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bar-voice-label {
+  font-size: 30rpx;
+  color: #6B7280;
+  letter-spacing: 1rpx;
+}
+
+/* ── 圆形按钮容器（键盘图标，与 + 号保持一致） ── */
+.ic-circle-btn {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 3rpx solid #9CA3AF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* ── 麦克风图标（传统样式） ───────────── */
+.ic-mic {
+  position: relative;
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.mic-body {
+  position: absolute;
+  top: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16rpx;
+  height: 24rpx;
+  background: #9CA3AF;
+  border-radius: 8rpx;
+}
+
+.mic-arc {
+  position: absolute;
+  bottom: 10rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26rpx;
+  height: 12rpx;
+  border: 3rpx solid #9CA3AF;
+  border-top: none;
+  border-radius: 0 0 13rpx 13rpx;
+  box-sizing: border-box;
+}
+
+.mic-stem {
+  position: absolute;
+  bottom: 4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3rpx;
+  height: 8rpx;
+  background: #9CA3AF;
+  border-radius: 2rpx;
+}
+
+/* ── 键盘图标：2行点 + 底横条 ────────── */
+.kb-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  width: 24rpx;
+}
+
+.kb-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.kb-dot {
+  width: 5rpx;
+  height: 5rpx;
+  background: #9CA3AF;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.kb-space {
+  width: 100%;
+  height: 4rpx;
+  background: #9CA3AF;
+  border-radius: 2rpx;
+}
+
+/* ── 相机图标 ─────────────────────── */
+.ic-camera {
+  width: 42rpx;
+  height: 32rpx;
+  border: 3rpx solid #9CA3AF;
+  border-radius: 6rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.ic-camera::before {
+  content: '';
+  position: absolute;
+  top: -9rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12rpx;
+  height: 7rpx;
+  background: #9CA3AF;
+  border-radius: 3rpx 3rpx 0 0;
+}
+
+.ic-camera-lens {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  border: 3rpx solid #9CA3AF;
+  box-sizing: border-box;
+}
+
+/* ── 发送图标 ─────────────────────── */
+.ic-send {
+  width: 56rpx;
+  height: 56rpx;
+  background: #5B5FC7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-arrow {
+  width: 0;
+  height: 0;
+  border-left: 9rpx solid transparent;
+  border-right: 9rpx solid transparent;
+  border-bottom: 14rpx solid #fff;
+  margin-top: -4rpx;
+}
+
+/* ── 加号图标 ─────────────────────── */
+.ic-plus {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 3rpx solid #9CA3AF;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.plus-h, .plus-v {
+  position: absolute;
+  background: #9CA3AF;
+  border-radius: 2rpx;
+  top: 50%;
+  left: 50%;
+}
+
+.plus-h {
+  width: 20rpx;
+  height: 3rpx;
+  transform: translate(-50%, -50%);
+}
+
+.plus-v {
+  width: 3rpx;
+  height: 20rpx;
+  transform: translate(-50%, -50%);
+}
+
+/* ════════════════════════════════════════
+   × 关闭图标
+   ════════════════════════════════════════ */
+.ic-close {
+  position: relative;
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.close-line {
+  position: absolute;
+  width: 36rpx;
+  height: 4rpx;
+  background: #9CA3AF;
+  border-radius: 2rpx;
+  top: 50%;
+  left: 0;
+}
+
+.close-line--1 { transform: translateY(-50%) rotate(45deg); }
+.close-line--2 { transform: translateY(-50%) rotate(-45deg); }
+
+/* ════════════════════════════════════════
+   + 展开菜单
+   ════════════════════════════════════════ */
+.plus-menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 24rpx 16rpx 20rpx;
+  background: #fff;
+}
+
+.plus-item {
+  display: flex;
+}
+
+.plus-icon-wrap {
+  width: 160rpx;
+  background: #F2F2F2;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  padding: 24rpx 20rpx 20rpx;
+  box-sizing: border-box;
+}
+
+.plus-label {
+  font-size: 24rpx;
+  color: #374151;
+}
+
+/* 相机图标 */
+.mi-camera {
+  position: relative;
+  width: 72rpx;
+  height: 56rpx;
+  background: #1a1a1a;
+  border-radius: 10rpx;
+}
+
+.mi-camera-lens {
+  position: absolute;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  border: 6rpx solid #F2F2F2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+}
+
+.mi-camera-bump {
+  position: absolute;
+  width: 20rpx;
+  height: 8rpx;
+  background: #1a1a1a;
+  border-radius: 4rpx 4rpx 0 0;
+  top: -7rpx;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 相册图标 */
+.mi-album {
+  position: relative;
+  width: 66rpx;
+  height: 56rpx;
+  border: 6rpx solid #1a1a1a;
+  border-radius: 8rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.mi-album-sun {
+  position: absolute;
+  width: 14rpx;
+  height: 14rpx;
+  background: #1a1a1a;
+  border-radius: 50%;
+  top: 7rpx;
+  left: 7rpx;
+}
+
+.mi-album-hill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 33rpx solid transparent;
+  border-right: 33rpx solid transparent;
+  border-bottom: 26rpx solid #1a1a1a;
+}
+
+/* 文件图标 */
+.mi-file {
+  position: relative;
+  width: 52rpx;
+  height: 64rpx;
+  background: #1a1a1a;
+  border-radius: 4rpx 16rpx 4rpx 4rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10rpx;
+  box-sizing: border-box;
+  gap: 7rpx;
+}
+
+.mi-file-fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18rpx;
+  height: 18rpx;
+  background: #F2F2F2;
+  border-radius: 0 0 0 10rpx;
+}
+
+.mi-file-line {
+  height: 4rpx;
+  background: #F2F2F2;
+  border-radius: 2rpx;
+  width: 100%;
+}
+
+.mi-file-line--short { width: 55%; }
+
+/* ════════════════════════════════════════
+   语音录音面板（蓝紫渐变，参考豆包风格）
+   ════════════════════════════════════════ */
+.voice-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
+  background: linear-gradient(to bottom, #9295E0 0%, #2D2B96 100%);
+  border-radius: 24rpx 24rpx 0 0;
+  box-shadow: 0 -4rpx 32rpx rgba(55, 48, 163, 0.25);
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events: none;
+  padding-bottom: 48rpx;
+}
+
+.panel--show {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* 拖拽把手 */
+.panel-handle-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 20rpx 0 8rpx;
+}
+
+.panel-handle {
+  width: 64rpx;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 4rpx;
+}
+
+/* 状态文字 */
+.panel-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32rpx 0 0;
+  height: 72rpx;
+}
+
+.panel-status-text {
+  font-size: 34rpx;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  letter-spacing: 2rpx;
+}
+
+.panel-status-text--cancel {
+  color: rgba(255, 200, 200, 0.95);
+}
+
+.panel-recognizing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+}
+
+/* 三点 loading */
+.dot-wrap {
+  display: flex;
+  flex-direction: row;
+  gap: 8rpx;
+  align-items: center;
+}
+
+.dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1.1); }
+}
+
+/* ── 静态小长条（替代波形） ───────────── */
+.voice-bar-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 120rpx;
+  margin: 16rpx 0 40rpx;
+}
+
+.voice-bar {
+  width: 120rpx;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4rpx;
+  transition: background 200ms ease;
+}
+
+.voice-bar--cancel {
+  background: rgba(255, 160, 160, 0.7);
+}

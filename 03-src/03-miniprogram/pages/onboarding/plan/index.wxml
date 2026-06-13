@@ -24,20 +24,30 @@
     <!-- 计划总览 -->
     <view class="card overview-card">
       <view class="overview-stats">
-        <view class="stat-col">
-          <text class="stat-num">{{plan.totalDays}}</text>
-          <text class="stat-label">学习天数</text>
+
+        <!-- 学习天数：view 作为响应区，picker 填满 -->
+        <view class="stat-col editable">
+          <picker mode="date" value="{{examDate}}" start="2025-01-01" end="2030-12-31"
+            bindchange="onExamDateChange" class="picker-fill">
+            <text class="stat-num">{{plan.totalDays}}</text>
+            <view class="stat-label-row">
+              <text class="stat-label">学习天数</text>
+              <text class="edit-hint">✎</text>
+            </view>
+          </picker>
         </view>
+
         <view class="stat-divider"></view>
-        <view class="stat-col">
-          <text class="stat-num">{{plan.milestoneCount}}</text>
-          <text class="stat-label">里程碑</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-col">
+
+        <!-- 每日时长：view 作为响应区 -->
+        <view class="stat-col editable" bindtap="onTapTime">
           <text class="stat-num">{{plan.dailyTime}}</text>
-          <text class="stat-label">每日时长</text>
+          <view class="stat-label-row">
+            <text class="stat-label">每日时长</text>
+            <text class="edit-hint">✎</text>
+          </view>
         </view>
+
       </view>
       <view class="goal-row">
         <text class="goal-icon">🎯</text>
@@ -45,20 +55,25 @@
       </view>
     </view>
 
-    <!-- 里程碑列表 -->
-    <view wx:for="{{plan.milestones}}" wx:key="id" wx:for-item="ms" class="ms-card ms-{{ms.tagColor}}">
-      <view class="ms-header">
-        <view class="ms-left">
-          <view class="ms-tag ms-tag-{{ms.tagColor}}">{{ms.id}}</view>
-          <text class="ms-title">{{ms.title}}</text>
+    <!-- 里程碑列表（重算时半透明） -->
+    <view class="milestones-wrap {{recalculating ? 'recalculating' : ''}}">
+      <view wx:if="{{recalculating}}" class="recalc-tip">
+        <text class="recalc-text">重新计算中…</text>
+      </view>
+      <view wx:for="{{plan.milestones}}" wx:key="id" wx:for-item="ms" class="ms-card ms-{{ms.tagColor}}">
+        <view class="ms-header">
+          <view class="ms-left">
+            <view class="ms-tag ms-tag-{{ms.tagColor}}">{{ms.id}}</view>
+            <text class="ms-title">{{ms.title}}</text>
+          </view>
+          <text class="ms-days">{{ms.dayRange}}</text>
         </view>
-        <text class="ms-days">{{ms.dayRange}}</text>
+        <text class="ms-date">{{ms.dateRange}}</text>
+        <view class="ms-tags">
+          <view wx:for="{{ms.tags}}" wx:key="*this" class="chip chip-{{ms.tagColor}}">{{item}}</view>
+        </view>
+        <text class="ms-goal ms-goal-{{ms.tagColor}}">{{ms.goal}}</text>
       </view>
-      <text class="ms-date">{{ms.dateRange}}</text>
-      <view class="ms-tags">
-        <view wx:for="{{ms.tags}}" wx:key="*this" class="chip chip-{{ms.tagColor}}">{{item}}</view>
-      </view>
-      <text class="ms-goal ms-goal-{{ms.tagColor}}">{{ms.goal}}</text>
     </view>
 
     <!-- 提示 -->
@@ -73,7 +88,7 @@
 
   <view class="bottom-bar">
     <button class="btn-primary {{saving ? 'btn-disabled' : ''}}" bindtap="onConfirm">
-      {{saving ? '计划生成中…' : '确认计划，启动训练项目 🚀'}}
+      {{saving ? '保存计划中…' : '确认计划，启动训练项目 🚀'}}
     </button>
   </view>
 

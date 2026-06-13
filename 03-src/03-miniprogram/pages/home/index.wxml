@@ -66,44 +66,44 @@
   <!-- ── 有项目：执行态 ── -->
   <block wx:elif="{{hasPlan}}">
 
-    <!-- 倒计时 Hero -->
+    <!-- 每日名言 Hero -->
     <view class="exec-hero">
-      <view class="exec-hero-deco">{{plan.daysLeft}}</view>
-      <view class="exec-hero-main">
-        <view>
-          <text class="countdown-label">距 2026 华杯小学组竞赛</text>
-          <view class="countdown-row">
-            <text class="countdown-num">{{plan.daysLeft}}</text>
-            <text class="countdown-unit">天</text>
-          </view>
-        </view>
-        <view class="exec-hero-right">
-          <text class="ms-label">当前阶段</text>
-          <view class="ms-pill">M1 · 整除与余数</view>
-          <text class="ms-day-label">Day {{m1Day}} / 21</text>
-        </view>
-      </view>
-      <!-- M1 进度条 -->
-      <view class="exec-progress">
-        <view class="exec-progress-top">
-          <text class="exec-progress-label">M1 进度</text>
-          <text class="exec-progress-pct">{{m1Pct}}%</text>
-        </view>
-        <view class="exec-bar-track">
-          <view class="exec-bar-fill" style="width:{{m1Pct}}%"></view>
-        </view>
-        <view class="ms-seg-row">
-          <view class="ms-seg ms-seg-active"></view>
-          <view class="ms-seg"></view>
-          <view class="ms-seg"></view>
-        </view>
-        <view class="ms-seg-labels">
-          <text>M1 整除</text><text>M2 行程</text><text>M3 冲刺</text>
-        </view>
+      <text class="quote-deco">’’</text>
+      <view class="hero-inner">
+        <text class="hero-date">{{todayDateFull}}</text>
+        <text class="hero-quote">{{quote}}</text>
+        <text class="hero-quote-from">——{{quoteFrom}}</text>
       </view>
     </view>
 
     <scroll-view class="page-scroll" scroll-y>
+
+      <!-- 项目燃尽图 -->
+      <view class="card burndown-card">
+        <view class="bd-stage-row">
+          <view class="bd-m1-badge">{{milestoneLabel}}</view>
+          <view class="bd-stage-info">
+            <view class="bd-stage-meta">
+              <text class="bd-stage-label">当前阶段目标</text>
+              <text class="bd-stage-sub">{{milestoneDeadline}}</text>
+            </view>
+            <text class="bd-stage-title">{{weeklyChapter}}</text>
+          </view>
+        </view>
+        <view class="bd-progress-section">
+          <view class="bd-seg-tracks">
+            <view
+              wx:for="{{milestoneSegs}}"
+              wx:key="label"
+              class="bd-seg-track {{item.isActive ? 'bd-seg-active' : ''}}"
+              style="flex:{{item.flex}}"
+            >
+              <view class="bd-seg-fill" style="width:{{item.fillPct}}%"></view>
+              <text class="bd-seg-label">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
 
       <!-- 训练日历 + 今日任务（合并卡） -->
       <view class="card">
@@ -112,9 +112,9 @@
         <view class="cal-top">
           <text class="card-title">训练日历</text>
           <view class="cal-nav">
-            <text bindtap="onPrevMonth" class="nav-btn">‹</text>
-            <text class="cal-month">{{monthLabel}}</text>
-            <text bindtap="onNextMonth" class="nav-btn">›</text>
+            <text bindtap="onPrevWeek" class="nav-btn">‹</text>
+            <text class="cal-month">{{calRangeLabel}}</text>
+            <text bindtap="onNextWeek" class="nav-btn">›</text>
           </view>
         </view>
         <view class="weekdays">
@@ -136,6 +136,31 @@
           </view>
         </view>
 
+        <!-- 图例  -->
+        <view class="cal-legend">
+          <view class="legend-item">
+            <view class="legend-dot dot-green"></view>
+            <text class="legend-text">已完成</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-dot dot-orange"></view>
+            <text class="legend-text">待登记错题</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-dot dot-red"></view>
+            <text class="legend-text">作业未上传</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-dot dot-gray"></view>
+            <text class="legend-text">待训练</text>
+          </view>
+          <view class="legend-item">
+            <view class="legend-dot dot-dim"></view>
+            <text class="legend-text">休息日</text>
+          </view>
+        </view>
+        
+
         <!-- 选中日详情（含今日） -->
         <view class="day-detail" wx:if="{{selectedDate && selectedDayPlan}}">
           <view class="detail-top">
@@ -152,7 +177,7 @@
           </view>
           <button wx:if="{{selectedDayStatus === 'done'}}" class="btn-action-green" bindtap="onDayActionView">查看打卡记录</button>
           <button wx:elif="{{selectedDayStatus === 'uploaded_pending'}}" class="btn-action-orange" bindtap="onDayActionReview">登记错题</button>
-          <button wx:else class="btn-action-red" bindtap="onDayActionUpload">拍照上传作业</button>
+          <button wx:else class="btn-action-red" bindtap="onDayActionUpload">📷 上传作业</button>
         </view>
 
         <!-- 无训练计划日期说明 -->
@@ -161,7 +186,6 @@
           <text class="no-plan-title">今日无训练安排</text>
           <text class="no-plan-sub">{{selectedDayLabel}}，休息调整\n保持状态，明天继续加油</text>
         </view>
-
 
       </view>
 

@@ -98,12 +98,12 @@ const ASSESSMENT_QUESTIONS: AsmQ[] = [
 const M1_SCHEDULE = [
   { topic: '整除判断基础',        keyPoints: ['整除的定义与意义', '整除判断规则（2/3/5）', '因数与倍数关系'],  chapterCode: 'C01' },
   { topic: '带余除法',            keyPoints: ['带余除法的意义', '余数与除数的大小关系', '验证与还原计算'],    chapterCode: 'C01' },
-  { topic: '带余除法（练习）',    keyPoints: ['综合题型训练', '余数还原法', '错误归因分析'],                  chapterCode: 'C01' },
+  { topic: '带余除法（练习）',    keyPoints: ['综合题型训练2', '余数还原法2', '错误归因分析2'],                  chapterCode: 'C01' },
   { topic: '余数的性质',          keyPoints: ['余数的范围', '余数的加减运算性质', '整除与余数关系'],          chapterCode: 'C01' },
   { topic: '余数的性质（练习）',  keyPoints: ['综合运用余数', '求数字末位', '周期问题入门'],                  chapterCode: 'C01' },
   { topic: '同余定义与性质',      keyPoints: ['同余的定义', '同余的基本性质', '同余的加法运算'],              chapterCode: 'C01' },
   { topic: '同余定义与性质（练习）', keyPoints: ['综合运用同余', '求数字末位', '周期问题入门'],               chapterCode: 'C01' },
-  { topic: '中国剩余定理入门',    keyPoints: ['联立同余方程', '中国剩余定理思路', '简单竞赛例题'],            chapterCode: 'C01' },
+  { topic: '中国剩余定理入门3',    keyPoints: ['联立同余方程', '中国剩余定理思路', '简单竞赛例题'],            chapterCode: 'C01' },
   { topic: '整除余数综合练习',    keyPoints: ['综合技巧串联', '竞赛真题训练', '错题归纳复盘'],                chapterCode: 'C01' },
 ]
 
@@ -367,7 +367,7 @@ async function main() {
   const sprint = await prisma.pla_SprintPlan.create({
     data: {
       projectId: project.id,
-      totalDays: 67,
+      totalDays: 672,
       competitionName: '华杯小学数学邀请赛',
       dailyMinutes: 90,
     },
@@ -410,7 +410,7 @@ async function main() {
       const slot      = schedule[dayCount % cycleLen]
       const chapterId = chapterCodeToId.get(slot.chapterCode) ?? null
 
-      await prisma.stu_TrainingPlan.create({
+      const plan = await prisma.stu_TrainingPlan.create({
         data: {
           studentId: sid,
           sprintPlanId: sprint.id,
@@ -421,6 +421,25 @@ async function main() {
           keyPoints: slot.keyPoints,
         },
       })
+
+      // 为每道知识点创建 planItem，关联对应章节的练习题
+      // C01(整除余数) → 评测题 origId 1,7,13；C02(行程速度) → origId 2,8,14
+      const qOrigIds = slot.chapterCode === 'C01' ? [1, 7, 13] : [2, 8, 14]
+      for (let qi = 0; qi < slot.keyPoints.length; qi++) {
+        const origId = qOrigIds[qi % qOrigIds.length]
+        const qId = questionIdByOrigId.get(origId)
+        if (qId) {
+          await prisma.stu_TrainingPlanItem.create({
+            data: {
+              planId: plan.id,
+              questionId: qId,
+              orderNum: qi,
+              itemType: 'new_practice',
+            },
+          })
+        }
+      }
+
       dayCount++
       totalPlans++
     }

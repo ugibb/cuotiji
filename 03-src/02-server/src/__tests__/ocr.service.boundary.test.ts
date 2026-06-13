@@ -1,75 +1,72 @@
 /**
- * Additional boundary-condition tests for ocr.service.ts
- * Covers: deterministic URL hashing, empty-ish URLs, all problem sets reachable
+ * Boundary tests for ocr.service — covers OCR text edge cases
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const mockGeneralHandwritingOCR = vi.fn()
+vi.mock('tencentcloud-sdk-nodejs-ocr', () => ({
+  ocr: {
+    v20181119: {
+      Client: vi.fn().mockImplementation(() => ({
+        GeneralHandwritingOCR: mockGeneralHandwritingOCR
+      }))
+    }
+  }
+}))
+
 import { ocrService } from '../services/ocr.service'
 
 describe('OCR Service — boundary conditions', () => {
-  it('should handle a minimal single-char URL without throwing', async () => {
-    const result = await ocrService.recognizeProblems('x')
-    expect(result).toHaveProperty('problems')
-    expect(Array.isArray(result.problems)).toBe(true)
-    expect(result.problems.length).toBeGreaterThan(0)
+  beforeEach(() => {
+    vi.clearAllMocks()
+    process.env.TENCENT_SECRET_ID = 'test-id'
+    process.env.TENCENT_SECRET_KEY = 'test-key'
   })
 
-  it('should return a deterministic result for the same URL across multiple calls', async () => {
-    const url = 'https://oss.example.com/assignments/2026/04/test-sheet.jpg'
-    const r1 = await ocrService.recognizeProblems(url)
-    const r2 = await ocrService.recognizeProblems(url)
-
-    expect(r1.problems.length).toBe(r2.problems.length)
-    r1.problems.forEach((p, i) => {
-      expect(p.text).toBe(r2.problems[i].text)
-      expect(p.studentAnswer).toBe(r2.problems[i].studentAnswer)
+  it('handles multi-line handwriting with numbers and Chinese', async () => {
+    mockGeneralHandwritingOCR.mockResolvedValueOnce({
+      TextDetections: [
+        { DetectedText: '解：设鸡x只，兔y只' },
+        { DetectedText: 'x+y=20' },
+        { DetectedText: '2x+4y=56' },
+        { DetectedText: '答：鸡12只，兔8只' }
+      ]
     })
+    const result = await ocrService.extractHandwriting('https://example.com/solution.jpg')
+    expect(result).toContain('鸡12只')
+    expect(result).toContain('x+y=20')
+    expect(result.split('\n').length).toBe(4)
   })
 
-  it('should return different problem sets for URLs that hash to different buckets', async () => {
-    // We need two URLs that produce different hash mod 3 values.
-    // Hash = sum of char codes mod 3.
-    // Brute-force verified offline: 'aaa' vs 'bbb' differ
-    const urlsAndHashes: Record<string, number> = {}
-    for (const url of ['http://a.com/1.jpg', 'http://b.com/2.jpg', 'http://c.com/3.jpg']) {
-      const hash = url.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 3
-      urlsAndHashes[url] = hash
-    }
-
-    // Confirm that at least two distinct hash buckets appear
-    const uniqueHashes = new Set(Object.values(urlsAndHashes))
-    expect(uniqueHashes.size).toBeGreaterThanOrEqual(2)
-
-    const results = await Promise.all(
-      Object.keys(urlsAndHashes).map(url => ocrService.recognizeProblems(url))
-    )
-
-    // All results are valid
-    results.forEach(r => {
-      expect(r.problems.length).toBeGreaterThan(0)
-      r.problems.forEach(p => {
-        expect(typeof p.text).toBe('string')
-        expect(typeof p.studentAnswer).toBe('string')
-      })
+  it('handles undefined DetectedText gracefully', async () => {
+    mockGeneralHandwritingOCR.mockResolvedValueOnce({
+      TextDetections: [
+        { DetectedText: undefined },
+        { DetectedText: '5050' }
+      ]
     })
+    const result = await ocrService.extractHandwriting('https://example.com/partial.jpg')
+    expect(result).toBe('5050')
   })
 
-  it('each problem text should be a non-empty string', async () => {
-    const result = await ocrService.recognizeProblems('https://test.com/sheet.jpg')
-    for (const p of result.problems) {
-      expect(p.text.length).toBeGreaterThan(0)
-    }
+  it('handles very long detected text', async () => {
+    const longText = '甲'.repeat(200)
+    mockGeneralHandwritingOCR.mockResolvedValueOnce({
+      TextDetections: [{ DetectedText: longText }]
+    })
+    const result = await ocrService.extractHandwriting('https://example.com/long.jpg')
+    expect(result).toBe(longText)
   })
 
-  it('studentAnswer may be empty string but should never be undefined', async () => {
-    const result = await ocrService.recognizeProblems('https://test.com/unanswered.jpg')
-    for (const p of result.problems) {
-      expect(p.studentAnswer).not.toBeUndefined()
-    }
-  })
-
-  it('should handle very long URLs without throwing', async () => {
-    const longUrl = 'https://cdn.example.com/' + 'a'.repeat(300) + '.jpg'
-    const result = await ocrService.recognizeProblems(longUrl)
-    expect(result.problems.length).toBeGreaterThan(0)
+  it('handles whitespace-only entries', async () => {
+    mockGeneralHandwritingOCR.mockResolvedValueOnce({
+      TextDetections: [
+        { DetectedText: '   ' },
+        { DetectedText: '\t' },
+        { DetectedText: '35' }
+      ]
+    })
+    const result = await ocrService.extractHandwriting('https://example.com/ws.jpg')
+    expect(result).toBe('35')
   })
 })

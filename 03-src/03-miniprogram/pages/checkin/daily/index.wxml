@@ -1,0 +1,169 @@
+<view class="page">
+
+  <!-- ── 自定义导航栏 ── -->
+  <view class="nav-wrap">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">第 {{currentIndex + 1}}/{{totalCount}} 题</text>
+      <view class="nav-dots">
+        <view
+          wx:for="{{slots}}"
+          wx:key="seq"
+          class="nav-dot dot-{{item.status}} {{index === currentIndex ? 'dot-current' : ''}}"
+        ></view>
+      </view>
+    </view>
+    <view class="progress-bar">
+      <text class="progress-text">已提交 {{submittedCount}}/{{totalCount}} 题</text>
+    </view>
+  </view>
+
+  <!-- ── Swiper（左右侧滑切换练习题） ── -->
+  <swiper
+    class="problem-swiper"
+    current="{{currentIndex}}"
+    bindchange="onSwiperChange"
+    duration="280"
+    easing-function="easeInOutCubic"
+  >
+    <swiper-item wx:for="{{slots}}" wx:key="seq">
+      <view class="swiper-inner">
+        <scroll-view class="content" scroll-y>
+
+          <!-- ① 题目卡（同 problem-detail） -->
+          <view class="section">
+            <text class="section-label">题目</text>
+            <view class="question-card">
+              <text class="question-text">{{item.questionText}}</text>
+            </view>
+          </view>
+
+          <!-- ② 拍照区（替换答案区，复用 problem-detail 的 box / verdict 样式） -->
+
+          <!-- pending：等待拍照 -->
+          <view
+            wx:if="{{item.status === 'pending'}}"
+            class="photo-pending"
+            bindtap="onTakePhoto"
+            data-seq="{{item.seq}}"
+          >
+            <text class="cam-icon">📷</text>
+            <text class="cam-hint">拍照上传</text>
+            <text class="cam-sub">对准题目，保持画面清晰</text>
+          </view>
+
+          <!-- uploading：上传中 -->
+          <view wx:elif="{{item.status === 'uploading'}}" class="photo-uploading">
+            <image class="photo-img" src="{{item.thumbUrl}}" mode="aspectFit"></image>
+            <view class="uploading-overlay">
+              <view class="spinner"></view>
+              <text class="uploading-text">AI 识别中…</text>
+            </view>
+          </view>
+
+          <!-- grading：已上传，AI 批改中 -->
+          <view wx:elif="{{item.status === 'grading'}}" class="photo-uploading">
+            <image class="photo-img photo-dim" src="{{item.thumbUrl}}" mode="aspectFit"></image>
+            <view class="uploading-overlay">
+              <view class="spinner"></view>
+              <text class="uploading-text">AI 批改中…</text>
+            </view>
+          </view>
+
+          <!-- graded：批改完成，展示结果 -->
+          <block wx:elif="{{item.status === 'graded'}}">
+            <view class="photo-done">
+              <image class="photo-img" src="{{item.thumbUrl}}" mode="aspectFill"></image>
+            </view>
+            <view wx:if="{{item.result === 'correct'}}" class="verdict verdict-correct">
+              <text class="verdict-icon">✓</text>
+              <text class="verdict-text">答对了！</text>
+              <text class="verdict-retake" bindtap="onTakePhoto" data-seq="{{item.seq}}">重拍</text>
+            </view>
+            <view wx:elif="{{item.result === 'wrong'}}" class="verdict verdict-wrong">
+              <text class="verdict-icon">✗</text>
+              <text class="verdict-text">再想想</text>
+              <text class="verdict-retake" bindtap="onTakePhoto" data-seq="{{item.seq}}">重拍</text>
+            </view>
+            <view wx:else class="verdict verdict-unknown">
+              <text class="verdict-icon">?</text>
+              <text class="verdict-text">未识别，建议重拍</text>
+              <text class="verdict-retake" bindtap="onTakePhoto" data-seq="{{item.seq}}">重拍</text>
+            </view>
+            <view wx:if="{{item.rawOcrText}}" class="answer-row answer-ocr-row">
+              <text class="answer-label">OCR 原文</text>
+              <text class="answer-value answer-ocr">{{item.rawOcrText}}</text>
+            </view>
+            <view wx:if="{{item.studentAnswer}}" class="answer-row">
+              <text class="answer-label">识别答案</text>
+              <text class="answer-value {{item.result === 'wrong' ? 'answer-wrong' : ''}}">{{item.studentAnswer}}</text>
+            </view>
+            <view wx:if="{{item.result === 'wrong' && item.correctAnswer}}" class="answer-row answer-correct-row">
+              <text class="answer-label">正确答案</text>
+              <text class="answer-value answer-correct">{{item.correctAnswer}}</text>
+            </view>
+          </block>
+
+          <!-- mismatch：内容不符 -->
+          <block wx:elif="{{item.status === 'mismatch'}}">
+            <view class="photo-done">
+              <image class="photo-img photo-dim" src="{{item.thumbUrl}}" mode="aspectFill"></image>
+            </view>
+            <view class="verdict verdict-wrong">
+              <text class="verdict-icon">⚠️</text>
+              <text class="verdict-text">内容与题目不符，请重拍</text>
+            </view>
+          </block>
+
+          <!-- error：上传失败 -->
+          <view
+            wx:elif="{{item.status === 'error'}}"
+            class="photo-pending photo-error"
+            bindtap="onTakePhoto"
+            data-seq="{{item.seq}}"
+          >
+            <text class="cam-icon">✕</text>
+            <text class="cam-hint">上传失败，点击重试</text>
+            <text class="cam-sub">请检查网络连接</text>
+          </view>
+
+          <view style="height:180rpx"></view>
+        </scroll-view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- ── 底部操作栏（替换 chat-input） ── -->
+  <view class="action-bar">
+
+    <!-- pending / mismatch / error → 拍照按钮 -->
+    <view wx:if="{{slots[currentIndex] && slots[currentIndex].status !== 'graded' && slots[currentIndex].status !== 'uploading' && slots[currentIndex].status !== 'grading'}}" class="btn-camera" bindtap="onTakePhoto" data-seq="{{slots[currentIndex].seq}}" >
+      <text class="btn-camera-text">{{slots[currentIndex].status === 'mismatch' ? '重新拍照' : '拍照上传'}}</text>
+    </view>
+
+    <!-- uploading / grading → 加载状态 -->
+    <view
+      wx:elif="{{slots[currentIndex] && (slots[currentIndex].status === 'uploading' || slots[currentIndex].status === 'grading')}}"
+      class="btn-loading"
+    >
+      <view class="spinner-sm"></view>
+      <text class="btn-loading-text">{{slots[currentIndex].status === 'uploading' ? '上传中…' : 'AI 批改中，请稍候…'}}</text>
+    </view>
+
+    <!-- graded → 上一题 / 下一题 / 提交作业 -->
+    <view
+      wx:elif="{{slots[currentIndex] && slots[currentIndex].status === 'graded'}}"
+      class="nav-btn-row"
+    >
+      <view wx:if="{{currentIndex > 0}}" class="btn-prev" bindtap="onPrev">上一题</view>
+      <view wx:if="{{!isLast}}" class="btn-next" bindtap="onNext">下一题 →</view>
+      <view wx:elif="{{canSubmit}}" class="btn-submit" bindtap="onSubmit">提交作业 ✓</view>
+      <view wx:else class="btn-wait">还有 {{totalCount - submittedCount}} 题未完成</view>
+    </view>
+
+  </view>
+
+</view>

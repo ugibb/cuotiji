@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "chat-input": "../../../components/chat-input/index"
+  },
+  "navigationStyle": "custom"
+}

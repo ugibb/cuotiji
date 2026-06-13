@@ -161,147 +161,188 @@
   margin-top: 16rpx;
 }
 
-/* ── Active: Hero 倒计时区 ── */
+/* ── Active: 每日名言 Hero ── */
 .exec-hero {
   background: linear-gradient(135deg, #5B5FC7 0%, #4338CA 100%);
-  padding: 28rpx 36rpx 36rpx;
+  padding: 36rpx 36rpx 44rpx;
   position: relative;
   overflow: hidden;
 }
 
-.exec-hero-deco {
+.quote-deco {
   position: absolute;
-  right: -16rpx;
-  top: -20rpx;
-  font-size: 280rpx;
+  top: -24rpx;
+  right: 20rpx;
+  font-size: 200rpx;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.1);
   line-height: 1;
   pointer-events: none;
+  font-family: Georgia, serif;
 }
 
-.exec-hero-main {
+.hero-inner {
   position: relative;
   z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 28rpx;
 }
 
-.countdown-label {
+.hero-date {
   display: block;
   font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 1rpx;
-  margin-bottom: 8rpx;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 12rpx;
+  letter-spacing: 0.5rpx;
 }
 
-.countdown-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
-}
-
-.countdown-num {
-  font-size: 80rpx;
+.hero-quote {
+  display: block;
+  font-size: 38rpx;
   font-weight: 900;
   color: #fff;
-  line-height: 1;
+  line-height: 1.35;
+  margin-bottom: 10rpx;
+  letter-spacing: 4rpx;
 }
 
-.countdown-unit {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.exec-hero-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8rpx;
-}
-
-.ms-label {
+.hero-quote-from {
   display: block;
   font-size: 20rpx;
   color: rgba(255, 255, 255, 0.6);
+  text-align: right;
 }
 
-.ms-pill {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 100rpx;
-  padding: 8rpx 20rpx;
+/* ── 项目燃尽图卡（白底 + 靛蓝进度条） ── */
+.card.burndown-card {
+  /* 继承 .card 白底，仅控制内部布局 */
+  overflow: hidden;
+}
+
+.bd-stage-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.bd-m1-badge {
+  width: 56rpx;
+  height: 56rpx;
+  background: #4338CA;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 900;
   color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 1rpx;
 }
 
-.ms-day-label {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.6);
+.bd-stage-info {
+  flex: 1;
 }
 
-/* M1 进度条 */
-.exec-progress {
-  position: relative;
-  z-index: 1;
-}
-
-.exec-progress-top {
+.bd-stage-meta {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10rpx;
-}
-
-.exec-progress-label {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.exec-progress-pct {
-  font-size: 22rpx;
-  font-weight: 700;
-  color: #fff;
-}
-
-.exec-bar-track {
-  height: 10rpx;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 5rpx;
-  overflow: hidden;
-  margin-bottom: 12rpx;
-}
-
-.exec-bar-fill {
-  height: 100%;
-  background: #fff;
-  border-radius: 5rpx;
-}
-
-.ms-seg-row {
-  display: flex;
-  gap: 6rpx;
+  align-items: center;
   margin-bottom: 6rpx;
 }
 
-.ms-seg {
-  flex: 1;
-  height: 6rpx;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3rpx;
-}
-
-.ms-seg-active {
-  background: #fff;
-}
-
-.ms-seg-labels {
-  display: flex;
-  justify-content: space-between;
+.bd-stage-label {
   font-size: 18rpx;
+  color: #9CA3AF;
+}
+
+.bd-stage-sub {
+  font-size: 18rpx;
+  color: #9CA3AF;
+}
+
+.bd-stage-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.25;
+}
+
+.bd-progress-section {
+  position: relative;
+  z-index: 1;
+}
+
+.bd-seg-tracks {
+  display: flex;
+  gap: 6rpx;
+}
+
+.bd-seg-track {
+  position: relative;
+  height: 44rpx;
+  border-radius: 8rpx;
+  background: #818CF8;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bd-seg-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: #4338CA;
+  border-radius: 8rpx;
+}
+
+.bd-seg-label {
+  position: relative;
+  z-index: 1;
+  font-size: 18rpx;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1rpx;
+}
+
+.bd-seg-active .bd-seg-label {
+  font-weight: 800;
+  color: #fff;
+}
+
+/* ── 日历图例 ── */
+.cal-legend {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 0 8rpx;
+  border-top: 1rpx solid #F0F1F5;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green  { background: #4ADE80; }
+.dot-orange { background: #FB923C; }
+.dot-red    { background: #F87171; }
+.dot-gray   { background: #CBD5E1; }
+.dot-dim    { background: #E2E8F0; }
+
+.legend-text {
+  font-size: 20rpx;
+  color: #9CA3AF;
 }
 
 /* ── 今日任务卡 ── */
@@ -317,42 +358,42 @@
 
 /* 训练要点列表 */
 .kp-wrap {
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
 }
 
 .kp-title {
   display: block;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #9CA3AF;
-  margin-bottom: 14rpx;
+  margin-bottom: 10rpx;
 }
 
 .kp-item {
   display: flex;
   align-items: baseline;
-  gap: 12rpx;
-  margin-bottom: 10rpx;
+  gap: 10rpx;
+  margin-bottom: 6rpx;
 }
 
 .kp-bullet {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #5B5FC7;
   flex-shrink: 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .kp-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #374151;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* ── 通用卡片 ── */
 .card {
   background: #fff;
   border-radius: 32rpx;
-  margin: 20rpx 32rpx 0;
-  padding: 28rpx 32rpx;
+  margin: 14rpx 28rpx 0;
+  padding: 20rpx 26rpx;
 }
 
 .card-title {
@@ -360,7 +401,7 @@
   font-size: 26rpx;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 /* ── 训练日历 ── */
@@ -368,7 +409,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .cal-nav {
@@ -397,7 +438,7 @@
 .weekdays text {
   flex: 1;
   text-align: center;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #9CA3AF;
   letter-spacing: 1rpx;
 }
@@ -412,12 +453,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10rpx 0;
+  padding: 5rpx 0;
 }
 
 .day-circle {
-  width: 62rpx;
-  height: 62rpx;
+  width: 52rpx;
+  height: 52rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -440,7 +481,7 @@
 }
 
 .day-num {
-  font-size: 26rpx;
+  font-size: 25rpx;
   font-weight: 500;
   color: #374151;
   line-height: 1;
@@ -453,10 +494,10 @@
 .n-today   { font-weight: 900; }
 
 .day-underline {
-  width: 45rpx;
-  height: 8rpx;
+  width: 58rpx;
+  height: 7rpx;
   border-radius: 100rpx;
-  margin-top: 6rpx;
+  margin-top: 4rpx;
 }
 
 .ul-green  { background: #4ADE80; }
@@ -467,8 +508,8 @@
 
 /* ── 选中日详情 ── */
 .day-detail {
-  margin-top: 20rpx;
-  padding-top: 20rpx;
+  margin-top: 14rpx;
+  padding-top: 14rpx;
   border-top: 1rpx solid #F0F1F5;
 }
 
@@ -476,7 +517,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10rpx;
+  margin-bottom: 8rpx;
 }
 
 /* ── 无计划日期详情 ── */
@@ -522,10 +563,10 @@
 
 .detail-topic {
   display: block;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .done-badge {
@@ -544,7 +585,7 @@
 }
 
 .btn-action-green {
-  width: 100%;
+  width: 100% !important;
   height: 88rpx;
   border-radius: 50rpx;
   background: linear-gradient(135deg, #22C55E, #16A34A);
@@ -559,8 +600,8 @@
 .btn-action-green::after { border: none; }
 
 .btn-action-orange {
-  width: 100%;
-  height: 88rpx;
+  width: 100% !important;
+  height: 80rpx;
   border-radius: 50rpx;
   background: linear-gradient(135deg, #FB923C, #EA580C);
   color: #fff;
@@ -574,8 +615,8 @@
 .btn-action-orange::after { border: none; }
 
 .btn-action-red {
-  width: 100%;
-  height: 88rpx;
+  width: 100% !important;
+  height: 80rpx;
   border-radius: 50rpx;
   background: linear-gradient(135deg, #F87171, #DC2626);
   color: #fff;
@@ -589,8 +630,8 @@
 .btn-action-red::after { border: none; }
 
 .btn-action-primary {
-  width: 100%;
-  height: 88rpx;
+  width: 100% !important;
+  height: 80rpx;
   border-radius: 50rpx;
   background: linear-gradient(135deg, #5B5FC7, #4338CA);
   color: #fff;

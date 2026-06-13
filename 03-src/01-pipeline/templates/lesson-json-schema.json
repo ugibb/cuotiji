@@ -1,0 +1,147 @@
+{
+  "_meta": {
+    "material_set": "《学而思秘籍 小学数学思维培养》",
+    "version": "2022版",
+    "desc": "11级-2022版《学而思秘籍 小学数学思维培养》第7讲 弦图.pdf",
+    "level": 11,
+    "lesson_num": 7,
+    "lesson_name": "第7讲 弦图"
+  },
+
+  "knowledge_guide_list": [
+    {"seq": 1, "title": "复习勾股定理"},
+    {"seq": 2, "title": "由弦图求解较复杂的几何问题"}
+  ],
+
+  "kp_list": [
+    {
+      "seq": 1,
+      "title": "勾股定理",
+      "content_latex": "在直角三角形中，两个直角边边长分别为 $a$、$b$，斜边长为 $c$，则 $a^2 + b^2 = c^2$。",
+      "images": [
+        {"placeholder": "img_p06_0", "desc": "勾股定理示意图"}
+      ]
+    },
+    {
+      "seq": 2,
+      "title": "弦图",
+      "content_latex": "$$a^2+b^2=c^2$$",
+      "images": []
+    }
+  ],
+
+  "methods": [
+    {
+      "seq": 1,
+      "title": "勾股定理",
+      "content_latex": "$$勾^2+股^2=斜^2$$",
+      "kp_seq": 1
+    },
+    {
+      "seq": 2,
+      "title": "好方法 2 标题（占位）",
+      "content_latex": "直角三角形中两直角边 $a$、$b$ 与斜边 $c$ 满足 $a^2+b^2=c^2$。",
+      "kp_seq": 2
+    }
+  ],
+
+  "exercises": [
+
+    {
+      "seq": 1,
+      "method_seq": 1,
+      "type": "example",
+      "question_type": "填空题",
+      "stem_parts": [
+        {
+          "seq": 1,
+          "stem_latex": "用四个完全相同的长方形拼出图(1)，大正方形的面积是小正方形面积的______倍。",
+          "answer_latex": "25",
+          "images": []
+        },
+        {
+          "seq": 2,
+          "stem_latex": "如图，连接图(1)中每个长方形的一条对角线，形成的图(2)中的虚线正方形 $ABCD$ 与中间最小的正方形的面积差为多少？",
+          "answer_latex": "12",
+          "images": [{"placeholder": "img_p07_1", "desc": "图(2)示意图"}]
+        }
+      ],
+      "solution": {
+        "thinking_latex": "(1) 计算大正方形的面积 → 计算小正方形的面积 → 求倍数关系\n(2) 利用勾股定理计算斜边的平方 → 得虚线正方形的面积 → 计算面积差",
+        "solution_latex": "(1) $(2+3)^2 \\div (3-2)^2 = 25$。\n(2) $2^2 + 3^2 = 13$，$13 - 1 = 12$，或 $2 \\times 3 \\div 2 \\times 4 = 12$。",
+        "images": [
+          {"placeholder": "img_p07_2", "desc": "解题辅助图（如有）"}
+        ]
+      }
+    },
+
+    {
+      "seq": 2,
+      "method_seq": 1,
+      "type": "practice",
+      "question_type": "填空题",
+      "stem_parts": [
+        {
+          "seq": 1,
+          "stem_latex": "2002年在北京召开了国际数学家大会，大会会标如下图所示。它是由四个相同的直角三角形拼成的（直角边分别为 2 和 3）。大正方形的面积是多少？",
+          "answer_latex": null,
+          "images": [
+            {"placeholder": "img_p09_0", "desc": "大会会标图"}
+          ]
+        }
+      ]
+    },
+
+    {
+      "seq": 3,
+      "method_seq": 1,
+      "type": "practice",
+      "question_type": "解答题",
+      "stem_parts": [
+        {
+          "seq": 1,
+          "stem_latex": "照图中的样子，在正方形纸板上剪去两个直角三角形。求图中阴影部分的面积。",
+          "answer_latex": null,
+          "images": [{"placeholder": "img_p09_1", "desc": "阴影部分示意图"}]
+        }
+      ]
+    },
+
+    {
+      "seq": 4,
+      "method_seq": 1,
+      "type": "hard_practice",
+      "question_type": "填空题",
+      "stem_parts": [
+        {
+          "seq": 1,
+          "stem_latex": "牛牛画了一幅图：三角形 $ABC$ 是直角三角形，$M$ 是斜边 $BC$ 的中点，四边形 $MNPQ$ 是正方形，$N$ 在 $AB$ 上，$P$ 在 $AC$ 上，$BP$ 的长度是 12 厘米，$AC$ 的长度是 8 厘米，那么正方形 $MNPQ$ 的面积是______平方厘米。",
+          "answer_latex": null,
+          "images": [{"placeholder": "img_p10_0", "desc": "正方形MNPQ示意图"}]
+        }
+      ]
+    },
+
+    {
+      "seq": 5,
+      "method_seq": null,
+      "type": "challenge",
+      "question_type": "填空题",
+      "stem_parts": [
+        {
+          "seq": 1,
+          "stem_latex": "探索知识巅峰小题1题干（含LaTeX）",
+          "answer_latex": "25",
+          "images": []
+        },
+        {
+          "seq": 2,
+          "stem_latex": "探索知识巅峰小题2题干（含LaTeX）",
+          "answer_latex": "12",
+          "images": [{"placeholder": "img_p07_1", "desc": "附图1"}]
+        }
+      ]
+    }
+
+  ]
+}

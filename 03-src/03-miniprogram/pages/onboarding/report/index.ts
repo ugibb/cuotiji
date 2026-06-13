@@ -6,22 +6,13 @@ const DEFAULT_REPORT: AbilityReport = {
   levelDesc: '', domains: [], radarPoints: '',
 }
 
-function buildAiAdjustReply(report: AbilityReport): string {
-  const sorted = [...report.domains].sort((a, b) => a.score - b.score)
-  const weakest = sorted[0]
-  if (!weakest || weakest.status === 'strong') {
-    return '明白了 👍 已记录你的补充，画像会据此微调，计划生成时会纳入。'
-  }
-  const label = weakest.status === 'weak' ? '待突破' : '有基础待强化'
-  return `明白了 👍 会把${weakest.name}调整为「${label}」，计划里会适当减少基础讲解，多安排练习题冲刺。画像已更新。`
-}
-
 interface ReportPageData {
   statusBarHeight: number
   headerHeight: number
+  safeBottom: number
+  bottomSpacerHeight: number
   report: AbilityReport
   aiOpeningMsg: string
-  inputVal: string
   userReply: string
   aiAdjust: string
 }
@@ -30,20 +21,25 @@ Page<ReportPageData, Record<string, unknown>>({
   data: {
     statusBarHeight: 0,
     headerHeight: 0,
+    safeBottom: 0,
+    bottomSpacerHeight: 160,
     report: DEFAULT_REPORT,
     aiOpeningMsg: '',
-    inputVal: '',
     userReply: '',
     aiAdjust: '',
   },
 
   onLoad() {
-    const { statusBarHeight } = wx.getSystemInfoSync()
+    const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+    const safeBottom = (sysInfo as { safeAreaInsets?: { bottom?: number } }).safeAreaInsets?.bottom ?? 0
+    // 按钮区高度：100rpx 按钮 + 20rpx padding-top，折算为 px 后加 safeBottom
+    const btnAreaPx = Math.ceil(120 * sysInfo.windowWidth / 750)
+    const bottomSpacerHeight = btnAreaPx + safeBottom + 16
     const app = getApp<{ globalData: AppGlobal }>()
     const report = app.globalData.abilityReport ?? DEFAULT_REPORT
     const aiOpeningMsg = app.globalData.aiOpeningMsg ?? ''
     ;(this as { _report?: AbilityReport })._report = report
-    this.setData({ statusBarHeight, report, aiOpeningMsg })
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight, safeBottom, bottomSpacerHeight, report, aiOpeningMsg })
     wx.nextTick(() => {
       wx.createSelectorQuery().in(this).select('.page-header').boundingClientRect(rect => {
         if (rect) this.setData({ headerHeight: rect.height })
@@ -163,17 +159,15 @@ Page<ReportPageData, Record<string, unknown>>({
     wx.navigateBack()
   },
 
-  onInput(e: WechatMiniprogram.Input) {
-    this.setData({ inputVal: e.detail.value })
+  onShow() {
+    const app = getApp<{ globalData: AppGlobal }>()
+    const userReply = app.globalData.reportChatReply ?? ''
+    const aiAdjust = app.globalData.reportChatAiAdjust ?? ''
+    this.setData({ userReply, aiAdjust })
   },
 
-  onSendReply() {
-    const reply = this.data.inputVal.trim()
-    if (!reply) return
-    this.setData({ userReply: reply, inputVal: '' })
-    setTimeout(() => {
-      this.setData({ aiAdjust: buildAiAdjustReply(this.data.report) })
-    }, 800)
+  onOpenChat() {
+    wx.navigateTo({ url: '/pages/onboarding/report-chat/index' })
   },
 
   onConfirm() {

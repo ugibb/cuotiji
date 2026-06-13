@@ -1,0 +1,177 @@
+<view class="chat-root">
+
+  <!-- ══ 语音录音面板（fixed，从底部滑入） ══ -->
+  <view class="voice-panel {{panelVisible ? 'panel--show' : ''}}">
+
+    <!-- 拖拽把手 -->
+    <view class="panel-handle-wrap">
+      <view class="panel-handle"></view>
+    </view>
+
+    <!-- 状态文字 -->
+    <view class="panel-status">
+      <view wx:if="{{recognizing}}" class="panel-recognizing">
+        <view class="dot-wrap">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+        <text class="panel-status-text">识别中</text>
+        <view class="dot-wrap">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+      </view>
+      <view wx:else class="panel-recognizing">
+        <view class="dot-wrap">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+        <text class="panel-status-text {{cancelHint ? 'panel-status-text--cancel' : ''}}">松手结束，上移取消</text>
+        <view class="dot-wrap">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+      </view>
+    </view>
+
+
+    <!-- 安全区占位 -->
+    <view style="height:{{safeBottom}}px"></view>
+
+  </view>
+
+  <!-- ══ 输入栏（常驻底部） ══ -->
+  <view class="bar {{!showTopBorder ? 'bar--no-border' : ''}}">
+
+    <!-- 相机 -->
+    <view wx:if="{{showCamera}}" class="bar-btn" bindtap="onCamera">
+      <view class="ic-camera">
+        <view class="ic-camera-lens"></view>
+      </view>
+    </view>
+
+    <!-- 中央：文字模式输入框 / 语音模式按住说话按钮 -->
+    <!-- 在文字模式下长按也可直接触发录音（无需先切换语音模式）-->
+    <view class="bar-mid"
+      bindtouchstart="onInputAreaTouchStart"
+      bindtouchmove="onVoiceTouchMove"
+      bindtouchend="onInputAreaTouchEnd"
+      bindtouchcancel="onInputAreaTouchCancel"
+    >
+      <!-- hidden 替代 wx:if，避免 DOM 变更中断 touch 追踪 -->
+      <view
+        hidden="{{!(voiceMode || panelVisible)}}"
+        class="bar-voice-btn"
+        bindtouchstart="onVoiceTouchStart"
+        bindtouchmove="onVoiceTouchMove"
+        bindtouchend="onVoiceTouchEnd"
+        bindtouchcancel="onVoiceTouchCancel"
+      >
+        <text class="bar-voice-label">{{cancelHint ? '松手取消' : (recording ? '上移取消·松手发送' : '按住说话')}}</text>
+      </view>
+      <textarea
+        wx:if="{{textareaVisible}}"
+        hidden="{{voiceMode || panelVisible}}"
+        class="bar-input"
+        value="{{inputVal}}"
+        placeholder="{{placeholder}}"
+        placeholder-class="bar-ph"
+        auto-height
+        show-confirm-bar="{{false}}"
+        focus="{{inputFocus}}"
+        cursor="{{inputCursor}}"
+        selection-start="{{inputSelStart}}"
+        selection-end="{{inputSelEnd}}"
+        bindinput="onInput"
+        bindfocus="onInputFocus"
+        cursor-spacing="20"
+        adjust-position="{{true}}"
+      />
+    </view>
+
+    <!-- 语音/键盘切换（录音或识别中时隐藏） -->
+    <view wx:if="{{!recording && !recognizing}}" class="bar-btn" bindtap="onToggleVoiceMode">
+      <!-- 键盘图标：圆形 + 2行点阵 + 底部横条 -->
+      <view wx:if="{{voiceMode}}" class="ic-circle-btn">
+        <view class="kb-layout">
+          <view class="kb-row">
+            <view class="kb-dot"></view>
+            <view class="kb-dot"></view>
+            <view class="kb-dot"></view>
+          </view>
+          <view class="kb-row">
+            <view class="kb-dot"></view>
+            <view class="kb-dot"></view>
+            <view class="kb-dot"></view>
+          </view>
+          <view class="kb-space"></view>
+        </view>
+      </view>
+      <!-- 录音图标：传统麦克风 -->
+      <view wx:else class="ic-mic">
+        <view class="mic-body"></view>
+        <view class="mic-arc"></view>
+        <view class="mic-stem"></view>
+      </view>
+    </view>
+
+    <!-- 发送按钮（有文字时显示），+ / × 切换 -->
+    <view wx:if="{{inputVal}}" class="bar-btn bar-btn--send" bindtap="onSendText">
+      <view class="ic-send">
+        <view class="send-arrow"></view>
+      </view>
+    </view>
+    <view wx:elif="{{showPlus && !recording && !recognizing}}" class="bar-btn" bindtap="onPlus">
+      <view wx:if="{{plusExpanded}}" class="ic-close">
+        <view class="close-line close-line--1"></view>
+        <view class="close-line close-line--2"></view>
+      </view>
+      <view wx:else class="ic-plus">
+        <view class="plus-h"></view>
+        <view class="plus-v"></view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ══ + 展开菜单 ══ -->
+  <view wx:if="{{plusExpanded}}" class="plus-menu">
+    <view class="plus-item" bindtap="onMenuCamera">
+      <view class="plus-icon-wrap">
+        <view class="mi-camera">
+          <view class="mi-camera-lens"></view>
+          <view class="mi-camera-bump"></view>
+        </view>
+        <text class="plus-label">相机</text>
+      </view>
+    </view>
+    <view class="plus-item" bindtap="onMenuAlbum">
+      <view class="plus-icon-wrap">
+        <view class="mi-album">
+          <view class="mi-album-sun"></view>
+          <view class="mi-album-hill"></view>
+        </view>
+        <text class="plus-label">相册</text>
+      </view>
+    </view>
+    <view class="plus-item" bindtap="onMenuFile">
+      <view class="plus-icon-wrap">
+        <view class="mi-file">
+          <view class="mi-file-fold"></view>
+          <view class="mi-file-line"></view>
+          <view class="mi-file-line"></view>
+          <view class="mi-file-line mi-file-line--short"></view>
+        </view>
+        <text class="plus-label">文件</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 安全区占位 -->
+  <view style="height:{{safeBottom}}px;background:#f5f5f5"></view>
+
+</view>

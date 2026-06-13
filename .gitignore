@@ -14,6 +14,15 @@ node_modules/
 03-src/02-server/coverage/
 03-src/02-server/uploads/
 
+# 版权教材原始文件（禁止上传）
+03-src/01-pipeline/input/
+
+# Pipeline 中间产物（13GB，不入库）
+03-src/01-pipeline/output/
+
+# 备份杂项（无需版本管理）
+03-src/00-bak/
+
 # 版权图片素材（禁止上传，119MB）
 pilot/results/figures_pymupdf/
 03-src/01-pilot/results/figures_pymupdf/

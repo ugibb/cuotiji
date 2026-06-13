@@ -44,7 +44,13 @@ export async function calendarRoutes(fastify: FastifyInstance) {
             studentId: sid,
             planDate: { gte: startDate, lte: endDate }
           },
-          include: { chapter: true },
+          include: {
+            chapter: true,
+            planItems: {
+              include: { question: true },
+              orderBy: { orderNum: 'asc' }
+            }
+          },
           orderBy: { planDate: 'asc' }
         })
 
@@ -56,25 +62,38 @@ export async function calendarRoutes(fastify: FastifyInstance) {
           select: { planDate: true, status: true }
         })
 
-        const assignmentsByDate = new Map<string, string>()
+        // 按日期聚合所有 assignment 状态（一道题一条记录）
+        const assignmentsByDate = new Map<string, string[]>()
         for (const a of assignments) {
           if (a.planDate) {
             const dateKey = a.planDate.toISOString().split('T')[0]
-            assignmentsByDate.set(dateKey, a.status)
+            const arr = assignmentsByDate.get(dateKey) ?? []
+            arr.push(a.status)
+            assignmentsByDate.set(dateKey, arr)
           }
         }
 
-        type PlanWithChapter = Prisma.Stu_TrainingPlanGetPayload<{ include: { chapter: true } }>
+        type PlanWithChapter = Prisma.Stu_TrainingPlanGetPayload<{
+          include: { chapter: true; planItems: { include: { question: true } } }
+        }>
         const enrichedPlans = plans.map((p: PlanWithChapter) => {
           const dateKey = p.planDate.toISOString().split('T')[0]
-          const assignmentStatus = assignmentsByDate.get(dateKey)
+          const statuses = assignmentsByDate.get(dateKey) ?? []
+
+          // 当天应完成的题目数（planItems 优先，兜底 1 道）
+          const expected = p.planItems.length > 0 ? p.planItems.length : 1
+          const gradedCount = statuses.filter(s => s === 'graded' || s === 'reviewed').length
+          const reviewedCount = statuses.filter(s => s === 'reviewed').length
 
           let calendarStatus: string
-          if (!assignmentStatus) {
+          if (statuses.length === 0 || gradedCount < expected) {
+            // 未上传或只上传了部分
             calendarStatus = 'not_uploaded'
-          } else if (assignmentStatus === 'reviewed' || assignmentStatus === 'graded') {
+          } else if (reviewedCount >= expected) {
+            // 全部题目都已复盘
             calendarStatus = 'completed'
           } else {
+            // 全部题目已批改，但未复盘
             calendarStatus = 'uploaded_pending'
           }
 
@@ -92,7 +111,20 @@ export async function calendarRoutes(fastify: FastifyInstance) {
               name: p.chapter.name,
               subtitle: p.chapter.subtitle
             } : null,
-            assignmentStatus: calendarStatus
+            assignmentStatus: calendarStatus,
+            planItems: p.planItems.map((item) => ({
+              id: Number(item.id),
+              seq: item.orderNum,
+              questionId: item.questionId ? Number(item.questionId) : null,
+              question: item.question
+                ? {
+                    id: Number(item.question.id),
+                    stemLatex: item.question.stemLatex,
+                    options: item.question.options,
+                    answerLatex: item.question.answerLatex,
+                  }
+                : null,
+            })),
           }
         })
 

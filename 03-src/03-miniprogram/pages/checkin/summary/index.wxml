@@ -13,6 +13,11 @@
 
     <!-- ── Hero：深紫渐变 ── -->
     <view class="hero">
+      <view class="nav-bar">
+        <view class="nav-back-icon" bindtap="onGoHome">
+          <text class="nav-back-arrow">‹</text>
+        </view>
+      </view>
       <text class="hero-emoji">🎉</text>
 
       <!-- 大分数：答对 / 总数 -->
@@ -32,45 +37,88 @@
     <!-- ── 白色内容区 ── -->
     <view class="body-section">
 
-      <!-- 三列统计卡（上移压住 hero 底部） -->
+      <!-- 四列统计卡（可点击筛选题目） -->
       <view class="stat-card">
-        <view class="stat-col">
+        <view class="stat-col {{filter === 'all' ? 'stat-col-active stat-col-active-all' : ''}}" data-filter="all" bindtap="onFilterChange" >
+          <text class="stat-num num-total">{{assignment.totalCount}}</text>
+          <text class="stat-label">全部</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view
+          class="stat-col {{filter === 'correct' ? 'stat-col-active stat-col-active-correct' : ''}}"
+          data-filter="correct"
+          bindtap="onFilterChange"
+        >
           <text class="stat-num num-correct">{{assignment.correctCount}}</text>
           <text class="stat-label">答对</text>
         </view>
         <view class="stat-divider"></view>
-        <view class="stat-col">
+        <view
+          class="stat-col {{filter === 'wrong' ? 'stat-col-active stat-col-active-wrong' : ''}}"
+          data-filter="wrong"
+          bindtap="onFilterChange"
+        >
           <text class="stat-num num-wrong">{{assignment.wrongCount}}</text>
           <text class="stat-label">做错</text>
         </view>
         <view class="stat-divider"></view>
-        <view class="stat-col">
+        <view
+          class="stat-col {{filter === 'unknown' ? 'stat-col-active stat-col-active-unknown' : ''}}"
+          data-filter="unknown"
+          bindtap="onFilterChange"
+        >
           <text class="stat-num num-unknown">{{assignment.unknownCount}}</text>
           <text class="stat-label">不会</text>
         </view>
       </view>
 
-      <!-- 知识点标签 -->
+      <!-- 知识点标签 
       <view wx:if="{{knowledgeTags.length > 0}}" class="kp-section">
         <text class="kp-title">本次涉及知识点</text>
         <view class="kp-tags">
-          <view
-            wx:for="{{knowledgeTags}}"
-            wx:key="label"
-            class="kp-tag kp-{{item.status}}"
-          >
+          <view wx:for="{{knowledgeTags}}" wx:key="label" class="kp-tag kp-{{item.status}}" >
             <text class="kp-text">{{item.label}} {{item.suffix}}</text>
           </view>
+        </view>
+      </view>
+      -->
+      <!-- ── 题目列表 ── -->
+      <view wx:if="{{problems.length > 0}}" class="problem-section">
+        <!--
+        <text class="problem-section-title">
+          题目列表{{filter !== 'all' ? '（已筛选）' : ''}}
+        </text>
+        -->
+
+        <!-- 题目行 -->
+        <view wx:for="{{filteredProblems}}" wx:key="id" class="problem-row" data-id="{{item.id}}" data-seq="{{item.seq}}" bindtap="onProblemTap" >
+          <view class="circle circle-{{item.result}}">
+            <text class="circle-icon">{{item.result === 'correct' ? '✓' : item.result === 'wrong' ? '×' : '?'}}</text>
+          </view>
+          <view class="row-body">
+            <text class="row-title">第 {{item.seq}} 题</text>
+            <text wx:if="{{item.knowledgePoint}}" class="row-kp">{{item.knowledgePoint}}</text>
+          </view>
+          <view class="row-status">
+            <text class="status-label status-{{item.result}}">
+              {{item.result === 'correct' ? '答对了' : item.result === 'wrong' ? '做错了' : '不会做'}}
+            </text>
+            <text wx:if="{{item.reviewStatus === 'done'}}" class="status-sub status-reviewed">已复盘</text>
+            <text wx:if="{{item.reviewStatus !== 'done'}}" class="status-sub">待复盘</text>
+          </view>
+        </view>
+
+        <view wx:if="{{filteredProblems.length === 0}}" class="empty-hint">
+          <text>该分类下暂无题目</text>
         </view>
       </view>
 
     </view>
 
-    <!-- ── 底部按钮区 ── -->
-    <view class="btn-section">
-      <view class="btn-primary" bindtap="onViewProblems">开始逐题复盘 →</view>
+    <!-- ── 底部固定按钮区 ── -->
+    <view class="btn-section" style="padding-bottom:calc({{safeAreaBottom}}px + 16rpx)">
+      <view class="btn-primary" bindtap="onStartReview">开始逐题复盘</view>
       <view class="btn-ghost" bindtap="onGoHome">稍后复盘</view>
-      <view style="height:{{safeAreaBottom}}px"></view>
     </view>
 
   </block>

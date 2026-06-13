@@ -9,6 +9,7 @@ interface StepItem {
 interface LoadingPageData {
   assignmentId: number | null
   chapterName: string
+  date: string
   step: string
   steps: StepItem[]
   totalQuestions: number
@@ -86,12 +87,10 @@ function startDotAnimation(page: PageInst) {
 }
 
 function handleGraded(page: PageInst) {
-  const { assignmentId, chapterName } = page.data
+  const { chapterName, date } = page.data
   if (dotTimer) clearInterval(dotTimer)
   setTimeout(() => {
-    wx.redirectTo({
-      url: `/pages/checkin/summary/index?assignmentId=${assignmentId}&chapterName=${encodeURIComponent(chapterName)}`
-    })
+    wx.redirectTo({ url: `/pages/checkin/summary/index?date=${date}&chapterName=${encodeURIComponent(chapterName)}` })
   }, 800)
 }
 
@@ -202,6 +201,9 @@ function pollAssignmentStatus(page: PageInst) {
       pollTimer = setTimeout(() => pollAssignmentStatus(page), 2000)
       return
     }
+    if (res.data.planDate && !page.data.date) {
+      page.setData({ date: res.data.planDate })
+    }
     applyStatus(page, res.data.status)
     if (res.data.status !== 'graded' && res.data.status !== 'reviewed') {
       pollTimer = setTimeout(() => pollAssignmentStatus(page), 2000)
@@ -240,6 +242,7 @@ Page<LoadingPageData, any>({
   data: {
     assignmentId: null,
     chapterName: '',
+    date: '',
     step: 'ocr_pending',
     steps: buildSteps('ocr_pending', 0),
     totalQuestions: 0,
@@ -253,11 +256,21 @@ Page<LoadingPageData, any>({
 
     const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
     const statusBarHeight = sysInfo.statusBarHeight || 44
-    // safeAreaInsets.bottom available in newer SDKs
     const safeAreaBottom = (sysInfo as { safeAreaInsets?: { bottom?: number } }).safeAreaInsets?.bottom ?? 34
 
     const chapterName = decodeURIComponent(options?.chapterName || '')
-    this.setData({ assignmentId, chapterName, statusBarHeight, safeAreaBottom })
+    const date = options?.date || ''
+    this.setData({ assignmentId, chapterName, date, statusBarHeight, safeAreaBottom })
+
+    // 没有 date 时立即拉一次，确保 WS 完成后 handleGraded 能用到
+    if (!date && assignmentId) {
+      const self = this as unknown as PageInst
+      assignmentsApi.get(assignmentId).then((res) => {
+        if (res.success && res.data?.planDate) {
+          self.setData({ date: res.data.planDate })
+        }
+      }).catch(() => { /* 非关键，轮询路径会再补上 */ })
+    }
 
     pollCount = 0
     wsConnected = false
@@ -266,13 +279,11 @@ Page<LoadingPageData, any>({
   },
 
   onSkip() {
-    const { assignmentId, chapterName } = this.data
+    const { chapterName, date } = this.data
     stopPolling()
     closeWebSocket()
     if (dotTimer) clearInterval(dotTimer)
-    wx.redirectTo({
-      url: `/pages/checkin/summary/index?assignmentId=${assignmentId}&chapterName=${encodeURIComponent(chapterName)}`
-    })
+    wx.redirectTo({ url: `/pages/checkin/summary/index?date=${date}&chapterName=${encodeURIComponent(chapterName)}` })
   },
 
   onUnload() {

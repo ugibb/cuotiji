@@ -1,5 +1,6 @@
 import { Assignment, Problem } from '../../../types/index'
 import { assignmentsApi } from '../../../services/api'
+import type { AppGlobal } from '../../../app'
 
 interface KnowledgeTag {
   label: string
@@ -11,6 +12,12 @@ interface SummaryPageData {
   assignment: Assignment | null
   chapterName: string
   knowledgeTags: KnowledgeTag[]
+  problems: Problem[]
+  filter: 'all' | 'wrong' | 'unknown' | 'correct'
+  filteredProblems: Problem[]
+  wrongCount: number
+  unknownCount: number
+  correctCount: number
   loading: boolean
   statusBarHeight: number
   safeAreaBottom: number
@@ -42,6 +49,12 @@ Page<SummaryPageData, any>({
     assignment: null,
     chapterName: '',
     knowledgeTags: [],
+    problems: [],
+    filter: 'all',
+    filteredProblems: [],
+    wrongCount: 0,
+    unknownCount: 0,
+    correctCount: 0,
     loading: true,
     statusBarHeight: 44,
     safeAreaBottom: 34
@@ -55,7 +68,53 @@ Page<SummaryPageData, any>({
     this.setData({ statusBarHeight, safeAreaBottom, chapterName })
 
     const assignmentId = Number(options?.assignmentId || 0)
-    if (assignmentId) this.loadAssignment(assignmentId)
+    const date = options?.date || ''
+
+    if (date) {
+      const app = getApp<{ globalData: AppGlobal }>()
+      const student = app.globalData.currentStudent
+      if (student) this.loadByDate(date, student.id)
+    } else if (assignmentId) {
+      this.loadAssignment(assignmentId)
+    }
+  },
+
+  async loadByDate(date: string, studentId: number) {
+    this.setData({ loading: true })
+    try {
+      const res = await assignmentsApi.byDate(studentId, date)
+      if (res.success && res.data) {
+        const { totalCount, correctCount, wrongCount, unknownCount, problems = [] } = res.data
+        const knowledgeTags = buildKnowledgeTags(problems)
+        const assignment: Assignment = {
+          id: 0,
+          studentId,
+          chapterId: 0,
+          planDate: date,
+          imageUrl: '',
+          status: 'reviewed',
+          totalCount,
+          correctCount,
+          wrongCount,
+          unknownCount,
+          problems: [],
+        }
+        this.setData({ assignment, problems, filteredProblems: problems, knowledgeTags, wrongCount, unknownCount, correctCount })
+      } else {
+        console.error('[summary] byDate failed:', res.error)
+        // API 失败时也设置 assignment（空状态），避免页面全空白
+        this.setData({
+          assignment: {
+            id: 0, studentId, chapterId: 0, planDate: date, imageUrl: '',
+            status: 'reviewed', totalCount: 0, correctCount: 0, wrongCount: 0, unknownCount: 0, problems: [],
+          },
+        })
+      }
+    } catch (err) {
+      console.error('[summary] loadByDate exception:', err)
+    } finally {
+      this.setData({ loading: false })
+    }
   },
 
   async loadAssignment(id: number) {
@@ -63,8 +122,20 @@ Page<SummaryPageData, any>({
     try {
       const res = await assignmentsApi.get(id)
       if (res.success && res.data) {
-        const knowledgeTags = buildKnowledgeTags(res.data.problems ?? [])
-        this.setData({ assignment: res.data, knowledgeTags })
+        const problems = res.data.problems ?? []
+        const knowledgeTags = buildKnowledgeTags(problems)
+        const wrongCount = problems.filter((p: Problem) => p.result === 'wrong').length
+        const unknownCount = problems.filter((p: Problem) => p.result === 'unknown').length
+        const correctCount = problems.filter((p: Problem) => p.result === 'correct').length
+        this.setData({
+          assignment: res.data,
+          problems,
+          filteredProblems: problems,
+          knowledgeTags,
+          wrongCount,
+          unknownCount,
+          correctCount
+        })
       }
     } catch (err) {
       console.error('loadAssignment error:', err)
@@ -73,11 +144,40 @@ Page<SummaryPageData, any>({
     }
   },
 
-  onViewProblems() {
-    const { assignment } = this.data
-    if (assignment) {
-      wx.navigateTo({ url: `/pages/checkin/problem-list/index?assignmentId=${assignment.id}` })
+  onFilterChange(e: WechatMiniprogram.BaseEvent) {
+    const dataset = e.currentTarget.dataset as { filter?: string }
+    const tapped = (dataset.filter || 'all') as SummaryPageData['filter']
+    const { problems, filter } = this.data
+    const next = tapped === filter ? 'all' : tapped
+    const filteredProblems = next === 'all'
+      ? problems
+      : problems.filter((p: Problem) => p.result === next)
+    this.setData({ filter: next, filteredProblems })
+  },
+
+  onProblemTap(e: WechatMiniprogram.BaseEvent) {
+    const dataset = e.currentTarget.dataset as { id?: string }
+    const id = dataset.id || ''
+    const { filteredProblems, assignment } = this.data
+    const index = filteredProblems.findIndex((p: Problem) => String(p.id) === String(id))
+    const ids = filteredProblems.map((p: Problem) => p.id).join(',')
+    const assignmentId = assignment?.id ?? 0
+    wx.navigateTo({
+      url: `/pages/checkin/problem-detail/index?problemId=${id}&problemIds=${ids}&currentIndex=${index}&assignmentId=${assignmentId}`
+    })
+  },
+
+  onStartReview() {
+    const { filteredProblems, assignment } = this.data
+    if (!filteredProblems.length || !assignment) {
+      wx.showToast({ title: '暂无题目', icon: 'none' })
+      return
     }
+    const ids = filteredProblems.map((p: Problem) => p.id).join(',')
+    const firstId = filteredProblems[0].id
+    wx.navigateTo({
+      url: `/pages/checkin/problem-detail/index?problemId=${firstId}&problemIds=${ids}&currentIndex=0&assignmentId=${assignment.id}`
+    })
   },
 
   onGoHome() {

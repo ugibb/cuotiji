@@ -92,7 +92,7 @@ Page<AnalysisPageData, any>({
     const chapterId = dataset.chapterId
     if (chapterId && studentId) {
       wx.navigateTo({
-        url: `/pages/checkin/problem-list/index?chapterId=${chapterId}&studentId=${studentId}`
+        url: `/pages/project/problem-list/index?chapterId=${chapterId}&studentId=${studentId}`
       })
     }
   }

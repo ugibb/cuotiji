@@ -1,9 +1,13 @@
 import 'dotenv/config'
 import http from 'node:http'
+import path from 'node:path'
+import fs from 'node:fs'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import jwt from '@fastify/jwt'
 import websocket from '@fastify/websocket'
+import multipart from '@fastify/multipart'
+import staticPlugin from '@fastify/static'
 
 import { authRoutes } from './routes/auth'
 import { studentRoutes } from './routes/students'
@@ -17,6 +21,7 @@ import { wsRoutes } from './routes/ws'
 import { sprintRoutes } from './routes/sprint'
 import { intakeRoutes } from './routes/intake'
 import { trainingPlanRoutes } from './routes/training-plans'
+import { sttRoutes } from './routes/stt'
 
 export function buildApp() {
   const fastify = Fastify({
@@ -31,25 +36,26 @@ export function buildApp() {
   // - 真 WebSocket 握手（含 Sec-WebSocket-Key）→ 交给 ws.Server
   // - 其他（WeChat 假升级）→ 删除 Upgrade 头后重新派发到 Fastify HTTP 链路
   fastify.addHook('onReady', async () => {
-    // 移除所有 upgrade 监听器（包括 @fastify/websocket 注册的）
+    // @fastify/websocket 已在 fastify.server 上注册了 upgrade 处理器（含路由匹配逻辑）
+    // 保留它，只额外拦截 WeChat DevTools 发出的「假升级」请求（无 Sec-WebSocket-Key）
+    // 真实 WebSocket 握手直接放行给已有的 @fastify/websocket 处理器，保证路由正常工作
+    const realWsListeners = fastify.server.listeners('upgrade').slice()
     fastify.server.removeAllListeners('upgrade')
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const wsServer = (fastify as any).websocketServer as import('ws').WebSocketServer | undefined
 
     fastify.server.on('upgrade', (req: http.IncomingMessage, socket: import('node:net').Socket, head: Buffer) => {
       const isRealWs =
         req.headers.upgrade?.toLowerCase() === 'websocket' &&
         !!req.headers['sec-websocket-key']
 
-      if (isRealWs && wsServer) {
-        wsServer.handleUpgrade(req, socket, head, (ws) => {
-          wsServer.emit('connection', ws, req)
-        })
+      if (isRealWs) {
+        // 真 WebSocket 握手 → 交回给 @fastify/websocket 的原始处理器（含路由匹配）
+        for (const listener of realWsListeners) {
+          (listener as Function)(req, socket, head)
+        }
         return
       }
 
-      // WeChat DevTools 假升级：删除 Upgrade 头后重新走 HTTP 管道
+      // WeChat DevTools 假升级（无 Key）→ 删 Upgrade 头后重新走 HTTP 管道
       delete (req.headers as Record<string, unknown>).upgrade
       req.headers.connection = 'close'
       const res = new http.ServerResponse(req)
@@ -70,11 +76,20 @@ export function buildApp() {
   })
 
   fastify.register(websocket)
+  fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } }) // 10MB
+
+  // 本地开发：静态服务 /uploads 目录
+  const uploadDir = path.resolve(process.env.LOCAL_UPLOAD_DIR || './uploads')
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true })
+  fastify.register(staticPlugin, { root: uploadDir, prefix: '/uploads/' })
 
   // Health check
   fastify.get('/health', async () => {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
+
+  // 静默处理 DevTools 自动请求的 favicon
+  fastify.get('/favicon.ico', async (_req, reply) => { reply.status(204).send() })
 
   // API routes with /api prefix
   fastify.register(async (api) => {
@@ -89,6 +104,7 @@ export function buildApp() {
     api.register(sprintRoutes)
     api.register(intakeRoutes, { prefix: '/intake' })
     api.register(trainingPlanRoutes)
+    api.register(sttRoutes)
     api.register(wsRoutes)
   }, { prefix: '/api' })
 

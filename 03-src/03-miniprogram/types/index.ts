@@ -26,6 +26,20 @@ export interface Chapter {
   isActive: boolean
 }
 
+export interface PlanItemQuestion {
+  id: number
+  stemLatex: string
+  options: { label: string; text: string }[]
+  answerLatex: string
+}
+
+export interface PlanItem {
+  id: number
+  seq: number
+  questionId: number | null
+  question?: PlanItemQuestion | null
+}
+
 export interface TrainingPlan {
   id: number
   studentId: number
@@ -36,6 +50,7 @@ export interface TrainingPlan {
   keyPoints?: string[]
   chapter?: Chapter
   assignmentStatus?: 'not_uploaded' | 'uploaded_pending' | 'completed'
+  planItems?: PlanItem[]
 }
 
 export interface Problem {
@@ -51,6 +66,8 @@ export interface Problem {
   solutionText?: string
   rootCause?: string
   reviewStatus: 'pending' | 'done'
+  reviewStage?: number
+  reviewStageName?: string
 }
 
 export interface Assignment {
@@ -74,6 +91,8 @@ export interface Dialogue {
   problemId: number
   role: 'ai' | 'student'
   content: string
+  imageUrl?: string | null
+  stageCode?: string | null
   createdAt: string
 }
 

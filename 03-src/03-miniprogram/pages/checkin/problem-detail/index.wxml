@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
 
   <!-- ── 自定义导航栏 ── -->
   <view class="nav-wrap">
@@ -7,13 +7,13 @@
       <view class="nav-back" bindtap="onBack">
         <text class="nav-back-icon">‹</text>
       </view>
-      <text class="nav-title">第 {{problem.seq}} 题</text>
-      <text class="nav-progress">{{problem.seq}}/{{total}}</text>
+      <text wx:if="{{isReviewMode}}" class="nav-title">第 {{currentIndex + 1}}/{{totalInReview}} 题</text>
+      <text wx:else class="nav-title">第 {{problem.seq}} 题</text>
     </view>
   </view>
 
   <!-- ── 可滚动主体 ── -->
-  <scroll-view class="content" scroll-y scroll-into-view="{{scrollAnchor}}" enable-flex>
+  <scroll-view class="content" scroll-y scroll-into-view="{{scrollAnchor}}" enable-flex style="height:{{scrollViewHeight}}px">
 
     <view wx:if="{{loading}}" class="page-loading">
       <view class="page-spinner"></view>
@@ -28,7 +28,7 @@
           <text class="question-text">{{problem.ocrText || '（题目识别中）'}}</text>
         </view>
       </view>
-
+      
       <!-- ② 答案区（wrong / correct，unknown 不显示） -->
       <block wx:if="{{problem.result !== 'unknown'}}">
 
@@ -103,7 +103,7 @@
 
       <!-- ④ AI 辅导对话区 -->
       <view class="dialogue-section">
-        <text class="dialogue-header">AI TUTORING · 辅导对话</text>
+        <text class="dialogue-header">--- {{hintText || 'AI TUTORING · 辅导对话'}} ---</text>
 
         <!-- 空状态 -->
         <view wx:if="{{dialogues.length === 0 && !sending}}" class="dialogue-empty">
@@ -111,16 +111,11 @@
         </view>
 
         <!-- 气泡列表 -->
-        <view
-          wx:for="{{dialogues}}"
-          wx:key="id"
-          class="bubble-row {{item.role === 'ai' ? 'row-ai' : 'row-student'}}"
-        >
-          <!-- AI 头像 -->
+        <view wx:for="{{dialogues}}" wx:key="id" class="bubble-row {{item.role === 'ai' ? 'row-ai' : 'row-student'}}">
           <view wx:if="{{item.role === 'ai'}}" class="ai-avatar">AI</view>
-          <!-- 气泡 -->
           <view class="bubble bubble-{{item.role}}">
-            <text class="bubble-text">{{item.content}}</text>
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="chat-image" mode="widthFix" data-url="{{item.imageUrl}}" bindtap="previewImage" />
+            <text wx:if="{{item.content}}" class="bubble-text">{{item.content}}</text>
           </view>
         </view>
 
@@ -132,29 +127,32 @@
           </view>
         </view>
 
-        <!-- 提示文字 -->
-        <text class="dialogue-hint">{{hintText}}</text>
+        <!-- 复盘完成标识 -->
+        <view wx:if="{{reviewDone}}" class="review-complete-banner">
+          <text class="complete-check">✓</text>
+          <text class="complete-title">本题复盘已完成</text>
+          <text class="complete-sub">你的复盘记录已保存</text>
+        </view>
+
+        <!-- 进入下一题行动卡片（在 banner 下方） -->
+        <view wx:if="{{isReviewMode && reviewDone}}" class="next-action-row" bindtap="onNext">
+          <text class="next-action-text">{{isLast ? '✓ 完成全部复盘' : '→ 进入下一题复盘'}}</text>
+        </view>
 
         <!-- 滚动锚点 -->
-        <view id="bottom-anchor" style="height:8rpx"></view>
+        <view id="bottom-anchor" style="height:160rpx"></view>
+
       </view>
 
     </block>
 
   </scroll-view>
 
-  <!-- ── 底部按住说话 ── -->
-  <view class="speak-bar">
-    <view
-      class="speak-btn {{recording ? 'speaking' : ''}}"
-      bindtouchstart="onSpeakStart"
-      bindtouchend="onSpeakEnd"
-      bindtouchcancel="onSpeakCancel"
-    >
-      <text class="speak-icon">{{recording ? '⬆️' : '🎙'}}</text>
-      <text class="speak-text">{{recording ? '松开发送' : '按住说话'}}</text>
-    </view>
-    <view style="height:{{safeAreaBottom}}px"></view>
+  <!-- ── 底部输入区 ── -->
+  <chat-input wx:if="{{!loading && !reviewDone}}" id="chat-input-comp" placeholder="发消息或按住说话…" safe-bottom="{{safeAreaBottom}}" bind:send="onChatSend" bind:voiceEnd="onVoiceEnd" bind:camera="onChatCamera" bind:plus="onChatPlus" />
+  <view wx:elif="{{!loading && reviewDone}}" class="review-done-bar" style="padding-bottom:{{safeAreaBottom}}px">
+    <text class="review-done-text">复盘已完成，无法继续输入</text>
   </view>
+
 
 </view>

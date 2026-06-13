@@ -1,0 +1,7 @@
+PyMuPDF
+Pillow
+pyzbar
+requests
+pymysql
+python-dotenv
+openai>=1.0

@@ -23,3 +23,30 @@
 - 小程序默认请求地址为 `http://localhost:3001/api`（见 `04-code/miniprogram/app.ts`）。
 - 若你本机有其他服务占用 `3000`，请保持以上配置以避免请求命中错误服务导致 `404`。
 - 启动后端：在 `04-code/server` 下执行 `./start.sh`（开发）或 `./start.sh prod`（需先 `npm run build`）。
+
+## 常见问题 / Troubleshooting
+
+### STT 语音识别报 `network timeout`
+
+**现象**：小程序录音结束后，服务端日志出现：
+```
+TencentCloudSDKHttpException: network timeout at: https://asr.tencentcloudapi.com/
+```
+
+**根因**：腾讯云 ASR SDK 的 `reqTimeout`（单位：秒）设置过短。空 GET 请求到该端点本身就需要 ~3s，带 base64 音频 payload 的实际调用在网络稍慢时轻易超时。
+
+**定位方法**：
+```bash
+curl -o /dev/null -s -w "http_code=%{http_code} time_total=%{time_total}s\n" --max-time 10 https://asr.tencentcloudapi.com/
+# 正常返回 http_code=200；time_total > 2s 说明端点本身偏慢，需留足余量
+```
+
+**修复**：将 `03-src/02-server/src/routes/stt.ts` 中的 `reqTimeout` 调大：
+```ts
+httpProfile: { endpoint: 'asr.tencentcloudapi.com', reqTimeout: 60 }
+// 原来是 15，60s 对短录音（≤30s）足够
+```
+
+**其他注意事项**：
+- 录音超过 30 秒时，腾讯云处理时间更长，仍可能偶发超时；建议小程序侧将 `duration` 限制在 30s 以内。
+- 该错误与鉴权凭证无关，`TENCENT_SECRET_ID / KEY` 正确即可。

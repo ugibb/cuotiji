@@ -3,16 +3,15 @@ import prisma from '../utils/prisma'
 import { ok, fail, JwtPayload } from '../types/index'
 import { authenticate } from '../middleware/auth'
 
-const DAILY_MINUTES = 90 // ≈1.5h
-
 interface StudentParams {
   studentId: string
 }
 
 interface GenerateBody {
   studentId: number
-  examDate?: string       // YYYY-MM-DD，可选，默认 2026-11-20
+  examDate?: string        // YYYY-MM-DD，可选，默认 6 个月后
   competitionName?: string
+  dailyMinutes?: number    // 每日学习分钟数，可选，默认 90
 }
 
 function addDays(date: Date, days: number): Date {
@@ -87,6 +86,51 @@ const M3_SCHEDULE: Array<{ topic: string; keyPoints: string[]; chapterCode: stri
   { topic: '综合冲刺 · 模拟考试', keyPoints: ['全真模拟', '时间管理'], chapterCode: 'C01' },
 ]
 
+interface PreviewBody {
+  examDate?: string
+  dailyMinutes?: number
+}
+
+// 纯计算，不涉及 DB — preview 和 generate 共用
+function computePlanPreview(examDate: string | undefined, dailyMinutes: number) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const examDateStr = examDate || dateStr(addDays(today, 180))
+  const examDateObj = new Date(examDateStr)
+  examDateObj.setHours(0, 0, 0, 0)
+  const totalDays = Math.max(7, Math.ceil((examDateObj.getTime() - today.getTime()) / 86400000))
+
+  const baseDays = MILESTONE_DEFS.reduce((s, m) => s + m.durationDays, 0)
+  const scaled = MILESTONE_DEFS.map((def, i) => ({
+    ...def,
+    durationDays: i < MILESTONE_DEFS.length - 1
+      ? Math.max(7, Math.round(totalDays * def.durationDays / baseDays))
+      : 0,
+  }))
+  const usedDays = scaled.slice(0, -1).reduce((s, d) => s + d.durationDays, 0)
+  scaled[scaled.length - 1].durationDays = Math.max(7, totalDays - usedDays)
+
+  let cursor = new Date(today)
+  const milestones = scaled.map((def, i) => {
+    const mStart = new Date(cursor)
+    const mEnd = addDays(mStart, def.durationDays - 1)
+    cursor = addDays(mEnd, 1)
+    return {
+      seq: def.seq,
+      name: def.name,
+      startDate: dateStr(mStart),
+      endDate: dateStr(mEnd),
+      durationDays: def.durationDays,
+      status: i === 0 ? 'active' : 'locked',
+      scoreBefore: def.scoreBefore,
+      scoreTarget: def.scoreTarget,
+      tags: def.tags,
+    }
+  })
+
+  return { today, totalDays, dailyMinutes, scaledDefs: scaled, milestones }
+}
+
 export async function trainingPlanRoutes(fastify: FastifyInstance) {
   // GET /training-plans?studentId=X&year=Y&month=M — 按月查询训练计划
   fastify.get<{ Querystring: { studentId?: string; year?: string; month?: string } }>(
@@ -118,7 +162,13 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
             studentId: sid,
             planDate: { gte: startDate, lte: endDate },
           },
-          include: { chapter: true },
+          include: {
+            chapter: true,
+            planItems: {
+              include: { question: true },
+              orderBy: { orderNum: 'asc' },
+            },
+          },
           orderBy: { planDate: 'asc' },
         })
 
@@ -167,12 +217,41 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
                 }
               : null,
             assignmentStatus,
+            planItems: p.planItems?.map((item) => ({
+              id: Number(item.id),
+              seq: item.orderNum + 1,
+              questionId: item.questionId ? Number(item.questionId) : null,
+              question: item.question
+                ? {
+                    id: Number(item.question.id),
+                    stemLatex: item.question.stemLatex,
+                    options: item.question.options,
+                    answerLatex: item.question.answerLatex,
+                  }
+                : null,
+            })) ?? [],
           }
         })
 
         return reply.send(ok({ plans: result }))
       } catch (err) {
         const message = err instanceof Error ? err.message : '获取训练计划失败'
+        return reply.status(500).send(fail(message))
+      }
+    },
+  )
+
+  // POST /training-plans/preview — 纯计算预览，不写库
+  fastify.post<{ Body: PreviewBody }>(
+    '/training-plans/preview',
+    { preHandler: authenticate },
+    async (request: FastifyRequest<{ Body: PreviewBody }>, reply: FastifyReply) => {
+      try {
+        const { examDate, dailyMinutes = 90 } = request.body
+        const { totalDays, milestones } = computePlanPreview(examDate, dailyMinutes)
+        return reply.send(ok({ totalDays, dailyMinutes, milestoneCount: milestones.length, milestones }))
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '预览计算失败'
         return reply.status(500).send(fail(message))
       }
     },
@@ -185,8 +264,11 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Body: GenerateBody }>, reply: FastifyReply) => {
       try {
         const payload = request.user as JwtPayload
-        const { studentId, examDate = '2026-11-20', competitionName = '华杯小学数学邀请赛' } =
-          request.body
+        const {
+          studentId,
+          competitionName = '华杯小学数学邀请赛',
+          dailyMinutes = 90,
+        } = request.body
 
         if (!studentId) return reply.status(400).send(fail('studentId 不能为空'))
         const sid = BigInt(studentId)
@@ -195,6 +277,10 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
           where: { id: sid, userId: BigInt(payload.userId) },
         })
         if (!student) return reply.status(404).send(fail('未找到该学生'))
+
+        // 复用预览计算逻辑（examDate 未传时默认 6 个月后）
+        const { today, totalDays, scaledDefs } = computePlanPreview(request.body.examDate, dailyMinutes)
+        const examDate = request.body.examDate ?? dateStr(addDays(today, 180))
 
         // 查找章节
         const chapterMap = new Map<string, number>()
@@ -224,17 +310,21 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
           })
         }
 
-        // 查找或创建 sprint plan（每个 project 唯一）
+        // 查找或创建 sprint plan（每个 project 唯一），始终更新 totalDays/dailyMinutes
         let sprint = await prisma.pla_SprintPlan.findUnique({ where: { projectId: project.id } })
-        const totalDays = MILESTONE_DEFS.reduce((s, m) => s + m.durationDays, 0)
         if (!sprint) {
           sprint = await prisma.pla_SprintPlan.create({
             data: {
               projectId: project.id,
               totalDays,
               competitionName,
-              dailyMinutes: DAILY_MINUTES,
+              dailyMinutes,
             },
+          })
+        } else {
+          sprint = await prisma.pla_SprintPlan.update({
+            where: { id: sprint.id },
+            data: { totalDays, competitionName, dailyMinutes },
           })
         }
 
@@ -244,12 +334,10 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
         })
         await prisma.pla_Milestone.deleteMany({ where: { sprintPlanId: sprint.id } })
 
-        // 生成里程碑 + 训练计划
-        const planStart = new Date('2026-04-22')
-        planStart.setHours(0, 0, 0, 0)
-        let cursor = new Date(planStart)
+        // 从今天开始生成里程碑 + 训练计划
+        let cursor = new Date(today)
 
-        for (const mDef of MILESTONE_DEFS) {
+        for (const mDef of scaledDefs) {
           const mStart = new Date(cursor)
           const mEnd = addDays(mStart, mDef.durationDays - 1)
 
@@ -306,16 +394,23 @@ export async function trainingPlanRoutes(fastify: FastifyInstance) {
             sprintPlanId: Number(sprint.id),
             projectId: Number(project.id),
             totalDays,
+            dailyMinutes,
             milestoneCount: milestones.length,
-            milestones: milestones.map((m) => ({
-              id: Number(m.id),
-              seq: m.seq,
-              name: m.name,
-              startDate: m.startDate ? dateStr(m.startDate) : null,
-              endDate: m.endDate ? dateStr(m.endDate) : null,
-              durationDays: m.durationDays,
-              status: m.status,
-            })),
+            milestones: milestones.map((m, idx) => {
+              const def = scaledDefs[idx] ?? scaledDefs[scaledDefs.length - 1]
+              return {
+                id: Number(m.id),
+                seq: m.seq,
+                name: m.name,
+                startDate: m.startDate ? dateStr(m.startDate) : null,
+                endDate: m.endDate ? dateStr(m.endDate) : null,
+                durationDays: m.durationDays,
+                status: m.status,
+                scoreBefore: m.scoreBefore,
+                scoreTarget: m.scoreTarget,
+                tags: def.tags,
+              }
+            }),
           }),
         )
       } catch (err) {

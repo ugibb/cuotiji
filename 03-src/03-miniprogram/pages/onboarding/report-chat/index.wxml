@@ -1,0 +1,53 @@
+<view class="page">
+
+  <!-- 固定头部 -->
+  <view class="page-header">
+    <view style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBack">‹</view>
+      <text class="nav-title">对话框</text>
+      <view style="width:72rpx"></view>
+    </view>
+  </view>
+  <view style="height:{{headerHeight}}px"></view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="msg-list"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    scroll-with-animation
+  >
+    <!-- AI 开场白 -->
+    <view class="ai-bubble">
+      <view class="ai-avatar">AI</view>
+      <view class="ai-msg">{{aiOpeningMsg}}</view>
+    </view>
+
+    <!-- 用户回复 -->
+    <view wx:if="{{userReply}}" class="user-bubble">
+      <view class="user-msg">{{userReply}}</view>
+    </view>
+
+    <!-- AI 调整回复 -->
+    <view wx:if="{{aiAdjust}}" class="ai-bubble">
+      <view class="ai-avatar">AI</view>
+      <view class="ai-msg">{{aiAdjust}}</view>
+    </view>
+
+    <!-- 滚动锚点 -->
+    <view id="msg-bottom" style="height:24rpx"></view>
+  </scroll-view>
+
+  <!-- 底部输入栏 -->
+  <chat-input
+    id="chat-input-comp"
+    placeholder="发消息或按住说话…"
+    show-camera="{{false}}"
+    show-plus="{{false}}"
+    safe-bottom="{{safeBottom}}"
+    bind:send="onChatSend"
+    bind:voiceEnd="onVoiceEnd"
+  />
+
+</view>

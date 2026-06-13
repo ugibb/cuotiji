@@ -1,4 +1,4 @@
-import { UserInfo, Student, IntakeAnswers, AbilityReport, ActiveSprintPlan } from './types/index'
+import { UserInfo, Student, IntakeAnswers, AbilityReport, ActiveSprintPlan, OnboardingSetup } from './types/index'
 
 interface AppGlobal {
   token: string | null
@@ -12,11 +12,14 @@ interface AppGlobal {
   }
   baseUrl: string
   // Onboarding flow state
+  onboardingSetup: OnboardingSetup | null
   intakeAnswers: IntakeAnswers | null
   assessmentAnswers: Record<number, string>
   abilityReport: AbilityReport | null
   aiOpeningMsg: string | null
   activePlan: ActiveSprintPlan | null
+  reportChatReply: string | null
+  reportChatAiAdjust: string | null
 }
 
 // Extend the App instance type to carry our globalData shape
@@ -31,12 +34,15 @@ const app = {
       planDate: null as string | null,
       problems: [] as import('./types/index').Problem[]
     },
-    baseUrl: 'http://127.0.0.1:3002/api',
+    baseUrl: 'http://192.168.0.103:3002/api',
+    onboardingSetup: null as OnboardingSetup | null,
     intakeAnswers: null as IntakeAnswers | null,
     assessmentAnswers: {} as Record<number, string>,
     abilityReport: null as AbilityReport | null,
     aiOpeningMsg: null as string | null,
     activePlan: null as ActiveSprintPlan | null,
+    reportChatReply: null as string | null,
+    reportChatAiAdjust: null as string | null,
   } as AppGlobal,
 
   onLaunch(this: WechatMiniprogram.App.Instance<AppGlobal> & { globalData: AppGlobal; doLogin: () => void; exchangeToken: (code: string) => void }) {

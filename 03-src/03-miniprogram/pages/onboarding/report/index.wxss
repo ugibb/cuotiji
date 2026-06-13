@@ -98,58 +98,95 @@
 .domain-strong .domain-score { color: #16A34A; }
 .domain-unit { font-size: 22rpx; font-weight: 500; }
 
-/* Chat */
-.chat-area { margin-bottom: 20rpx; }
-.ai-bubble { display: flex; gap: 20rpx; margin-bottom: 28rpx; }
-.ai-avatar {
-  width: 64rpx; height: 64rpx; border-radius: 50%;
+/* AI 校正对话预览卡片 */
+.chat-preview-card { padding: 24rpx 28rpx; }
+
+.mini-avatar {
+  width: 52rpx; height: 52rpx; border-radius: 50%;
   background: linear-gradient(135deg, #5B5FC7, #4338CA);
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 22rpx; font-weight: 700; flex-shrink: 0;
-}
-.ai-msg {
-  max-width: 480rpx;
-  background: #fff;
-  border-radius: 8rpx 32rpx 32rpx 32rpx;
-  padding: 22rpx 28rpx;
-  font-size: 26rpx;
-  color: #111827;
-  line-height: 1.7;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
-}
-.user-bubble { display: flex; justify-content: flex-end; margin-bottom: 28rpx; }
-.user-msg {
-  max-width: 440rpx;
-  background: #5B5FC7;
-  border-radius: 32rpx 8rpx 32rpx 32rpx;
-  padding: 22rpx 28rpx;
-  font-size: 26rpx;
-  color: #fff;
-  line-height: 1.7;
-}
-.chat-input-row {
-  display: flex;
-  gap: 16rpx;
-  align-items: center;
-  background: #F5F6FA;
-  border-radius: 24rpx;
-  padding: 12rpx 20rpx;
-}
-.chat-input { flex: 1; font-size: 26rpx; color: #111827; }
-.send-btn {
-  font-size: 26rpx;
-  color: #5B5FC7;
-  font-weight: 600;
-  flex-shrink: 0;
+  color: #fff; font-size: 18rpx; font-weight: 700; flex-shrink: 0;
 }
 
-/* 底部 */
-.bottom-bar {
+.mini-ai-bubble {
+  display: flex; align-items: flex-start; gap: 16rpx; margin-bottom: 16rpx;
+}
+.mini-ai-msg {
+  flex: 1;
+  background: #F5F6FA;
+  border-radius: 6rpx 24rpx 24rpx 24rpx;
+  padding: 16rpx 20rpx;
+  font-size: 26rpx; color: #111827; line-height: 1.6;
+}
+
+.mini-user-bubble {
+  display: flex; justify-content: flex-end; margin-bottom: 16rpx;
+}
+.mini-user-msg {
+  max-width: 380rpx;
+  background: #5B5FC7;
+  border-radius: 24rpx 6rpx 24rpx 24rpx;
+  padding: 16rpx 20rpx;
+  font-size: 26rpx; color: #fff; line-height: 1.6;
+}
+
+/* 仿输入框引导条 */
+.mini-reply-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 4rpx;
+  height: 72rpx;
+  background: #F5F6FA;
+  border-radius: 36rpx;
+  padding: 0 24rpx;
+}
+.mini-reply-hint { font-size: 28rpx; color: #B8BCC8; }
+
+/* 麦克风图标（复用 chat-input 图标结构，页面作用域） */
+.ic-mic {
+  position: relative;
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
+}
+.mic-body {
+  position: absolute;
+  top: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 13rpx;
+  height: 19rpx;
+  background: #9CA3AF;
+  border-radius: 7rpx;
+}
+.mic-arc {
+  position: absolute;
+  bottom: 7rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22rpx;
+  height: 10rpx;
+  border: 3rpx solid #9CA3AF;
+  border-top: none;
+  border-radius: 0 0 11rpx 11rpx;
+  box-sizing: border-box;
+}
+.mic-stem {
+  position: absolute;
+  bottom: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3rpx;
+  height: 7rpx;
+  background: #9CA3AF;
+  border-radius: 2rpx;
+}
+/* 底部固定区（确认按钮 + chat-input 组件） */
+.bottom-fixed {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: #fff;
-  padding: 24rpx 32rpx;
-  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  padding: 20rpx 32rpx env(safe-area-inset-bottom);
   border-top: 1rpx solid #F0F1F5;
+  z-index: 200;
 }
 .btn-primary {
   width: 100% !important;

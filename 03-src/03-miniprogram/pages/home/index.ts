@@ -12,6 +12,20 @@ function formatDayLabel(d: Date): string {
   return `${d.getMonth() + 1}月${d.getDate()}日 · ${WEEKDAY_SHORT[d.getDay()]}`
 }
 
+function formatDateFull(d: Date): string {
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 · ${WEEKDAY_SHORT[d.getDay()]}`
+}
+
+const QUOTES = [
+  { text: '锲而不舍，金石可镌', from: '《荀子·劝学》' },
+  { text: '不积跬步，无以至千里', from: '《荀子·劝学》' },
+  { text: '学而时习之，不亦说乎', from: '《论语》' },
+  { text: '温故而知新，可以为师矣', from: '《论语》' },
+  { text: '业精于勤，荒于嬉', from: '《进学解》' },
+  { text: '博学之，审问之，慎思之', from: '《中庸》' },
+  { text: '学如逆水行舟，不进则退', from: '古训' },
+]
+
 function todayDateStr(): string {
   const now = new Date()
   return `${now.getFullYear()}-${zeroPad(now.getMonth() + 1)}-${zeroPad(now.getDate())}`
@@ -48,19 +62,13 @@ function getDayStatus(dateStr: string, plans: TrainingPlan[], todayStr: string):
   return dateStr <= todayStr ? 'not_uploaded' : 'planned'
 }
 
-function buildCalendarDays(year: number, month: number, plans: TrainingPlan[]): CalendarDay[] {
-  const firstDay = new Date(year, month - 1, 1)
-  const lastDay = new Date(year, month, 0)
+function buildThreeWeekDays(windowStart: Date, plans: TrainingPlan[]): CalendarDay[] {
   const tStr = todayDateStr()
   const days: CalendarDay[] = []
-
-  const startDow = (firstDay.getDay() + 6) % 7
-  for (let i = 0; i < startDow; i++) {
-    days.push({ date: '', status: 'no_plan', day: 0, isToday: false, hasPlan: false, circleClass: '', numClass: '', isPast: false })
-  }
-
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const dateStr = `${year}-${zeroPad(month)}-${zeroPad(d)}`
+  for (let i = 0; i < 21; i++) {
+    const d = new Date(windowStart)
+    d.setDate(windowStart.getDate() + i)
+    const dateStr = `${d.getFullYear()}-${zeroPad(d.getMonth() + 1)}-${zeroPad(d.getDate())}`
     const status = getDayStatus(dateStr, plans, tStr)
     const isToday = dateStr === tStr
     const isPast = dateStr <= tStr
@@ -73,12 +81,11 @@ function buildCalendarDays(year: number, month: number, plans: TrainingPlan[]): 
     } else if (status === 'no_plan' && isPast) {
       underlineClass = 'ul-dim'
     }
-
     days.push({
       date: dateStr,
       status,
       plan: plans.find((p) => p.planDate === dateStr),
-      day: d,
+      day: d.getDate(),
       isToday,
       isPast,
       hasPlan,
@@ -87,12 +94,29 @@ function buildCalendarDays(year: number, month: number, plans: TrainingPlan[]): 
       underlineClass,
     })
   }
-
   return days
+}
+
+function calcWindowStart(anchor: Date): Date {
+  const dow = anchor.getDay()
+  const mondayOffset = dow === 0 ? -6 : 1 - dow
+  const thisMonday = new Date(anchor)
+  thisMonday.setDate(anchor.getDate() + mondayOffset)
+  thisMonday.setHours(0, 0, 0, 0)
+  const ws = new Date(thisMonday)
+  ws.setDate(thisMonday.getDate() - 7)
+  return ws
 }
 
 interface PlanSummary {
   daysLeft: number
+}
+
+interface MilestoneSeg {
+  label: string
+  flex: number
+  fillPct: number
+  isActive: boolean
 }
 
 interface HomePageData {
@@ -108,14 +132,32 @@ interface HomePageData {
   todayStr: string
   todayKey: string
   recentPractices: RecentPractice[]
-  year: number
-  month: number
-  monthLabel: string
+  windowStartDate: string
+  calRangeLabel: string
   calendarDays: CalendarDay[]
   selectedDate: string
   selectedDayLabel: string
   selectedDayPlan: TrainingPlan | null
   selectedDayStatus: DayStatus
+  todayDateFull: string
+  quote: string
+  quoteFrom: string
+  weeklyDone: number
+  weeklyTotal: number
+  weeklyChapter: string
+  milestoneLabel: string
+  milestoneDeadline: string
+  sprintStartDate: string
+  overallMilestonePct: number
+  m1m2DividerPct: string
+  m2m3DividerPct: string
+  m1FillPct: number
+  m2FillPct: number
+  m3FillPct: number
+  milestoneSegs: MilestoneSeg[]
+  weekDateRange: string
+  weeklyGoalText: string
+  weeklyPct: number
 }
 
 Page<HomePageData, Record<string, unknown>>({
@@ -132,23 +174,44 @@ Page<HomePageData, Record<string, unknown>>({
     todayStr: '',
     todayKey: '',
     recentPractices: [],
-    year: new Date().getFullYear(),
-    month: new Date().getMonth() + 1,
-    monthLabel: '',
+    windowStartDate: '',
+    calRangeLabel: '',
     calendarDays: [],
     selectedDate: '',
     selectedDayLabel: '',
     selectedDayPlan: null,
     selectedDayStatus: 'no_plan' as DayStatus,
+    todayDateFull: '',
+    quote: '',
+    quoteFrom: '',
+    weeklyDone: 0,
+    weeklyTotal: 0,
+    weeklyChapter: '',
+    milestoneLabel: 'M1',
+    milestoneDeadline: '',
+    sprintStartDate: '',
+    overallMilestonePct: 0,
+    m1m2DividerPct: '46.7%',
+    m2m3DividerPct: '93.3%',
+    m1FillPct: 0,
+    m2FillPct: 0,
+    m3FillPct: 0,
+    milestoneSegs: [],
+    weekDateRange: '',
+    weeklyGoalText: '',
+    weeklyPct: 0,
   },
 
   onLoad() {
     const { statusBarHeight } = wx.getSystemInfoSync()
-    // 用胶囊按钮位置算出需要避让的顶部高度（statusBar + navBar）
     const menuButton = wx.getMenuButtonBoundingClientRect()
     const navAreaHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
     const now = new Date()
     const tStr = todayDateStr()
+    const startOfYear = new Date(now.getFullYear(), 0, 0)
+    const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000)
+    const q = QUOTES[dayOfYear % QUOTES.length]
+    const windowStart = calcWindowStart(now)
     this.setData({
       statusBarHeight,
       navAreaHeight,
@@ -156,6 +219,10 @@ Page<HomePageData, Record<string, unknown>>({
       selectedDate: tStr,
       todayKey: tStr,
       selectedDayLabel: formatDayLabel(now),
+      todayDateFull: formatDateFull(now),
+      quote: q.text,
+      quoteFrom: q.from,
+      windowStartDate: windowStart.toISOString().slice(0, 10),
     })
   },
 
@@ -190,14 +257,33 @@ Page<HomePageData, Record<string, unknown>>({
       const m1Day = Math.min(21, elapsed + 1)
       const m1Pct = Math.round((m1Day / 21) * 100)
 
+      // 全项目进度（M1+M2+M3 共 45 天）
+      const M_DAYS = [21, 21, 3]
+      const totalMilestoneDays = M_DAYS.reduce((a, b) => a + b, 0)
+      const overallMilestonePct = Math.min(100, Math.round((elapsed + 1) / totalMilestoneDays * 100))
+      // 分隔线位置（按实际天数比例）
+      const m1m2DividerPct = `${(M_DAYS[0] / totalMilestoneDays * 100).toFixed(1)}%`
+      const m2m3DividerPct = `${((M_DAYS[0] + M_DAYS[1]) / totalMilestoneDays * 100).toFixed(1)}%`
+      // 各里程碑独立填充进度
+      const m1FillPct = Math.min(100, Math.max(0, Math.round((elapsed + 1) / M_DAYS[0] * 100)))
+      const m2FillPct = Math.min(100, Math.max(0, Math.round((elapsed - M_DAYS[0] + 1) / M_DAYS[1] * 100)))
+      const m3FillPct = Math.min(100, Math.max(0, Math.round((elapsed - M_DAYS[0] - M_DAYS[1] + 1) / M_DAYS[2] * 100)))
+
       const tStr = todayDateStr()
       const todayLabel = formatDayLabel(new Date())
 
       this.setData({
         hasPlan: true,
         plan: { daysLeft: activePlan.daysLeft },
+        sprintStartDate: startDate.toISOString().slice(0, 10),
         m1Day,
         m1Pct,
+        overallMilestonePct,
+        m1m2DividerPct,
+        m2m3DividerPct,
+        m1FillPct,
+        m2FillPct,
+        m3FillPct,
         todayStr: todayLabel,
         daysLeft: activePlan.daysLeft,
       })
@@ -213,23 +299,100 @@ Page<HomePageData, Record<string, unknown>>({
   },
 
   async loadCalendar(studentId: number, tStr: string) {
-    const { year, month } = this.data
-    this.setData({ monthLabel: `${year}年${zeroPad(month)}月` })
+    const { windowStartDate } = this.data
+    const windowStart = new Date(windowStartDate)
+    const windowEnd = new Date(windowStart)
+    windowEnd.setDate(windowStart.getDate() + 20)
+
+    const fmtShort = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日`
+    const calRangeLabel = `${fmtShort(windowStart)} — ${fmtShort(windowEnd)}`
+    this.setData({ calRangeLabel })
+
     try {
-      const res = await calendarApi.get(year, month, studentId)
-      if (res.success && res.data) {
-        const trainingPlans = res.data.plans
-        const calendarDays = buildCalendarDays(year, month, trainingPlans)
-        const todayPlan = trainingPlans.find((p) => p.planDate === tStr) || null
-        const { selectedDate } = this.data
-        const selDay = calendarDays.find((d) => d.date === selectedDate)
-        this.setData({
-          calendarDays,
-          todayPlan,
-          selectedDayPlan: selDay?.plan ?? null,
-          selectedDayStatus: selDay?.status ?? 'no_plan',
-        })
+      // 收集窗口跨越的月份（可能跨月）
+      const monthSet = new Set<string>()
+      for (let i = 0; i < 21; i++) {
+        const d = new Date(windowStart)
+        d.setDate(windowStart.getDate() + i)
+        monthSet.add(`${d.getFullYear()}-${d.getMonth() + 1}`)
       }
+
+      // 并行拉取所有涉及月份的训练计划
+      const planArrays = await Promise.all(
+        Array.from(monthSet).map((ym) => {
+          const [y, m] = ym.split('-').map(Number)
+          return calendarApi.get(y, m, studentId)
+            .then((r) => (r.success && r.data?.plans) ? r.data.plans : [])
+        })
+      )
+      const trainingPlans = planArrays.flat()
+
+      const calendarDays = buildThreeWeekDays(windowStart, trainingPlans)
+      const todayPlan = trainingPlans.find((p) => p.planDate === tStr) || null
+      const { selectedDate } = this.data
+
+      // 本周范围（以今天为基准，固定不随导航变化）
+      const now = new Date()
+      const dow = now.getDay()
+      const mondayOffset = dow === 0 ? -6 : 1 - dow
+      const monday = new Date(now)
+      monday.setDate(now.getDate() + mondayOffset)
+      monday.setHours(0, 0, 0, 0)
+      const sunday = new Date(monday)
+      sunday.setDate(monday.getDate() + 6)
+      const weekDateRange = `${fmtShort(monday)} — ${fmtShort(sunday)}`
+      const mondayStr = `${monday.getFullYear()}-${zeroPad(monday.getMonth() + 1)}-${zeroPad(monday.getDate())}`
+      const sundayStr = `${sunday.getFullYear()}-${zeroPad(sunday.getMonth() + 1)}-${zeroPad(sunday.getDate())}`
+      const weekPlans = trainingPlans.filter((p) => p.planDate >= mondayStr && p.planDate <= sundayStr)
+      const weeklyTotal = weekPlans.length
+      const weeklyDone = weekPlans.filter((p) => p.assignmentStatus === 'completed').length
+
+      // 当前里程碑（取所有已拉取计划中第一个有 chapter 的）
+      const milestonePlan = trainingPlans.find((p) => p.chapter?.name)
+      const weeklyChapter = milestonePlan?.chapter?.name ?? ''
+      const milestoneCode = milestonePlan?.chapter?.code ?? ''
+      const milestoneLabel =
+        milestoneCode === 'C01' ? 'M1' :
+        milestoneCode === 'C02' ? 'M2' : 'M3'
+
+      const MILESTONE_END_OFFSET: Record<string, number> = { M1: 20, M2: 41, M3: 44 }
+      const { sprintStartDate } = this.data
+      const milestoneDeadline = (() => {
+        if (!sprintStartDate) return ''
+        const end = new Date(sprintStartDate)
+        end.setDate(end.getDate() + (MILESTONE_END_OFFSET[milestoneLabel] ?? 20))
+        return `截止 ${end.getMonth() + 1}月${end.getDate()}日`
+      })()
+      const weeklyGoalText = weeklyTotal > 0
+        ? `掌握${weeklyChapter}核心内容，完成 ${weeklyTotal} 次训练`
+        : '本周暂无训练计划'
+      const weeklyPct = weeklyTotal > 0 ? Math.round((weeklyDone / weeklyTotal) * 100) : 0
+
+      // 里程碑分段数组（数据驱动，含当前激活状态）
+      const { m1FillPct, m2FillPct, m3FillPct } = this.data
+      const milestoneSegs: MilestoneSeg[] = [
+        { label: 'M1', flex: 21, fillPct: m1FillPct, isActive: milestoneLabel === 'M1' },
+        { label: 'M2', flex: 21, fillPct: m2FillPct, isActive: milestoneLabel === 'M2' },
+        { label: 'M3', flex: 3,  fillPct: m3FillPct, isActive: milestoneLabel === 'M3' },
+      ]
+
+      const selDay = calendarDays.find((d) => d.date === selectedDate)
+      this.setData({
+        calRangeLabel,
+        calendarDays,
+        todayPlan,
+        selectedDayPlan: selDay?.plan ?? null,
+        selectedDayStatus: selDay?.status ?? 'no_plan',
+        weekDateRange,
+        weeklyTotal,
+        weeklyDone,
+        weeklyChapter,
+        milestoneLabel,
+        milestoneDeadline,
+        milestoneSegs,
+        weeklyGoalText,
+        weeklyPct,
+      })
     } catch (err) {
       console.error('loadCalendar error:', err)
     } finally {
@@ -258,21 +421,21 @@ Page<HomePageData, Record<string, unknown>>({
     }
   },
 
-  onPrevMonth() {
-    let { year, month } = this.data
-    month -= 1
-    if (month < 1) { month = 12; year -= 1 }
-    this.setData({ year, month })
+  onPrevWeek() {
+    const { windowStartDate } = this.data
+    const d = new Date(windowStartDate)
+    d.setDate(d.getDate() - 7)
+    this.setData({ windowStartDate: d.toISOString().slice(0, 10) })
     const app = getApp<{ globalData: AppGlobal }>()
     const student = app.globalData.currentStudent
     if (student) this.loadCalendar(student.id, todayDateStr())
   },
 
-  onNextMonth() {
-    let { year, month } = this.data
-    month += 1
-    if (month > 12) { month = 1; year += 1 }
-    this.setData({ year, month })
+  onNextWeek() {
+    const { windowStartDate } = this.data
+    const d = new Date(windowStartDate)
+    d.setDate(d.getDate() + 7)
+    this.setData({ windowStartDate: d.toISOString().slice(0, 10) })
     const app = getApp<{ globalData: AppGlobal }>()
     const student = app.globalData.currentStudent
     if (student) this.loadCalendar(student.id, todayDateStr())
@@ -312,19 +475,19 @@ Page<HomePageData, Record<string, unknown>>({
     const date = this.data.selectedDate || todayDateStr()
     const chapterId = this.data.selectedDayPlan?.chapterId || 0
     const chapterName = encodeURIComponent(this.data.selectedDayPlan?.chapter?.name || '')
-    wx.navigateTo({ url: `/pages/checkin/camera/index?date=${date}&chapterId=${chapterId}&chapterName=${chapterName}` })
+    wx.navigateTo({ url: `/pages/checkin/daily/index?date=${date}&chapterId=${chapterId}&chapterName=${chapterName}` })
   },
 
   onDayActionReview() {
     const { selectedDate } = this.data
     if (!selectedDate) return
-    wx.navigateTo({ url: `/pages/checkin/problem-list/index?date=${selectedDate}` })
+    wx.navigateTo({ url: `/pages/checkin/summary/index?date=${selectedDate}` })
   },
 
   onDayActionView() {
     const { selectedDate } = this.data
     if (!selectedDate) return
-    wx.navigateTo({ url: `/pages/checkin/problem-list/index?date=${selectedDate}` })
+    wx.navigateTo({ url: `/pages/checkin/summary/index?date=${selectedDate}` })
   },
 
 })

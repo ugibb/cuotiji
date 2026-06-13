@@ -1,4 +1,5 @@
-import { IntakeAnswers } from '../../../types/index'
+import { IntakeAnswers, CompetitionTarget } from '../../../types/index'
+import type { AppGlobal } from '../../../app'
 
 function formatDateDisplay(dateStr: string): string {
   const [y, m, d] = dateStr.split('-')
@@ -89,8 +90,14 @@ Page({
       weeklyHours: q3 as IntakeAnswers['weeklyHours'],
       confidence: '' as IntakeAnswers['confidence'],
     }
-    const app = getApp<{ globalData: { intakeAnswers: IntakeAnswers | null } }>()
+    const app = getApp<{ globalData: AppGlobal }>()
     app.globalData.intakeAnswers = answers
+    app.globalData.onboardingSetup = {
+      grade: this.data.grade,
+      examDate: this.data.examDate,
+      examName: '华杯小学数学邀请赛',
+      target: this.data.goal as CompetitionTarget,
+    }
     wx.navigateTo({ url: '/pages/onboarding/assessment/index' })
   },
 })

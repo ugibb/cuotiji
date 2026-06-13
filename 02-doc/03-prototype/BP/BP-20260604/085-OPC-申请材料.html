@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPC 社区入驻申请材料</title>
+  <style>
+    :root {
+      --bg: #f6f4f0;
+      --surface: #ffffff;
+      --surface2: #f0ede7;
+      --accent: #2d5be3;
+      --accent-light: #e8eefb;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: #dedad2;
+      --r: 10px;
+      --r-sm: 6px;
+      --font: "PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+      --serif: "Songti SC","Noto Serif SC","SimSun",Georgia,serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 1.25rem 1rem;
+      font-size: 13px;
+    }
+    .page { max-width: 1060px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.5rem 1.75rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.2rem 0.65rem;
+      border-radius: 100px;
+      margin-bottom: 0.6rem;
+    }
+    .header h1 {
+      font-family: var(--serif);
+      font-size: 1.55rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 0.4rem;
+    }
+    .header-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.55;
+      white-space: nowrap;
+    }
+    .meta-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: baseline;
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.35rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .meta-label { font-size: 0.72rem; letter-spacing: 0.04em; color: var(--muted); flex-shrink: 0; }
+    .meta-value { font-size: 0.82rem; font-weight: 700; }
+
+    /* ── 单列模块流 ── */
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .grid-row-2 {
+      display: grid;
+      grid-template-columns: 7fr 3fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
+    .grid-row-2 .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    .grid-row-2 .card-body { flex: 1; }
+    .grid-row-3 {
+      display: grid;
+      grid-template-columns: 45fr 30fr 25fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
+    .grid-row-3 .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    .grid-row-3 .card-body { flex: 1; }
+    .grid-row-3 .proto-grid { grid-template-columns: 1fr; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head-icon { font-size: 0.9rem; }
+    .card-head-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .card-body { padding: 1rem; }
+
+    /* ── Tags ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0; }
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.18rem 0.55rem;
+      border-radius: 100px;
+    }
+
+    /* ── Highlight ── */
+    .hl {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      padding: 0.6rem 0.9rem;
+      margin: 0.7rem 0;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .hl strong { color: var(--accent); }
+
+    /* ── Step list ── */
+    .steps { display: flex; flex-direction: column; gap: 0.65rem; margin: 0.7rem 0; }
+    .step { display: flex; gap: 0.65rem; align-items: baseline; }
+    .step > div:not(.step-n) {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.35rem;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+    }
+    .step-n {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.05rem;
+    }
+    .step-t { font-size: 0.82rem; font-weight: 700; flex-shrink: 0; }
+    .step-t::after { content: '：'; }
+    .step-d {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.55;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Proto grid ── */
+    .proto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 0.7rem 0; }
+    .proto {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.75rem;
+    }
+    .proto-icon { font-size: 1.1rem; margin-bottom: 0.25rem; }
+    .proto-title { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .proto-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── Timeline ── */
+    .tl { display: flex; flex-direction: column; gap: 0; margin: 0.5rem 0; }
+    .tl-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding-bottom: 0.65rem;
+      position: relative;
+    }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 0.45rem;
+      top: 1.1rem;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+    .tl-dot {
+      flex-shrink: 0;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 2px solid var(--accent);
+      margin-top: 0.15rem;
+    }
+    .tl-lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.15rem; }
+    .tl-txt { font-size: 0.78rem; color: var(--text); line-height: 1.55; }
+
+    /* ── Divider ── */
+    .div { height: 1px; background: var(--border); margin: 0.75rem 0; }
+
+    /* ── Body text ── */
+    p { font-size: 0.82rem; line-height: 1.65; margin-bottom: 0.5rem; }
+    p:last-child { margin-bottom: 0; }
+    blockquote {
+      font-family: var(--serif);
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-left: 2px solid var(--border);
+      padding: 0.5rem 0.85rem;
+      margin: 0.65rem 0;
+      font-style: italic;
+      line-height: 1.6;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      margin-top: 0.75rem;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding: 0.75rem 0 0.25rem;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">未来社OPC 社区入驻申请</div>
+    <h1>AI 驱动的 PBL 学习平台</h1>
+    <p class="header-sub">用 AI 替代传统 PBL 中对高水平教师的依赖，让每个孩子都能获得目标驱动、有实时反馈的主动学习体验</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-label">阶段</span><span class="meta-value">原型验证期</span></div>
+      <div class="meta-item"><span class="meta-label">方向</span><span class="meta-value">EdTech · AI</span></div>
+      <div class="meta-item"><span class="meta-label">团队规模</span><span class="meta-value">2 人</span></div>
+      <div class="meta-item"><span class="meta-label">日期</span><span class="meta-value">2026-06-04</span></div>
+    </div>
+  </div>
+
+  <!-- Body: 单列按申请结构排列 -->
+  <div class="grid">
+
+    <div class="grid-row-2">
+
+    <!-- 1. 核心产品 / 解决方案 · 项目信息 -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-icon">🚀</span><span class="card-head-title">项目信息</span></div>
+      <div class="card-body">
+        <p class="section-label">项目定位</p>
+        <p>AI 大幅压低知识生产成本，让项目制学习（PBL）的普及成为可能；平台以<strong>目标驱动、游戏化</strong>的方式，重新定义每个人的学习体验。</p>
+
+        <blockquote>「当学习扎根于真实经验且由学生的兴趣驱动时，知识才能从抽象的符号转化为控制环境的工具。」— 约翰·杜威</blockquote>
+
+        <p>项目制学习（PBL）是杜威教育理想最成熟的实践形式，但长期被困在精英教育圈——它对教师要求极高，需要教练型、引导型的高水平老师，普及成本极大。</p>
+
+        <div class="hl">
+          <strong>AI 的到来，正在打破这个瓶颈。</strong><br>
+          AI 扮演「教练与促进者」角色——过去只有少数精英学校才负担得起，现在我们让它规模化。
+        </div>
+
+        <p class="section-label">平台聚焦三件事</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div>
+              <div class="step-t">目标锚定</div>
+              <div class="step-d">学生（或家长引导）设定真实目标，AI 反推学习路径，清掉规划负担</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div>
+              <div class="step-t">每日执行</div>
+              <div class="step-d">AI 拆解成「跳一跳能够得着」的每日任务，只需打卡完成，无需自己制定计划</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">3</div>
+            <div>
+              <div class="step-t">实时反馈</div>
+              <div class="step-d">每天可见的学习进度，让成就感持续驱动动力，对抗学习过程的枯燥感</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 个人背景 / 团队介绍 -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-icon">👤</span><span class="card-head-title">团队介绍</span></div>
+      <div class="card-body">
+        <p class="section-label">创始人</p>
+        <p>互联网产品经理出身，十余年 B2B 产品经验，擅长产品规划、需求拆解与快速迭代。</p>
+        <p class="section-label">技术联创</p>
+        <p>十余年系统架构背景，具备从 0 到 1 搭建高可用产品的完整能力。</p>
+        <div class="div"></div>
+        <p>我们不是教育行业出身，而是被自己的痛点逼出来的创业者——</p>
+        <div class="tags">
+          <span class="tag">雅思备考的成年学习者</span>
+          <span class="tag">两个孩子学奥数的父亲</span>
+          <span class="tag">用户变创始人</span>
+        </div>
+        <p style="color:var(--muted);">对问题有第一手感知，对产品有十年以上打磨经验，对技术落地有完整判断力。</p>
+      </div>
+    </div>
+
+    </div>
+
+    <div class="grid-row-3">
+
+    <!-- 2. 当前阶段 -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-icon">🛠</span><span class="card-head-title">当前阶段</span></div>
+      <div class="card-body">
+        <p>已完成两个方向的早期工具原型，均来自创始人自身真实场景：</p>
+        <div class="proto-grid">
+          <div class="proto">
+            <div class="proto-title">📝 雅思备考工具</div>
+            <div class="proto-desc">目标分数 → 个性化计划 → 每日打卡 → 进度可视化</div>
+          </div>
+          <div class="proto">
+            <div class="proto-title">🧮 奥数错题系统</div>
+            <div class="proto-desc">备考训练计划 + 错题归因分析 + 针对性练习推荐</div>
+          </div>
+        </div>
+        <p style="color:var(--muted); margin-top:0.35rem;">同步经营两个视频号（雅思 / 奥数），以内容积累首批种子用户。</p>
+      </div>
+    </div>
+
+    <!-- 3. 发展目标 -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-icon">🎯</span><span class="card-head-title">发展目标</span></div>
+      <div class="card-body">
+        <div class="tl">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div>
+              <div class="tl-lbl">近期</div>
+              <div class="tl-txt">跑通雅思 + 小学奥数两个垂直场景，验证「AI 学习执行系统」产品模型</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div>
+              <div class="tl-lbl">中期</div>
+              <div class="tl-txt">横向复制至更多学科 / 考试场景，形成可规模化的 PBL 执行平台</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div>
+              <div class="tl-lbl">长期</div>
+              <div class="tl-txt">从应试教育延伸至兴趣驱动的非应试领域，成为「每个人的 AI 学习教练」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 盈利模式 -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-icon">💰</span><span class="card-head-title">盈利模式</span></div>
+      <div class="card-body">
+        <p>面向家长端的 <strong>B2C 订阅制</strong>（早期假设）。</p>
+        <p style="color:var(--muted);">切入点是「学习执行陪伴」而非内容本身，差异化支撑独立定价；中国家长对教育付费意愿强，订阅习惯已成熟。</p>
+      </div>
+    </div>
+
+    </div>
+
+  </div>
+
+  <div class="footer">AI 驱动的 PBL 学习平台 · OPC 社区入驻申请 · 2026-06-04</div>
+
+</div>
+</body>
+</html>
